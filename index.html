@@ -1,0 +1,1242 @@
+import { useState, useEffect, useRef } from "react";
+
+// ── LOGO SVG (Voltara V shape blue/orange) ─────────────────────────────────
+const VoltaraLogo = ({ size = 32 }) => (
+  <svg width={size} height={size * 0.7} viewBox="0 0 120 84" fill="none">
+    <polygon points="0,0 45,0 60,40 30,84" fill="url(#lb)" />
+    <polygon points="120,0 75,0 60,40 90,84" fill="url(#ro)" />
+    <polygon points="30,84 60,40 90,84 60,60" fill="#1a1f5e" opacity="0.3" />
+    <defs>
+      <linearGradient id="lb" x1="0" y1="0" x2="60" y2="84" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stopColor="#4fc3f7"/>
+        <stop offset="50%" stopColor="#1565c0"/>
+        <stop offset="100%" stopColor="#0d2b8e"/>
+      </linearGradient>
+      <linearGradient id="ro" x1="120" y1="0" x2="60" y2="84" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stopColor="#ffb300"/>
+        <stop offset="50%" stopColor="#f4511e"/>
+        <stop offset="100%" stopColor="#c62828"/>
+      </linearGradient>
+    </defs>
+  </svg>
+);
+
+// ── TRANSLATIONS ────────────────────────────────────────────────────────────
+const LANGS = [
+  { code:"es", flag:"🇨🇷", name:"Español" },
+  { code:"en", flag:"🇺🇸", name:"English" },
+  { code:"bribri", flag:"🌿", name:"Bribri" },
+  { code:"cabecar", flag:"🌿", name:"Cabécar" },
+  { code:"maleku", flag:"🌿", name:"Maleku" },
+  { code:"brunca", flag:"🌿", name:"Brunca" },
+  { code:"ngabe", flag:"🌿", name:"Ngäbe" },
+];
+
+const TX = {
+  es:{
+    appName:"Voltara", badge:"PREMIUM CORPORATE",
+    tagline:"La plataforma que supera a PowerPoint, Keynote y Google Slides",
+    nav:{home:"Inicio",editor:"Editor",ai:"IA Creativa",canva:"Diseño",library:"Biblioteca",present:"Presentar",collab:"Colaborar",charts:"Gráficos",translate:"Traductor",export:"Exportar",ecosystem:"Ecosistema",settings:"Ajustes"},
+    home:{
+      welcome:"Bienvenido a Voltara", desc:"Crea presentaciones increíbles con IA en segundos. Supera a PowerPoint, Keynote y Google Slides.",
+      startAI:"Generar con IA", startUpload:"Subir PDF/Word", startBlank:"En blanco", startTemplate:"Plantillas",
+      recent:"Recientes", features:"Todo lo que necesitas", slides:"diapositivas",
+      stats:[{n:"10x",l:"Más rápido que PowerPoint"},{n:"7",l:"Idiomas incluidos"},{n:"∞",l:"Plantillas con IA"},{n:"100%",l:"Compatible con .pptx"}],
+    },
+    ai:{
+      title:"IA Creativa — Tu copiloto de presentaciones",
+      desc:"Describe lo que quieres presentar y la IA genera TODA la presentación: diapositivas, diseño, gráficos, notas y storytelling.",
+      promptLabel:"¿Qué quieres presentar?",
+      placeholder:"Ej: Haz una presentación ejecutiva sobre resultados financieros del Q4 2024 con gráficos de crecimiento...",
+      generate:"✨ Generar presentación completa",
+      generating:"Generando tu presentación...",
+      uploadTitle:"O sube un documento",
+      uploadDesc:"Arrastra o haz clic — PDF, Word, Excel, notas de voz",
+      uploadHint:"La IA lee el documento y construye las diapositivas automáticamente",
+      processing:"Analizando documento con IA...",
+      ready:"¡Presentación lista!",
+      openEditor:"Abrir en Editor",
+      translateToo:"Convertir y traducir",
+      refineTitle:"Modo Refine — Edición iterativa",
+      refineDesc:"Conversa con la IA para ajustar secciones específicas sin regenerar todo",
+      refinePlaceholder:"Ej: Cambia la diapositiva 3 para enfocarse más en el ROI...",
+      refineBtn:"Refinar con IA",
+      suggestions:["Informe financiero Q4","Plan de negocio 2025","Propuesta comercial","Capacitación RRHH","Tesis universitaria","Estrategia de marketing","Análisis de mercado","Proyecto tecnológico"],
+      caps:[{icon:"🔍",t:"Investigación automática",d:"La IA busca fuentes confiables y las incluye"},{icon:"📊",t:"Charts desde datos",d:"Genera gráficos automáticamente desde tus números"},{icon:"🎨",t:"Diseño automático",d:"Layout, colores y tipografía elegidos por IA"},{icon:"📝",t:"Notas del expositor",d:"Genera guiones completos para cada diapositiva"},{icon:"🔮",t:"Análisis de audiencia",d:"Predice engagement y sugiere mejoras"},{icon:"🌍",t:"Traducción instantánea",d:"Traduce toda la presentación al instante"}],
+    },
+    canva:{
+      title:"Diseño — Herramientas estilo Canva",
+      desc:"Diseña con libertad total: texto, formas, imágenes, íconos, fondos y más.",
+      tools:"Herramientas", elements:"Elementos", text:"Texto", shapes:"Formas", photos:"Fotos", icons:"Íconos", backgrounds:"Fondos", brand:"Brand Kit",
+      textStyles:["Título Grande","Subtítulo","Cuerpo","Cita","Destacado"],
+      shapeList:["Rectángulo","Círculo","Triángulo","Flecha","Estrella","Línea"],
+      bgList:["Degradado Corporativo","Geométrico Moderno","Oscuro Elegante","Claro Minimalista","Tropical","Ejecutivo Dorado"],
+      brandTitle:"Brand Kit Corporativo",
+      brandDesc:"Aplica logos, colores y fuentes globalmente con un clic",
+      brandColors:["Color Primario","Color Secundario","Acento","Fondo","Texto"],
+      filters:["Sin filtro","Profesional","Vintage","Vívido","Mono","Suave"],
+      animTitle:"Animaciones",
+      animList:["Fundido","Deslizar","Zoom","Girar","Rebote","Typewriter"],
+    },
+    library:{
+      title:"Biblioteca Corporativa",
+      exec:"Plantillas Ejecutivas", academic:"Plantillas Académicas", diagrams:"Diagramas", icons:"Íconos y Assets",
+      execItems:["Informe Anual","Pitch Deck","Plan Estratégico","Propuesta Comercial","Resumen Ejecutivo","Análisis FODA","Roadmap","OKRs"],
+      academicItems:["Tesis","Investigación","Seminario","Clase Universitaria","Proyecto Final","Defensa de Grado","Congreso","Poster Científico"],
+      diagramItems:["Jerarquía Empresarial","Proceso Lineal","Flujo de Trabajo","Mapa Mental","Diagrama de Venn","Línea de Tiempo","Árbol de Decisiones","Kanban"],
+    },
+    present:{
+      title:"Modo Presentación Avanzado",
+      timer:"Cronómetro", start:"Iniciar", pause:"Pausar", reset:"Reset",
+      aiListen:"IA Escuchando en vivo", aiListenDesc:"Detecta qué cubriste y qué falta. Alertas en tiempo real.",
+      teleprompter:"Teleprompter Inteligente", teleDesc:"Guión adaptativo con velocidad controlable",
+      speakerView:"Vista del Expositor", polls:"Encuestas en vivo", qa:"Q&A Interactivo",
+      subtitles:"Subtítulos automáticos", analytics:"Analíticas post-presentación",
+      covered:"Cubierto:", pending:"Pendiente:", suggest:"Sugerencia:",
+    },
+    collab:{
+      title:"Colaboración en tiempo real",
+      active:"Colaboradores activos", invite:"+ Invitar colaborador",
+      comments:"Comentarios", history:"Historial", versions:"Versiones", notifs:"Notificaciones",
+      online:"EN LÍNEA", offline:"DESCONECTADO", editing:"Editando...",
+    },
+    charts:{
+      title:"Gráficos y Dashboards KPI",
+      types:"Tipos de gráfico", importData:"Importar datos",
+      kpiTitle:"KPIs en tiempo real",
+    },
+    translate:{
+      title:"Traductor en Vivo — 7 Idiomas",
+      desc:"Traduce toda tu presentación incluyendo las lenguas indígenas de Costa Rica.",
+      targetLang:"Idioma destino", btn:"Traducir presentación completa",
+      result:"Traducción:", indigenous:"🌿 Lenguas indígenas de Costa Rica",
+      indigenousDesc:"Voltara es la única plataforma de presentaciones con soporte para Bribri, Cabécar, Maleku, Brunca y Ngäbe — preservando la herencia cultural de Costa Rica.",
+    },
+    export:{
+      title:"Exportar y Compartir",
+      opts:[{icon:"📄",l:"PDF de alta calidad",d:"Impresión o distribución digital",c:"#e05a1a"},{icon:"🎬",l:"Video narrado",d:"MP4 con voz IA y animaciones",c:"#9b1af0"},{icon:"🖼️",l:"Imágenes PNG/JPG",d:"Cada diapositiva por separado",c:"#1a6cf0"},{icon:"📊",l:"PowerPoint .pptx",d:"Compatible 100% con Office",c:"#0ea96b"},{icon:"🔗",l:"Link interactivo",d:"Comparte sin instalar nada",c:"#e0aa1a"},{icon:"📱",l:"Versión móvil",d:"Optimizada para smartphones",c:"#1ae0d0"},{icon:"🌐",l:"Sitio web",d:"Tu presentación como webpage",c:"#f01a9b"},{icon:"🎙️",l:"Podcast/Audio",d:"Exporta solo el audio narrado",c:"#aa1af0"}],
+    },
+    ecosystem:{
+      title:"Ecosistema WC Corporate",
+      desc:"Voltara trabaja en perfecta sincronía con todas las apps del ecosistema.",
+      apps:[
+        {icon:"✏️",name:"WC Corporate Editor",desc:"Editor de documentos empresariales. Importa textos e informes directamente como diapositivas.",color:"#1a6cf0",actions:["Importar documento","Sincronizar en tiempo real","Exportar a Editor"]},
+        {icon:"📊",name:"Matriz Contable",desc:"Software de contabilidad. Conecta datos financieros y genera presentaciones de resultados automáticamente.",color:"#0ea96b",actions:["Importar balance","Generar reporte KPI","Conectar datos en vivo"]},
+        {icon:"⚡",name:"Voltara",desc:"Esta app. El hub central de presentaciones del ecosistema.",color:"#f4511e",actions:["App activa","Ver integraciones","Configurar sync"]},
+      ],
+      integrations:"Integraciones externas",
+      extList:["Google Workspace","Microsoft 365","Slack","Notion","Teams","Figma","Dropbox","OneDrive"],
+    },
+    settings:{
+      title:"Ajustes",
+      aiChat:"IA Conversacional",
+      chatPh:"Pregunta sobre tu presentación... Ej: ¿Qué slide mejorar primero?",
+      prefs:"Preferencias",
+      prefList:[{l:"Guardado automático",v:true},{l:"Sugerencias IA activas",v:true},{l:"Animaciones",v:true},{l:"Modo offline",v:true},{l:"Subtítulos automáticos",v:false},{l:"Notificaciones colaboración",v:false}],
+      account:"Cuenta Premium",
+      greeting:"Hola, soy el copiloto IA de Voltara. Puedo ayudarte a mejorar cualquier diapositiva, generar contenido nuevo o analizar tu presentación. ¿Por dónde empezamos?",
+    },
+    misc:{save:"Guardado",dark:"Modo Oscuro",light:"Modo Claro",notify:"iniciando...",applying:"Aplicando:",template:"Plantilla:",opening:"Abriendo:"},
+  },
+  en:{
+    appName:"Voltara", badge:"PREMIUM CORPORATE",
+    tagline:"The platform that beats PowerPoint, Keynote and Google Slides",
+    nav:{home:"Home",editor:"Editor",ai:"AI Creative",canva:"Design",library:"Library",present:"Present",collab:"Collaborate",charts:"Charts",translate:"Translator",export:"Export",ecosystem:"Ecosystem",settings:"Settings"},
+    home:{
+      welcome:"Welcome to Voltara", desc:"Create amazing presentations with AI in seconds. Beats PowerPoint, Keynote and Google Slides.",
+      startAI:"Generate with AI", startUpload:"Upload PDF/Word", startBlank:"Blank", startTemplate:"Templates",
+      recent:"Recent", features:"Everything you need", slides:"slides",
+      stats:[{n:"10x",l:"Faster than PowerPoint"},{n:"7",l:"Languages included"},{n:"∞",l:"AI Templates"},{n:"100%",l:".pptx compatible"}],
+    },
+    ai:{
+      title:"AI Creative — Your presentation copilot",
+      desc:"Describe what you want to present and AI generates the ENTIRE presentation: slides, design, charts, notes and storytelling.",
+      promptLabel:"What do you want to present?",
+      placeholder:"e.g: Create an executive presentation about Q4 2024 financial results with growth charts...",
+      generate:"✨ Generate complete presentation",
+      generating:"Generating your presentation...",
+      uploadTitle:"Or upload a document",
+      uploadDesc:"Drag or click — PDF, Word, Excel, voice notes",
+      uploadHint:"AI reads the document and builds slides automatically",
+      processing:"Analyzing document with AI...",
+      ready:"Presentation ready!",
+      openEditor:"Open in Editor",
+      translateToo:"Convert and translate",
+      refineTitle:"Refine Mode — Iterative editing",
+      refineDesc:"Chat with AI to adjust specific sections without regenerating everything",
+      refinePlaceholder:"e.g: Change slide 3 to focus more on ROI...",
+      refineBtn:"Refine with AI",
+      suggestions:["Q4 Financial Report","2025 Business Plan","Commercial Proposal","HR Training","University Thesis","Marketing Strategy","Market Analysis","Tech Project"],
+      caps:[{icon:"🔍",t:"Auto Research",d:"AI finds reliable sources and includes them"},{icon:"📊",t:"Charts from data",d:"Automatically generates charts from your numbers"},{icon:"🎨",t:"Auto Design",d:"Layout, colors and typography chosen by AI"},{icon:"📝",t:"Speaker notes",d:"Generates complete scripts for each slide"},{icon:"🔮",t:"Audience analysis",d:"Predicts engagement and suggests improvements"},{icon:"🌍",t:"Instant translation",d:"Translates the entire presentation instantly"}],
+    },
+    canva:{
+      title:"Design — Canva-style tools",
+      desc:"Design with total freedom: text, shapes, images, icons, backgrounds and more.",
+      tools:"Tools", elements:"Elements", text:"Text", shapes:"Shapes", photos:"Photos", icons:"Icons", backgrounds:"Backgrounds", brand:"Brand Kit",
+      textStyles:["Big Title","Subtitle","Body","Quote","Highlight"],
+      shapeList:["Rectangle","Circle","Triangle","Arrow","Star","Line"],
+      bgList:["Corporate Gradient","Modern Geometric","Dark Elegant","Light Minimal","Tropical","Gold Executive"],
+      brandTitle:"Corporate Brand Kit",
+      brandDesc:"Apply logos, colors and fonts globally with one click",
+      brandColors:["Primary Color","Secondary Color","Accent","Background","Text"],
+      filters:["No filter","Professional","Vintage","Vivid","Mono","Soft"],
+      animTitle:"Animations",
+      animList:["Fade","Slide","Zoom","Rotate","Bounce","Typewriter"],
+    },
+    library:{
+      title:"Corporate Library",
+      exec:"Executive Templates", academic:"Academic Templates", diagrams:"Diagrams", icons:"Icons & Assets",
+      execItems:["Annual Report","Pitch Deck","Strategic Plan","Commercial Proposal","Executive Summary","SWOT Analysis","Roadmap","OKRs"],
+      academicItems:["Thesis","Research","Seminar","University Class","Final Project","Thesis Defense","Congress","Scientific Poster"],
+      diagramItems:["Corporate Hierarchy","Linear Process","Workflow","Mind Map","Venn Diagram","Timeline","Decision Tree","Kanban"],
+    },
+    present:{
+      title:"Advanced Presentation Mode",
+      timer:"Timer", start:"Start", pause:"Pause", reset:"Reset",
+      aiListen:"AI Listening live", aiListenDesc:"Detects what you covered and what's missing. Real-time alerts.",
+      teleprompter:"Smart Teleprompter", teleDesc:"Adaptive script with controllable speed",
+      speakerView:"Speaker View", polls:"Live Polls", qa:"Interactive Q&A",
+      subtitles:"Auto subtitles", analytics:"Post-presentation analytics",
+      covered:"Covered:", pending:"Pending:", suggest:"Suggestion:",
+    },
+    collab:{
+      title:"Real-time collaboration",
+      active:"Active collaborators", invite:"+ Invite collaborator",
+      comments:"Comments", history:"History", versions:"Versions", notifs:"Notifications",
+      online:"ONLINE", offline:"OFFLINE", editing:"Editing...",
+    },
+    charts:{title:"Charts & KPI Dashboards",types:"Chart types",importData:"Import data",kpiTitle:"Real-time KPIs"},
+    translate:{
+      title:"Live Translator — 7 Languages",
+      desc:"Translate your entire presentation including indigenous languages of Costa Rica.",
+      targetLang:"Target language", btn:"Translate entire presentation",
+      result:"Translation:", indigenous:"🌿 Indigenous languages of Costa Rica",
+      indigenousDesc:"Voltara is the only presentation platform with support for Bribri, Cabécar, Maleku, Brunca and Ngäbe — preserving Costa Rica's cultural heritage.",
+    },
+    export:{
+      title:"Export & Share",
+      opts:[{icon:"📄",l:"High quality PDF",d:"Print or digital distribution",c:"#e05a1a"},{icon:"🎬",l:"Narrated video",d:"MP4 with AI voice and animations",c:"#9b1af0"},{icon:"🖼️",l:"PNG/JPG images",d:"Each slide separately",c:"#1a6cf0"},{icon:"📊",l:"PowerPoint .pptx",d:"100% Office compatible",c:"#0ea96b"},{icon:"🔗",l:"Interactive link",d:"Share without installing anything",c:"#e0aa1a"},{icon:"📱",l:"Mobile version",d:"Optimized for smartphones",c:"#1ae0d0"},{icon:"🌐",l:"Website",d:"Your presentation as a webpage",c:"#f01a9b"},{icon:"🎙️",l:"Podcast/Audio",d:"Export narration only",c:"#aa1af0"}],
+    },
+    ecosystem:{
+      title:"WC Corporate Ecosystem",
+      desc:"Voltara works in perfect sync with all ecosystem apps.",
+      apps:[
+        {icon:"✏️",name:"WC Corporate Editor",desc:"Business document editor. Import texts and reports directly as slides.",color:"#1a6cf0",actions:["Import document","Sync in real time","Export to Editor"]},
+        {icon:"📊",name:"Matriz Contable",desc:"Accounting software. Connect financial data and auto-generate results presentations.",color:"#0ea96b",actions:["Import balance","Generate KPI report","Connect live data"]},
+        {icon:"⚡",name:"Voltara",desc:"This app. The ecosystem's central presentation hub.",color:"#f4511e",actions:["App active","View integrations","Configure sync"]},
+      ],
+      integrations:"External integrations",
+      extList:["Google Workspace","Microsoft 365","Slack","Notion","Teams","Figma","Dropbox","OneDrive"],
+    },
+    settings:{
+      title:"Settings",
+      aiChat:"Conversational AI",
+      chatPh:"Ask about your presentation... e.g: Which slide should I improve first?",
+      prefs:"Preferences",
+      prefList:[{l:"Auto save",v:true},{l:"Active AI suggestions",v:true},{l:"Animations",v:true},{l:"Offline mode",v:true},{l:"Auto subtitles",v:false},{l:"Collaboration notifications",v:false}],
+      account:"Premium Account",
+      greeting:"Hi, I'm Voltara's AI copilot. I can help you improve any slide, generate new content or analyze your presentation. Where do we start?",
+    },
+    misc:{save:"Saved",dark:"Dark Mode",light:"Light Mode",notify:"initiating...",applying:"Applying:",template:"Template:",opening:"Opening:"},
+  },
+};
+// For brevity, indigenous languages show key UI in their language + Spanish fallback
+["bribri","cabecar","maleku","brunca","ngabe"].forEach(code => {
+  const names = {bribri:"Bribri",cabecar:"Cabécar",maleku:"Maleku",brunca:"Brunca",ngabe:"Ngäbe"};
+  const greetings = {
+    bribri:"I̠ẽ̤ tö' dör yök — Soy el copiloto IA de Voltara en Bribri. ¿Cómo puedo ayudarte?",
+    cabecar:"Täke kë' dör yös — Soy el copiloto IA de Voltara en Cabécar. ¿Cómo puedo ayudarte?",
+    maleku:"Maká jóto koó — Soy el copiloto IA de Voltara en Maleku. ¿Cómo puedo ayudarte?",
+    brunca:"Dëkë tö mëra — Soy el copiloto IA de Voltara en Brunca. ¿Cómo puedo ayudarte?",
+    ngabe:"Ñan kwe mören — Soy el copiloto IA de Voltara en Ngäbe. ¿Cómo puedo ayudarte?",
+  };
+  const navWords = {
+    bribri:{home:"Kë' tso'",editor:"I̠ẽ̤ klö'",ai:"IA yök",canva:"Dör tö'",library:"Sör dë'",present:"Tö' klë",collab:"Dör sör",charts:"Yök mën",translate:"I̠ẽ̤ tö'",export:"Klö' sör",ecosystem:"Tö' sör",settings:"Të' yök"},
+    cabecar:{home:"Yë' kë'",editor:"Täke klö'",ai:"IA yös",canva:"Kë' tö'",library:"Kë' dör",present:"Tö' yës",collab:"Dör kë'",charts:"Yös mën",translate:"Täke tö'",export:"Klö' kë'",ecosystem:"Kë' sör",settings:"Të' yös"},
+    maleku:{home:"Maká",editor:"Jóto koó",ai:"IA maká",canva:"Koó jóto",library:"Koó jóto",present:"Maká jóto",collab:"Koó maká",charts:"Jóto mën",translate:"Maká koó",export:"Koó jóto",ecosystem:"Maká sör",settings:"Maká të'"},
+    brunca:{home:"Dëkë",editor:"Tö mëra",ai:"IA dëkë",canva:"Mëra tö",library:"Mëra tö",present:"Dëkë tö",collab:"Mëra dëkë",charts:"Tö kälë",translate:"Dëkë mëra",export:"Mëra tö",ecosystem:"Dëkë sör",settings:"Dëkë të'"},
+    ngabe:{home:"Ñan kwe",editor:"Mören btö",ai:"IA ñan",canva:"Kwe mören",library:"Kwe mören",present:"Ñan btö",collab:"Mören ñan",charts:"Btö kwe",translate:"Ñan mören",export:"Kwe btö",ecosystem:"Ñan sör",settings:"Ñan të'"},
+  };
+  TX[code] = {
+    ...TX.es,
+    appName:"Voltara", badge:"PREMIUM CORPORATE",
+    tagline:`${names[code]} — ${TX.es.tagline}`,
+    nav: navWords[code],
+    settings:{...TX.es.settings, greeting: greetings[code]},
+    misc:{...TX.es.misc},
+  };
+});
+
+// ── THEMES ─────────────────────────────────────────────────────────────────
+const THEMES=[
+  {name:"Corporativo",bg:"#0a1628",accent:"#1a6cf0",text:"#fff"},
+  {name:"Moderno",bg:"#0d0d0d",accent:"#0ea96b",text:"#fff"},
+  {name:"Ejecutivo",bg:"#12120e",accent:"#e0aa1a",text:"#fff"},
+  {name:"Académico",bg:"#1a1025",accent:"#9b1af0",text:"#fff"},
+  {name:"Tropical",bg:"#0a2018",accent:"#1ae0d0",text:"#fff"},
+  {name:"Minimalista",bg:"#f8f8f8",accent:"#1a1a1a",text:"#1a1a1a"},
+];
+
+const SAMPLE=[
+  {id:1,title:"Informe Financiero Q4 2024",slides:18,date:"hace 2 días",color:"#1a6cf0"},
+  {id:2,title:"Plan Estratégico 2025",slides:24,date:"hace 5 días",color:"#0ea96b"},
+  {id:3,title:"Propuesta Comercial",slides:12,date:"hace 1 semana",color:"#e05a1a"},
+  {id:4,title:"Capacitación RRHH",slides:32,date:"hace 2 semanas",color:"#9b1af0"},
+];
+
+// ── SLIDE CANVAS ────────────────────────────────────────────────────────────
+function SlideCanvas({slide,themeIdx}){
+  const th=THEMES[themeIdx]||THEMES[0];
+  return(
+    <div style={{background:th.bg,borderRadius:"12px",padding:"28px 32px",aspectRatio:"16/9",display:"flex",flexDirection:"column",justifyContent:"center",position:"relative",overflow:"hidden",boxShadow:"0 8px 32px rgba(0,0,0,0.4)"}}>
+      <div style={{position:"absolute",top:0,right:0,width:"40%",height:"100%",background:`linear-gradient(135deg,transparent,${th.accent}18)`,pointerEvents:"none"}}/>
+      <div style={{position:"absolute",bottom:0,left:0,width:"4px",height:"55%",background:th.accent}}/>
+      <div style={{position:"absolute",top:14,right:18,display:"flex",alignItems:"center",gap:6}}>
+        <VoltaraLogo size={18}/>
+        <span style={{fontSize:"8px",color:th.accent,fontWeight:800,letterSpacing:"0.15em"}}>VOLTARA</span>
+      </div>
+      <div style={{color:th.accent,fontSize:"9px",fontWeight:800,letterSpacing:"0.18em",marginBottom:8}}>PREMIUM CORPORATE</div>
+      <div style={{color:th.text,fontSize:"20px",fontWeight:900,lineHeight:1.2,marginBottom:12}}>{slide?.title||"Título de la Diapositiva"}</div>
+      <div style={{color:`${th.text}bb`,fontSize:"12px",lineHeight:1.7}}>{slide?.content||"Contenido generado automáticamente con IA"}</div>
+      <div style={{position:"absolute",bottom:12,right:18,color:`${th.text}33`,fontSize:"11px",fontWeight:700}}>{slide?.number||"01"}</div>
+    </div>
+  );
+}
+
+// ── BAR CHART ───────────────────────────────────────────────────────────────
+function BarChart({dark}){
+  const bars=[65,82,47,91,73,88,56];
+  const max=Math.max(...bars);
+  const lbls=["Ene","Feb","Mar","Abr","May","Jun","Jul"];
+  return(
+    <div style={{padding:16,background:dark?"#1a1a2e":"#f0f4ff",borderRadius:12}}>
+      <div style={{fontSize:10,fontWeight:700,color:dark?"#888":"#555",marginBottom:10,letterSpacing:"0.1em"}}>VENTAS MENSUALES — KPI</div>
+      <div style={{display:"flex",alignItems:"flex-end",gap:6,height:80}}>
+        {bars.map((v,i)=>(
+          <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
+            <div style={{width:"100%",height:`${(v/max)*70}px`,background:"linear-gradient(180deg,#1a6cf0,#0ea96b)",borderRadius:"4px 4px 0 0"}}/>
+            <span style={{fontSize:8,color:dark?"#666":"#888"}}>{lbls[i]}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── MAIN ────────────────────────────────────────────────────────────────────
+export default function Voltara(){
+  const [dark,setDark]=useState(true);
+  const [lang,setLang]=useState("es");
+  const [tab,setTab]=useState("home");
+  const [slides,setSlides]=useState([]);
+  const [selSlide,setSelSlide]=useState(null);
+  const [themeIdx,setThemeIdx]=useState(0);
+  const [aiPrompt,setAiPrompt]=useState("");
+  const [refinePrompt,setRefinePrompt]=useState("");
+  const [generating,setGenerating]=useState(false);
+  const [uploadFile,setUploadFile]=useState(null);
+  const [processing,setProcessing]=useState(false);
+  const [fileReady,setFileReady]=useState(false);
+  const [dragOver,setDragOver]=useState(false);
+  const [timer,setTimer]=useState(0);
+  const [timerOn,setTimerOn]=useState(false);
+  const [chatInput,setChatInput]=useState("");
+  const [chat,setChat]=useState([]);
+  const [transLang,setTransLang]=useState("en");
+  const [translated,setTranslated]=useState("");
+  const [notif,setNotif]=useState(null);
+  const [canvaTool,setCanvaTool]=useState("text");
+  const [selectedBg,setSelectedBg]=useState(0);
+  const [selectedAnim,setSelectedAnim]=useState(0);
+  const [pollActive,setPollActive]=useState(false);
+  const [pollVotes,setPollVotes]=useState([14,8,22,6]);
+  const fileRef=useRef(null);
+  const timerRef=useRef(null);
+  const chatEnd=useRef(null);
+
+  const t=TX[lang]||TX.es;
+  const bg=dark?"#08090f":"#f2f4fb";
+  const surf=dark?"#10121c":"#ffffff";
+  const surf2=dark?"#181b2a":"#edf0fa";
+  const bord=dark?"#1e2136":"#dde3f5";
+  const txt=dark?"#e6e8f5":"#111827";
+  const muted=dark?"#4a5070":"#7a88a8";
+  const acc="#1a6cf0";
+
+  useEffect(()=>{setChat([{r:"ai",m:t.settings.greeting}]);},[lang]);
+  useEffect(()=>{
+    if(timerOn) timerRef.current=setInterval(()=>setTimer(s=>s+1),1000);
+    else clearInterval(timerRef.current);
+    return()=>clearInterval(timerRef.current);
+  },[timerOn]);
+  useEffect(()=>{chatEnd.current?.scrollIntoView({behavior:"smooth"});},[chat]);
+
+  const fmt=s=>`${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
+  const notify=(m,type="ok")=>{setNotif({m,type});setTimeout(()=>setNotif(null),3200);};
+  const buildSlides=title=>[
+    {id:1,number:"01",title,content:"Presentación generada automáticamente con Voltara AI",type:"cover"},
+    {id:2,number:"02",title:"Tabla de Contenidos",content:"• Introducción  • Análisis  • Datos clave  • Estrategia  • Conclusiones",type:"toc"},
+    {id:3,number:"03",title:"Introducción",content:"Contexto, antecedentes y objetivos principales del tema presentado.",type:"content"},
+    {id:4,number:"04",title:"Datos y Análisis",content:"📊 Métricas clave, estadísticas y análisis de datos con visualizaciones.",type:"chart"},
+    {id:5,number:"05",title:"Estrategia",content:"Plan de acción estructurado con responsables, plazos y KPIs definidos.",type:"content"},
+    {id:6,number:"06",title:"Conclusiones",content:"Resumen ejecutivo, hallazgos principales y próximos pasos recomendados.",type:"conclusion"},
+  ];
+
+  const handleGenerate=async()=>{
+    if(!aiPrompt.trim())return;
+    setGenerating(true);
+    await new Promise(r=>setTimeout(r,2400));
+    const s=buildSlides(aiPrompt);
+    setSlides(s);setSelSlide(s[0]);
+    setGenerating(false);setTab("editor");
+    notify(`✨ ${t.ai.ready} "${aiPrompt}"`);
+    setAiPrompt("");
+  };
+
+  const handleFile=async(file)=>{
+    setUploadFile(file);setProcessing(true);setFileReady(false);
+    await new Promise(r=>setTimeout(r,2600));
+    const s=buildSlides(file.name.replace(/\.(pdf|docx?|xlsx?)$/i,""));
+    setSlides(s);setSelSlide(s[0]);
+    setProcessing(false);setFileReady(true);
+    notify(`📄 ${file.name} → ${t.ai.ready}`);
+  };
+
+  const handleChat=async()=>{
+    if(!chatInput.trim())return;
+    const msg=chatInput;setChatInput("");
+    setChat(h=>[...h,{r:"user",m:msg}]);
+    await new Promise(r=>setTimeout(r,700));
+    const lc=msg.toLowerCase();
+    let resp="💡 Puedo ayudarte a mejorar cualquier diapositiva, agregar gráficos o traducir contenido.";
+    if(lc.includes("crecimiento")||lc.includes("growth")) resp="📈 El crecimiento fue del 18% en Q4, superando el objetivo del 15% establecido en el plan estratégico.";
+    else if(lc.includes("resumen")||lc.includes("summary")) resp=`📋 Tu presentación tiene ${slides.length} diapositivas con estructura: portada, contenido, datos, estrategia y conclusiones.`;
+    else if(lc.includes("mejora")||lc.includes("improve")) resp="✨ Sugerencia: Agrega más datos visuales en slide 4, reduce texto en slide 3 y fortalece el call-to-action en la conclusión.";
+    else if(lc.includes("traducir")||lc.includes("translate")) resp="🌍 Puedo traducir tu presentación completa. Ve a la sección Traductor y selecciona el idioma destino.";
+    setChat(h=>[...h,{r:"ai",m:resp}]);
+  };
+
+  const handleTranslate=async()=>{
+    await new Promise(r=>setTimeout(r,700));
+    const samples={
+      en:"Welcome to our corporate presentation. Today we analyze the financial results of the year with key metrics.",
+      bribri:"I̠ẽ̤ tö' dör yök klö' sör. Tö' klë yök dë' sör I̠ẽ̤ yök tö'.",
+      cabecar:"Täke kë' dör yös klö'. Kë' dör yös täke klö' sör yös.",
+      maleku:"Maká jóto koó mëra. Jóto koó maká mëra jóto koó.",
+      brunca:"Dëkë tö mëra kälë. Tö mëra dëkë kälë tö mëra.",
+      ngabe:"Ñan kwe mören btö. Kwe mören ñan btö kwe mören.",
+      es:"Bienvenidos a nuestra presentación corporativa. Analizamos los resultados financieros del año.",
+    };
+    setTranslated(samples[transLang]||"Traducción disponible.");
+  };
+
+  const card={background:surf,border:`1px solid ${bord}`,borderRadius:12,padding:16};
+  const btnPrimary={background:"linear-gradient(135deg,#1a6cf0,#0ea96b)",border:"none",borderRadius:10,padding:"11px 20px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",width:"100%"};
+
+  const NAV=[
+    {id:"home",icon:"🏠",label:t.nav.home},
+    {id:"ai",icon:"🤖",label:t.nav.ai},
+    {id:"editor",icon:"✏️",label:t.nav.editor},
+    {id:"canva",icon:"🎨",label:t.nav.canva},
+    {id:"library",icon:"📚",label:t.nav.library},
+    {id:"present",icon:"🎤",label:t.nav.present},
+    {id:"collab",icon:"👥",label:t.nav.collab},
+    {id:"charts",icon:"📊",label:t.nav.charts},
+    {id:"translate",icon:"🌍",label:t.nav.translate},
+    {id:"export",icon:"📤",label:t.nav.export},
+    {id:"ecosystem",icon:"🔗",label:t.nav.ecosystem},
+    {id:"settings",icon:"⚙️",label:t.nav.settings},
+  ];
+
+  return(
+    <div style={{fontFamily:"'Segoe UI',system-ui,sans-serif",background:bg,color:txt,minHeight:"100vh",display:"flex",flexDirection:"column"}}>
+
+      {/* NOTIFICATION */}
+      {notif&&(
+        <div style={{position:"fixed",top:16,right:16,zIndex:9999,background:notif.type==="ok"?"#0ea96b":"#e05a1a",color:"#fff",padding:"10px 18px",borderRadius:10,fontSize:13,fontWeight:600,boxShadow:"0 6px 24px rgba(0,0,0,0.35)",animation:"slideIn .3s ease"}}>
+          {notif.m}
+        </div>
+      )}
+
+      {/* HEADER */}
+      <header style={{background:surf,borderBottom:`1px solid ${bord}`,padding:"0 16px",height:56,display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100,gap:8}}>
+        <div style={{display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
+          <VoltaraLogo size={36}/>
+          <div>
+            <div style={{fontSize:17,fontWeight:900,letterSpacing:"-0.03em",color:dark?"#fff":"#0d2040"}}>Voltara</div>
+            <div style={{fontSize:"7px",color:"#f4511e",fontWeight:800,letterSpacing:"0.12em"}}>{t.badge}</div>
+          </div>
+        </div>
+
+        {/* LANGUAGE SELECTOR — prominent */}
+        <div style={{display:"flex",alignItems:"center",gap:4,background:surf2,border:`1px solid ${bord}`,borderRadius:10,padding:"4px 6px",flexWrap:"wrap"}}>
+          <span style={{fontSize:10,fontWeight:700,color:muted,marginRight:4,whiteSpace:"nowrap"}}>🌍</span>
+          {LANGS.map(l=>(
+            <button key={l.code} onClick={()=>setLang(l.code)} style={{
+              background:lang===l.code?`#f4511e`:"transparent",
+              border:`1px solid ${lang===l.code?"#f4511e":bord}`,
+              borderRadius:6,padding:"3px 7px",cursor:"pointer",
+              color:lang===l.code?"#fff":muted,
+              fontSize:10,fontWeight:lang===l.code?700:400,
+              transition:"all .15s",whiteSpace:"nowrap",
+            }}>{l.flag} {l.name}</button>
+          ))}
+        </div>
+
+        <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
+          <div style={{fontSize:10,color:"#0ea96b",background:"#0ea96b15",padding:"3px 10px",borderRadius:20,fontWeight:700}}>✓ {t.misc.save}</div>
+          <button onClick={()=>setDark(!dark)} style={{background:surf2,border:`1px solid ${bord}`,borderRadius:8,padding:"5px 11px",cursor:"pointer",color:txt,fontSize:11,fontWeight:600}}>
+            {dark?"☀️":"🌙"} {dark?t.misc.light:t.misc.dark}
+          </button>
+        </div>
+      </header>
+
+      <div style={{display:"flex",flex:1,overflow:"hidden",height:"calc(100vh - 56px)"}}>
+
+        {/* SIDEBAR */}
+        <aside style={{width:180,background:surf,borderRight:`1px solid ${bord}`,display:"flex",flexDirection:"column",padding:"10px 7px",gap:2,overflowY:"auto",flexShrink:0}}>
+          {NAV.map(item=>(
+            <button key={item.id} onClick={()=>setTab(item.id)} style={{
+              background:tab===item.id?`${acc}18`:"transparent",
+              border:`1px solid ${tab===item.id?acc+"55":"transparent"}`,
+              borderRadius:8,padding:"8px 10px",cursor:"pointer",
+              color:tab===item.id?acc:muted,
+              fontSize:11,fontWeight:tab===item.id?700:400,
+              textAlign:"left",display:"flex",alignItems:"center",gap:8,
+            }}>
+              <span>{item.icon}</span><span style={{lineHeight:1.2}}>{item.label}</span>
+            </button>
+          ))}
+          <div style={{flex:1}}/>
+          <div style={{background:`linear-gradient(135deg,${acc}18,#f4511e18)`,border:`1px solid ${acc}33`,borderRadius:10,padding:11,textAlign:"center",fontSize:10}}>
+            <div style={{marginBottom:4}}><VoltaraLogo size={22}/></div>
+            <div style={{fontWeight:700,color:acc,marginBottom:2}}>Premium</div>
+            <div style={{color:muted,fontSize:9}}>All features</div>
+          </div>
+        </aside>
+
+        {/* MAIN CONTENT */}
+        <main style={{flex:1,overflowY:"auto",padding:20}}>
+
+          {/* ══ HOME ══════════════════════════════════════════════ */}
+          {tab==="home"&&(
+            <div>
+              <div style={{marginBottom:24}}>
+                <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:8}}>
+                  <VoltaraLogo size={44}/>
+                  <div>
+                    <h1 style={{fontSize:26,fontWeight:900,margin:0,letterSpacing:"-0.03em"}}>{t.home.welcome}</h1>
+                    <p style={{color:muted,fontSize:13,margin:0}}>{t.home.desc}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Stats */}
+              <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:24}}>
+                {t.home.stats.map((s,i)=>(
+                  <div key={i} style={{...card,textAlign:"center"}}>
+                    <div style={{fontSize:22,fontWeight:900,color:["#1a6cf0","#f4511e","#0ea96b","#9b1af0"][i]}}>{s.n}</div>
+                    <div style={{fontSize:10,color:muted,marginTop:3}}>{s.l}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Quick actions */}
+              <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:24}}>
+                {[
+                  {icon:"🤖",label:t.home.startAI,color:"#1a6cf0",tab:"ai"},
+                  {icon:"📁",label:t.home.startUpload,color:"#f4511e",tab:"ai"},
+                  {icon:"📄",label:t.home.startBlank,color:"#0ea96b",tab:"editor"},
+                  {icon:"🎨",label:t.home.startTemplate,color:"#9b1af0",tab:"library"},
+                ].map(a=>(
+                  <button key={a.label} onClick={()=>setTab(a.tab)} style={{background:`${a.color}14`,border:`2px solid ${a.color}33`,borderRadius:12,padding:"18px 10px",cursor:"pointer",color:txt,textAlign:"center"}}>
+                    <div style={{fontSize:28,marginBottom:7}}>{a.icon}</div>
+                    <div style={{fontSize:11,fontWeight:700,color:a.color}}>{a.label}</div>
+                  </button>
+                ))}
+              </div>
+
+              {/* Recent */}
+              <h2 style={{fontSize:14,fontWeight:700,marginBottom:12}}>{t.home.recent}</h2>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:10,marginBottom:24}}>
+                {SAMPLE.map(p=>(
+                  <div key={p.id} onClick={()=>{setTab("editor");notify(`${t.misc.opening} ${p.title}`);}} style={{...card,cursor:"pointer"}}>
+                    <div style={{height:52,borderRadius:8,marginBottom:9,background:`linear-gradient(135deg,${p.color}28,${p.color}0d)`,border:`1px solid ${p.color}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>📊</div>
+                    <div style={{fontSize:12,fontWeight:700,marginBottom:3}}>{p.title}</div>
+                    <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:muted}}>
+                      <span>{p.slides} {t.home.slides}</span><span>{p.date}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Features grid */}
+              <h2 style={{fontSize:14,fontWeight:700,marginBottom:12}}>{t.home.features}</h2>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:9}}>
+                {[
+                  {icon:"🤖",title:t.nav.ai,desc:"Genera desde prompt o documento PDF/Word",color:"#1a6cf0"},
+                  {icon:"🎨",title:t.nav.canva,desc:"Herramientas de diseño estilo Canva",color:"#f4511e"},
+                  {icon:"🌍",title:t.nav.translate,desc:"7 idiomas incluyendo lenguas indígenas CR",color:"#0ea96b"},
+                  {icon:"📊",title:t.nav.charts,desc:"KPIs, gráficos y dashboards automáticos",color:"#9b1af0"},
+                  {icon:"🔗",title:t.nav.ecosystem,desc:"WC Editor, Matriz Contable y más",color:"#e0aa1a"},
+                  {icon:"👥",title:t.nav.collab,desc:"Colaboración en tiempo real",color:"#1ae0d0"},
+                ].map(f=>(
+                  <div key={f.title} style={{...card,cursor:"pointer"}} onClick={()=>setTab(["ai","canva","translate","charts","ecosystem","collab"][["🤖","🎨","🌍","📊","🔗","👥"].indexOf(f.icon)])}>
+                    <div style={{fontSize:22,marginBottom:7}}>{f.icon}</div>
+                    <div style={{fontSize:11,fontWeight:700,marginBottom:3,color:f.color}}>{f.title}</div>
+                    <div style={{fontSize:10,color:muted,lineHeight:1.4}}>{f.desc}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ══ AI CREATIVE ═══════════════════════════════════════ */}
+          {tab==="ai"&&(
+            <div style={{maxWidth:700}}>
+              <h2 style={{fontSize:20,fontWeight:900,marginBottom:4}}>🤖 {t.ai.title}</h2>
+              <p style={{color:muted,fontSize:13,marginBottom:20}}>{t.ai.desc}</p>
+
+              {/* PROMPT */}
+              <div style={{...card,marginBottom:14}}>
+                <div style={{fontSize:12,fontWeight:700,marginBottom:8}}>{t.ai.promptLabel}</div>
+                <textarea value={aiPrompt} onChange={e=>setAiPrompt(e.target.value)}
+                  placeholder={t.ai.placeholder}
+                  style={{width:"100%",background:surf2,border:`1px solid ${bord}`,borderRadius:9,padding:13,color:txt,fontSize:13,resize:"none",height:100,boxSizing:"border-box",marginBottom:10}}/>
+                <div style={{display:"flex",gap:6,marginBottom:12,flexWrap:"wrap"}}>
+                  {t.ai.suggestions.map(s=>(
+                    <button key={s} onClick={()=>setAiPrompt(lang==="en"?`Make a presentation about ${s}`:`Haz una presentación sobre ${s}`)}
+                      style={{background:surf2,border:`1px solid ${bord}`,borderRadius:18,padding:"3px 10px",fontSize:10,cursor:"pointer",color:muted}}>
+                      {s}
+                    </button>
+                  ))}
+                </div>
+                <button onClick={handleGenerate} disabled={generating||!aiPrompt.trim()} style={{...btnPrimary,opacity:(generating||!aiPrompt.trim())?0.6:1}}>
+                  {generating?`⏳ ${t.ai.generating}`:t.ai.generate}
+                </button>
+              </div>
+
+              {/* FILE UPLOAD */}
+              <div style={{...card,marginBottom:14}}>
+                <div style={{fontSize:13,fontWeight:700,marginBottom:10}}>📁 {t.ai.uploadTitle}</div>
+                <div
+                  onDragOver={e=>{e.preventDefault();setDragOver(true);}}
+                  onDragLeave={()=>setDragOver(false)}
+                  onDrop={e=>{e.preventDefault();setDragOver(false);const f=e.dataTransfer.files[0];if(f)handleFile(f);}}
+                  onClick={()=>fileRef.current?.click()}
+                  style={{border:`2px dashed ${dragOver?acc:bord}`,borderRadius:12,padding:"28px 20px",textAlign:"center",cursor:"pointer",background:dragOver?`${acc}0a`:surf2,transition:"all .2s",marginBottom:10}}
+                >
+                  {processing?(
+                    <div>
+                      <div style={{fontSize:26,marginBottom:7}}>⚙️</div>
+                      <div style={{fontSize:13,fontWeight:700,color:acc}}>{t.ai.processing}</div>
+                      <div style={{marginTop:10,height:4,background:bord,borderRadius:2,overflow:"hidden"}}>
+                        <div style={{height:"100%",width:"70%",background:`linear-gradient(90deg,${acc},#0ea96b)`,borderRadius:2,animation:"progress 1.8s ease infinite"}}/>
+                      </div>
+                    </div>
+                  ):fileReady?(
+                    <div>
+                      <div style={{fontSize:26,marginBottom:7}}>✅</div>
+                      <div style={{fontSize:13,fontWeight:700,color:"#0ea96b"}}>{t.ai.ready}</div>
+                      <div style={{fontSize:11,color:muted,marginTop:4}}>{uploadFile?.name}</div>
+                    </div>
+                  ):(
+                    <div>
+                      <div style={{fontSize:32,marginBottom:7}}>📂</div>
+                      <div style={{fontSize:13,fontWeight:600}}>{t.ai.uploadDesc}</div>
+                      <div style={{fontSize:11,color:muted,marginTop:4}}>{t.ai.uploadHint}</div>
+                    </div>
+                  )}
+                </div>
+                <input ref={fileRef} type="file" accept=".pdf,.docx,.doc,.xlsx,.xls" onChange={e=>{if(e.target.files[0])handleFile(e.target.files[0]);}} style={{display:"none"}}/>
+                {fileReady&&(
+                  <div style={{display:"flex",gap:8}}>
+                    <button onClick={()=>{setTab("editor");notify("📊 Abierto en Editor");}} style={{...btnPrimary,flex:1}}>✏️ {t.ai.openEditor}</button>
+                    <button onClick={()=>{setTab("translate");notify("🌍 Redirigiendo...");}} style={{background:surf2,border:`1px solid ${bord}`,borderRadius:10,padding:"10px 14px",cursor:"pointer",color:txt,fontSize:11,fontWeight:600,whiteSpace:"nowrap"}}>🌍 {t.ai.translateToo}</button>
+                  </div>
+                )}
+              </div>
+
+              {/* REFINE MODE */}
+              <div style={{...card,marginBottom:14}}>
+                <div style={{fontSize:13,fontWeight:700,marginBottom:4}}>🔮 {t.ai.refineTitle}</div>
+                <div style={{fontSize:11,color:muted,marginBottom:10}}>{t.ai.refineDesc}</div>
+                <div style={{display:"flex",gap:8}}>
+                  <input value={refinePrompt} onChange={e=>setRefinePrompt(e.target.value)}
+                    placeholder={t.ai.refinePlaceholder}
+                    style={{flex:1,background:surf2,border:`1px solid ${bord}`,borderRadius:8,padding:"8px 11px",color:txt,fontSize:12}}/>
+                  <button onClick={()=>{notify(`✨ ${t.ai.refineBtn}`);setRefinePrompt("");}} style={{background:acc,border:"none",borderRadius:8,padding:"8px 14px",color:"#fff",fontSize:12,cursor:"pointer",fontWeight:600,whiteSpace:"nowrap"}}>{t.ai.refineBtn}</button>
+                </div>
+              </div>
+
+              {/* CAPABILITIES */}
+              <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:9}}>
+                {t.ai.caps.map(c=>(
+                  <div key={c.t} onClick={()=>notify(`${c.t} — disponible`)} style={{...card,cursor:"pointer"}}>
+                    <div style={{fontSize:20,marginBottom:5}}>{c.icon}</div>
+                    <div style={{fontSize:11,fontWeight:700,marginBottom:2}}>{c.t}</div>
+                    <div style={{fontSize:10,color:muted}}>{c.d}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ══ EDITOR ════════════════════════════════════════════ */}
+          {tab==="editor"&&(
+            <div style={{display:"grid",gridTemplateColumns:"180px 1fr 200px",gap:14,height:"100%"}}>
+              {/* Slide list */}
+              <div style={{display:"flex",flexDirection:"column",gap:6}}>
+                <div style={{fontSize:9,fontWeight:700,color:muted,marginBottom:4}}>DIAPOSITIVAS</div>
+                {slides.length===0?(
+                  <div style={{...card,border:`2px dashed ${bord}`,textAlign:"center",color:muted,fontSize:11}}>
+                    <div style={{fontSize:20,marginBottom:6}}>📄</div>
+                    <div style={{marginBottom:8}}>Sin diapositivas</div>
+                    <button onClick={()=>{const s={id:Date.now(),number:"01",title:"Nueva",content:"Contenido",type:"content"};setSlides([s]);setSelSlide(s);}} style={{background:acc,border:"none",borderRadius:6,padding:"5px 10px",color:"#fff",fontSize:10,cursor:"pointer",fontWeight:600}}>+ Agregar</button>
+                  </div>
+                ):slides.map((sl,i)=>(
+                  <div key={sl.id} onClick={()=>setSelSlide(sl)} style={{background:selSlide?.id===sl.id?`${acc}18`:surf,border:`1px solid ${selSlide?.id===sl.id?acc:bord}`,borderRadius:8,padding:"8px 10px",cursor:"pointer"}}>
+                    <div style={{fontSize:8,color:acc,fontWeight:700}}>{String(i+1).padStart(2,"0")}</div>
+                    <div style={{fontSize:10,fontWeight:600,marginTop:2,lineHeight:1.2}}>{sl.title}</div>
+                  </div>
+                ))}
+                {slides.length>0&&(
+                  <button onClick={()=>{const s={id:Date.now(),number:String(slides.length+1).padStart(2,"0"),title:"Nueva diapositiva",content:"Contenido",type:"content"};setSlides(p=>[...p,s]);setSelSlide(s);}} style={{background:"transparent",border:`1px dashed ${bord}`,borderRadius:8,padding:8,color:muted,fontSize:10,cursor:"pointer"}}>➕ Agregar</button>
+                )}
+              </div>
+
+              {/* Canvas */}
+              <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                <div style={{...card,display:"flex",gap:6,flexWrap:"wrap",alignItems:"center",padding:"7px 11px"}}>
+                  {["B","I","U","|","H1","H2","|","🖼️","📊","🔗","⬛","🎨"].map((t2,i)=>(
+                    <button key={i} onClick={()=>notify(`${t.misc.applying} ${t2}`)} style={{background:surf2,border:`1px solid ${bord}`,borderRadius:5,padding:"3px 7px",cursor:"pointer",color:txt,fontSize:10,fontWeight:t2==="|"?300:600,opacity:t2==="|"?0.25:1}}>{t2}</button>
+                  ))}
+                  <div style={{flex:1}}/>
+                  <span style={{fontSize:10,color:muted}}>{slides.length} slides</span>
+                </div>
+                {selSlide?(
+                  <>
+                    <SlideCanvas slide={selSlide} themeIdx={themeIdx}/>
+                    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9}}>
+                      <div>
+                        <label style={{fontSize:9,color:muted,display:"block",marginBottom:3}}>TÍTULO</label>
+                        <input value={selSlide.title} onChange={e=>{const u={...selSlide,title:e.target.value};setSelSlide(u);setSlides(s=>s.map(sl=>sl.id===u.id?u:sl));}} style={{width:"100%",background:surf,border:`1px solid ${bord}`,borderRadius:7,padding:"7px 10px",color:txt,fontSize:12,boxSizing:"border-box"}}/>
+                      </div>
+                      <div>
+                        <label style={{fontSize:9,color:muted,display:"block",marginBottom:3}}>CONTENIDO</label>
+                        <textarea value={selSlide.content} onChange={e=>{const u={...selSlide,content:e.target.value};setSelSlide(u);setSlides(s=>s.map(sl=>sl.id===u.id?u:sl));}} style={{width:"100%",background:surf,border:`1px solid ${bord}`,borderRadius:7,padding:"7px 10px",color:txt,fontSize:12,resize:"none",height:56,boxSizing:"border-box"}}/>
+                      </div>
+                    </div>
+                  </>
+                ):(
+                  <div style={{...card,border:`2px dashed ${bord}`,padding:"50px 20px",textAlign:"center",color:muted}}>
+                    <div style={{fontSize:36,marginBottom:10}}>✏️</div>
+                    <div style={{fontSize:13}}>Genera con IA o crea diapositivas manualmente</div>
+                    <button onClick={()=>setTab("ai")} style={{...btnPrimary,width:"auto",marginTop:14}}>🤖 {t.nav.ai}</button>
+                  </div>
+                )}
+              </div>
+
+              {/* Right panel */}
+              <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                <div style={card}>
+                  <div style={{fontSize:9,fontWeight:700,color:muted,marginBottom:8}}>TEMAS</div>
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:5}}>
+                    {THEMES.map((th,i)=>(
+                      <button key={th.name} onClick={()=>setThemeIdx(i)} style={{background:th.bg,border:`2px solid ${themeIdx===i?th.accent:"transparent"}`,borderRadius:7,padding:"8px 4px",cursor:"pointer",fontSize:8,color:th.text,fontWeight:600}}>
+                        <div style={{width:16,height:2,background:th.accent,borderRadius:2,margin:"0 auto 3px"}}/>
+                        {th.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div style={card}>
+                  <div style={{fontSize:9,fontWeight:700,color:muted,marginBottom:6}}>📝 NOTAS EXPOSITOR</div>
+                  <textarea placeholder="Notas privadas..." style={{width:"100%",background:surf2,border:`1px solid ${bord}`,borderRadius:7,padding:7,color:txt,fontSize:10,resize:"none",height:60,boxSizing:"border-box"}}/>
+                </div>
+                <div style={card}>
+                  <div style={{fontSize:9,fontWeight:700,color:muted,marginBottom:6}}>🤖 SUGERENCIAS IA</div>
+                  {["+ Datos visuales en slide 4","Reduce texto 30%","Añade gráfico KPI","Fortalece conclusión"].map(s=>(
+                    <div key={s} onClick={()=>notify(`${t.misc.applying} ${s}`)} style={{fontSize:9,color:muted,padding:"5px 7px",background:surf2,borderRadius:5,marginBottom:3,cursor:"pointer",border:`1px solid ${bord}`}}>💡 {s}</div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ══ CANVA DESIGN ══════════════════════════════════════ */}
+          {tab==="canva"&&(
+            <div style={{display:"grid",gridTemplateColumns:"160px 1fr 180px",gap:14}}>
+              {/* Left tools */}
+              <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                <div style={{fontSize:9,fontWeight:700,color:muted,marginBottom:4}}>{t.canva.tools.toUpperCase()}</div>
+                {[
+                  {id:"text",icon:"T",label:t.canva.text},
+                  {id:"shapes",icon:"⬛",label:t.canva.shapes},
+                  {id:"photos",icon:"🖼️",label:t.canva.photos},
+                  {id:"icons",icon:"⭐",label:t.canva.icons},
+                  {id:"backgrounds",icon:"🎨",label:t.canva.backgrounds},
+                  {id:"brand",icon:"🏢",label:t.canva.brand},
+                ].map(tool=>(
+                  <button key={tool.id} onClick={()=>setCanvaTool(tool.id)} style={{background:canvaTool===tool.id?`${acc}18`:surf,border:`1px solid ${canvaTool===tool.id?acc:bord}`,borderRadius:8,padding:"10px 8px",cursor:"pointer",color:canvaTool===tool.id?acc:muted,fontSize:10,fontWeight:canvaTool===tool.id?700:400,display:"flex",alignItems:"center",gap:8}}>
+                    <span style={{fontSize:14}}>{tool.icon}</span>{tool.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Canvas area */}
+              <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                {/* Toolbar */}
+                <div style={{...card,display:"flex",gap:6,flexWrap:"wrap",padding:"8px 12px",alignItems:"center"}}>
+                  <button style={{background:surf2,border:`1px solid ${bord}`,borderRadius:5,padding:"4px 9px",cursor:"pointer",color:txt,fontSize:11,fontWeight:700}}>B</button>
+                  <button style={{background:surf2,border:`1px solid ${bord}`,borderRadius:5,padding:"4px 9px",cursor:"pointer",color:txt,fontSize:11,fontStyle:"italic"}}>I</button>
+                  <button style={{background:surf2,border:`1px solid ${bord}`,borderRadius:5,padding:"4px 9px",cursor:"pointer",color:txt,fontSize:11,textDecoration:"underline"}}>U</button>
+                  <div style={{width:1,height:20,background:bord,margin:"0 4px"}}/>
+                  {["12","14","16","18","24","32"].map(size=>(
+                    <button key={size} onClick={()=>notify(`Tamaño: ${size}px`)} style={{background:surf2,border:`1px solid ${bord}`,borderRadius:5,padding:"4px 7px",cursor:"pointer",color:txt,fontSize:10}}>{size}</button>
+                  ))}
+                  <div style={{width:1,height:20,background:bord,margin:"0 4px"}}/>
+                  {["◀","▶","🔒","🗑️"].map((ic,i)=>(
+                    <button key={i} onClick={()=>notify(`${ic}`)} style={{background:surf2,border:`1px solid ${bord}`,borderRadius:5,padding:"4px 8px",cursor:"pointer",color:txt,fontSize:12}}>{ic}</button>
+                  ))}
+                </div>
+
+                {/* Design canvas */}
+                <div style={{...card,minHeight:320,position:"relative",overflow:"hidden",background:dark?"#0d0f1a":"#f8f9ff"}}>
+                  {canvaTool==="text"&&(
+                    <div style={{padding:20}}>
+                      <div style={{fontSize:9,fontWeight:700,color:muted,marginBottom:10}}>ESTILOS DE TEXTO</div>
+                      <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                        {t.canva.textStyles.map((s,i)=>(
+                          <div key={s} onClick={()=>notify(`${s} añadido`)} style={{padding:"10px 14px",background:surf2,borderRadius:8,cursor:"pointer",border:`1px solid ${bord}`,fontSize:[22,16,13,13,15][i],fontWeight:[900,700,400,400,600][i],fontStyle:i===3?"italic":"normal",color:[acc,"#f4511e",txt,muted,"#0ea96b"][i]}}>{s}</div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {canvaTool==="shapes"&&(
+                    <div style={{padding:20}}>
+                      <div style={{fontSize:9,fontWeight:700,color:muted,marginBottom:10}}>FORMAS</div>
+                      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
+                        {t.canva.shapeList.map(s=>(
+                          <div key={s} onClick={()=>notify(`${s} añadido`)} style={{background:surf2,border:`1px solid ${bord}`,borderRadius:8,padding:"16px 8px",cursor:"pointer",textAlign:"center",fontSize:10,fontWeight:600}}>
+                            {s==="Rectángulo"||s==="Rectangle"?"⬛":s==="Círculo"||s==="Circle"?"⚪":s==="Triángulo"||s==="Triangle"?"🔺":s==="Estrella"||s==="Star"?"⭐":s==="Flecha"||s==="Arrow"?"➡️":"➖"}
+                            <div style={{marginTop:4,fontSize:9}}>{s}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {canvaTool==="photos"&&(
+                    <div style={{padding:20}}>
+                      <div style={{fontSize:9,fontWeight:700,color:muted,marginBottom:10}}>FOTOS Y FILTROS</div>
+                      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,marginBottom:12}}>
+                        {["🏙️","🌿","💼","📈","🏢","👥"].map((e,i)=>(
+                          <div key={i} onClick={()=>notify("Foto añadida")} style={{background:surf2,border:`1px solid ${bord}`,borderRadius:8,height:60,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:24}}>{e}</div>
+                        ))}
+                      </div>
+                      <div style={{fontSize:9,fontWeight:700,color:muted,marginBottom:8}}>FILTROS</div>
+                      <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                        {t.canva.filters.map(f=>(
+                          <button key={f} onClick={()=>notify(`Filtro: ${f}`)} style={{background:surf2,border:`1px solid ${bord}`,borderRadius:6,padding:"4px 9px",cursor:"pointer",color:muted,fontSize:9}}>{f}</button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {canvaTool==="icons"&&(
+                    <div style={{padding:20}}>
+                      <div style={{fontSize:9,fontWeight:700,color:muted,marginBottom:10}}>ÍCONOS</div>
+                      <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:8}}>
+                        {["💰","📊","🏆","⚡","🔑","🌍","💡","🎯","📱","🔒","✅","❌","⭐","🚀","🔧","📋","🎨","🤝","📌","🏅","🔍","📢","💬","🎓"].map((ic,i)=>(
+                          <div key={i} onClick={()=>notify(`Ícono ${ic} añadido`)} style={{background:surf2,border:`1px solid ${bord}`,borderRadius:7,height:40,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:18}}>{ic}</div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {canvaTool==="backgrounds"&&(
+                    <div style={{padding:20}}>
+                      <div style={{fontSize:9,fontWeight:700,color:muted,marginBottom:10}}>FONDOS</div>
+                      <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:8}}>
+                        {[
+                          {n:t.canva.bgList[0],bg:"linear-gradient(135deg,#0a1628,#1a6cf0)"},
+                          {n:t.canva.bgList[1],bg:"linear-gradient(135deg,#1a1025,#9b1af0)"},
+                          {n:t.canva.bgList[2],bg:"linear-gradient(135deg,#0d0d0d,#1a1a2e)"},
+                          {n:t.canva.bgList[3],bg:"linear-gradient(135deg,#f8f8f8,#e8eaf0)"},
+                          {n:t.canva.bgList[4],bg:"linear-gradient(135deg,#0a2018,#1ae0d0)"},
+                          {n:t.canva.bgList[5],bg:"linear-gradient(135deg,#12120e,#e0aa1a)"},
+                        ].map((b,i)=>(
+                          <div key={i} onClick={()=>{setSelectedBg(i);notify(`Fondo: ${b.n}`);}} style={{background:b.bg,borderRadius:8,height:48,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",border:`2px solid ${selectedBg===i?acc:"transparent"}`,fontSize:9,color:"#fff",fontWeight:700,padding:"0 8px",textAlign:"center"}}>{b.n}</div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {canvaTool==="brand"&&(
+                    <div style={{padding:20}}>
+                      <div style={{fontSize:12,fontWeight:700,marginBottom:4}}>{t.canva.brandTitle}</div>
+                      <div style={{fontSize:10,color:muted,marginBottom:12}}>{t.canva.brandDesc}</div>
+                      <div style={{marginBottom:12}}>
+                        <div style={{fontSize:9,fontWeight:700,color:muted,marginBottom:7}}>COLORES</div>
+                        <div style={{display:"flex",gap:7}}>
+                          {["#1a6cf0","#f4511e","#0ea96b","#0a1628","#ffffff"].map((c,i)=>(
+                            <div key={i} style={{width:30,height:30,borderRadius:6,background:c,cursor:"pointer",border:`2px solid ${bord}`,title:t.canva.brandColors[i]}}/>
+                          ))}
+                        </div>
+                      </div>
+                      <div style={{marginBottom:12}}>
+                        <div style={{fontSize:9,fontWeight:700,color:muted,marginBottom:7}}>LOGO</div>
+                        <div style={{display:"flex",gap:8,alignItems:"center"}}>
+                          <VoltaraLogo size={32}/>
+                          <button onClick={()=>notify("Logo actualizado")} style={{background:surf2,border:`1px solid ${bord}`,borderRadius:6,padding:"5px 10px",cursor:"pointer",color:txt,fontSize:10}}>Cambiar logo</button>
+                        </div>
+                      </div>
+                      <button onClick={()=>notify("Brand Kit aplicado globalmente")} style={{...btnPrimary}}>⚡ Aplicar a toda la presentación</button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Right: animations */}
+              <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                <div style={card}>
+                  <div style={{fontSize:9,fontWeight:700,color:muted,marginBottom:8}}>{t.canva.animTitle.toUpperCase()}</div>
+                  {t.canva.animList.map((a,i)=>(
+                    <button key={a} onClick={()=>{setSelectedAnim(i);notify(`Animación: ${a}`);}} style={{width:"100%",background:selectedAnim===i?`${acc}18`:surf2,border:`1px solid ${selectedAnim===i?acc:bord}`,borderRadius:7,padding:"8px 10px",cursor:"pointer",color:selectedAnim===i?acc:muted,fontSize:10,textAlign:"left",marginBottom:4,fontWeight:selectedAnim===i?700:400}}>
+                      {["✨","↗️","🔍","🔄","↩️","⌨️"][i]} {a}
+                    </button>
+                  ))}
+                </div>
+                <div style={card}>
+                  <div style={{fontSize:9,fontWeight:700,color:muted,marginBottom:8}}>CAPAS</div>
+                  {["Fondo","Imagen","Título","Subtítulo","Íconos"].map((layer,i)=>(
+                    <div key={layer} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"5px 0",borderBottom:`1px solid ${bord}`,fontSize:10}}>
+                      <span>{layer}</span>
+                      <div style={{display:"flex",gap:4}}>
+                        <button onClick={()=>notify(`👁 ${layer}`)} style={{background:"none",border:"none",cursor:"pointer",color:muted,fontSize:11}}>👁</button>
+                        <button onClick={()=>notify(`🔒 ${layer}`)} style={{background:"none",border:"none",cursor:"pointer",color:muted,fontSize:11}}>🔒</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ══ LIBRARY ═══════════════════════════════════════════ */}
+          {tab==="library"&&(
+            <div>
+              <h2 style={{fontSize:20,fontWeight:900,marginBottom:18}}>📚 {t.library.title}</h2>
+              {[
+                {title:t.library.exec,items:t.library.execItems,color:"#1a6cf0"},
+                {title:t.library.academic,items:t.library.academicItems,color:"#9b1af0"},
+                {title:t.library.diagrams,items:t.library.diagramItems,color:"#0ea96b"},
+              ].map(section=>(
+                <div key={section.title} style={{marginBottom:22}}>
+                  <div style={{fontSize:11,fontWeight:700,color:muted,marginBottom:10,display:"flex",alignItems:"center",gap:6}}>
+                    <div style={{width:3,height:14,background:section.color,borderRadius:2}}/>{section.title.toUpperCase()}
+                  </div>
+                  <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:9}}>
+                    {section.items.map(item=>(
+                      <div key={item} onClick={()=>{setSlides([{id:Date.now(),number:"01",title:item,content:"Plantilla corporativa Voltara Premium",type:"template"}]);setTab("editor");notify(`${t.misc.template} ${item}`);}} style={{...card,cursor:"pointer",textAlign:"center"}}>
+                        <div style={{fontSize:20,marginBottom:5}}>📋</div>
+                        <div style={{fontSize:10,fontWeight:600}}>{item}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* ══ PRESENT ═══════════════════════════════════════════ */}
+          {tab==="present"&&(
+            <div style={{maxWidth:620}}>
+              <h2 style={{fontSize:20,fontWeight:900,marginBottom:18}}>🎤 {t.present.title}</h2>
+
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:12}}>
+                {/* Timer */}
+                <div style={{...card,textAlign:"center"}}>
+                  <div style={{fontSize:9,fontWeight:700,color:muted,marginBottom:8}}>⏱️ {t.present.timer.toUpperCase()}</div>
+                  <div style={{fontSize:44,fontWeight:900,fontVariantNumeric:"tabular-nums",color:timerOn?acc:txt,marginBottom:12}}>{fmt(timer)}</div>
+                  <div style={{display:"flex",gap:8,justifyContent:"center"}}>
+                    <button onClick={()=>setTimerOn(!timerOn)} style={{background:timerOn?"#e05a1a":acc,border:"none",borderRadius:8,padding:"8px 18px",color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer"}}>{timerOn?`⏸ ${t.present.pause}`:`▶ ${t.present.start}`}</button>
+                    <button onClick={()=>{setTimerOn(false);setTimer(0);}} style={{background:surf2,border:`1px solid ${bord}`,borderRadius:8,padding:"8px 12px",color:txt,fontSize:11,cursor:"pointer"}}>↺ {t.present.reset}</button>
+                  </div>
+                </div>
+
+                {/* Speaker view */}
+                <div style={card}>
+                  <div style={{fontSize:9,fontWeight:700,color:muted,marginBottom:8}}>👁️ {t.present.speakerView.toUpperCase()}</div>
+                  {selSlide?(
+                    <>
+                      <div style={{fontSize:9,color:acc,fontWeight:700}}>ACTUAL</div>
+                      <div style={{fontSize:14,fontWeight:800,marginTop:3,marginBottom:6}}>{selSlide.title}</div>
+                      <div style={{fontSize:10,color:muted}}>Siguiente: Datos y Análisis</div>
+                    </>
+                  ):<div style={{color:muted,fontSize:10}}>Selecciona una diapositiva en el Editor</div>}
+                </div>
+              </div>
+
+              {/* AI Listening */}
+              <div style={{...card,marginBottom:12}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+                  <div style={{fontSize:12,fontWeight:700}}>🎙️ {t.present.aiListen}</div>
+                  <div style={{width:8,height:8,borderRadius:"50%",background:"#0ea96b",boxShadow:"0 0 6px #0ea96b",animation:"pulse 1.5s infinite"}}/>
+                </div>
+                <div style={{fontSize:10,color:muted,marginBottom:8}}>{t.present.aiListenDesc}</div>
+                {[`✅ ${t.present.covered} Introducción`,`⚠️ ${t.present.pending} Datos Q3`,`💡 ${t.present.suggest} Mencionar el ROI`].map(s=>(
+                  <div key={s} style={{fontSize:10,padding:"5px 8px",background:surf2,borderRadius:6,marginBottom:3}}>{s}</div>
+                ))}
+              </div>
+
+              {/* Teleprompter */}
+              <div style={{...card,marginBottom:12}}>
+                <div style={{fontSize:12,fontWeight:700,marginBottom:6}}>📜 {t.present.teleprompter}</div>
+                <div style={{fontSize:10,color:muted,marginBottom:8}}>{t.present.teleDesc}</div>
+                <div style={{background:"#000",borderRadius:8,padding:"12px 14px",fontSize:13,lineHeight:1.8,color:"#00ff88",fontFamily:"monospace",height:70,overflow:"hidden"}}>
+                  Bienvenidos a nuestra presentación corporativa. Hoy analizaremos los resultados financieros y el plan estratégico para el siguiente período...
+                </div>
+                <div style={{display:"flex",gap:8,marginTop:8}}>
+                  {["Lento","Normal","Rápido"].map(v=>(
+                    <button key={v} onClick={()=>notify(`Velocidad: ${v}`)} style={{background:surf2,border:`1px solid ${bord}`,borderRadius:6,padding:"4px 10px",cursor:"pointer",color:muted,fontSize:10}}>{v}</button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Live polls */}
+              <div style={card}>
+                <div style={{fontSize:12,fontWeight:700,marginBottom:6}}>📊 {t.present.polls}</div>
+                <div style={{fontSize:10,color:muted,marginBottom:10}}>Encuesta activa en vivo para la audiencia</div>
+                {["Excelente","Bueno","Regular","Necesita mejoras"].map((opt,i)=>(
+                  <div key={opt} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+                    <div style={{fontSize:10,width:80,color:txt}}>{opt}</div>
+                    <div style={{flex:1,height:14,background:surf2,borderRadius:7,overflow:"hidden"}}>
+                      <div style={{height:"100%",width:`${(pollVotes[i]/Math.max(...pollVotes))*100}%`,background:`linear-gradient(90deg,${acc},#0ea96b)`,borderRadius:7,transition:"width .5s"}}/>
+                    </div>
+                    <div style={{fontSize:10,color:muted,width:20}}>{pollVotes[i]}</div>
+                  </div>
+                ))}
+                <button onClick={()=>{setPollVotes(v=>v.map(x=>x+Math.floor(Math.random()*5)));notify("Voto registrado");}} style={{...btnPrimary,marginTop:8}}>+ Simular voto</button>
+              </div>
+            </div>
+          )}
+
+          {/* ══ COLLAB ════════════════════════════════════════════ */}
+          {tab==="collab"&&(
+            <div style={{maxWidth:580}}>
+              <h2 style={{fontSize:20,fontWeight:900,marginBottom:18}}>👥 {t.collab.title}</h2>
+              <div style={{...card,marginBottom:14}}>
+                <div style={{fontSize:10,fontWeight:700,color:muted,marginBottom:12}}>{t.collab.active.toUpperCase()}</div>
+                {[{name:"María García",color:"#1a6cf0",online:true,action:"Editando slide 2"},{name:"Carlos Rodríguez",color:"#0ea96b",online:true,action:"Viendo slide 5"},{name:"Ana López",color:"#9b1af0",online:false,action:"Última edición hace 1h"}].map(c=>(
+                  <div key={c.name} style={{display:"flex",alignItems:"center",gap:11,padding:"9px 0",borderBottom:`1px solid ${bord}`}}>
+                    <div style={{width:34,height:34,borderRadius:"50%",background:c.color,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:13,fontWeight:700,flexShrink:0}}>{c.name[0]}</div>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:12,fontWeight:600}}>{c.name}</div>
+                      <div style={{fontSize:10,color:muted}}>{c.action}</div>
+                    </div>
+                    <div style={{fontSize:9,fontWeight:700,padding:"3px 7px",borderRadius:18,background:c.online?"#0ea96b15":surf2,color:c.online?"#0ea96b":muted}}>{c.online?`● ${t.collab.online}`:`○ ${t.collab.offline}`}</div>
+                  </div>
+                ))}
+                <button onClick={()=>notify("Enlace de colaboración copiado")} style={{...btnPrimary,marginTop:12}}>{t.collab.invite}</button>
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:11}}>
+                {[{icon:"💬",title:t.collab.comments,count:"8 nuevos"},{icon:"📋",title:t.collab.history,count:"23 cambios"},{icon:"🔖",title:t.collab.versions,count:"5 versiones"},{icon:"🔔",title:t.collab.notifs,count:"2 alertas"}].map(item=>(
+                  <div key={item.title} onClick={()=>notify(`${item.title}: ${item.count}`)} style={{...card,cursor:"pointer"}}>
+                    <div style={{fontSize:20,marginBottom:5}}>{item.icon}</div>
+                    <div style={{fontSize:11,fontWeight:700}}>{item.title}</div>
+                    <div style={{fontSize:10,color:acc,marginTop:2}}>{item.count}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ══ CHARTS ════════════════════════════════════════════ */}
+          {tab==="charts"&&(
+            <div style={{maxWidth:680}}>
+              <h2 style={{fontSize:20,fontWeight:900,marginBottom:18}}>📊 {t.charts.title}</h2>
+              <BarChart dark={dark}/>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:11,margin:"14px 0"}}>
+                {[{label:t.charts.kpiTitle,val:"₡2.4M",change:"+18%",color:"#0ea96b"},{label:"Gastos",val:"₡1.1M",change:"-5%",color:"#e05a1a"},{label:"Utilidad neta",val:"₡1.3M",change:"+32%",color:"#1a6cf0"}].map(k=>(
+                  <div key={k.label} style={{...card,textAlign:"center"}}>
+                    <div style={{fontSize:10,color:muted,fontWeight:600,marginBottom:5}}>{k.label}</div>
+                    <div style={{fontSize:20,fontWeight:900,color:k.color}}>{k.val}</div>
+                    <div style={{fontSize:11,color:k.color,marginTop:3,fontWeight:600}}>{k.change}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={card}>
+                <div style={{fontSize:10,fontWeight:700,color:muted,marginBottom:10}}>{t.charts.types.toUpperCase()}</div>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:7,marginBottom:14}}>
+                  {["Barras","Pastel","Líneas","Área","KPI","Radar","Dispersión","Donuts"].map(t2=>(
+                    <button key={t2} onClick={()=>notify(`Gráfico ${t2} añadido`)} style={{background:surf2,border:`1px solid ${bord}`,borderRadius:7,padding:9,cursor:"pointer",color:txt,fontSize:10,fontWeight:600}}>📊 {t2}</button>
+                  ))}
+                </div>
+                <div style={{fontSize:10,fontWeight:700,color:muted,marginBottom:7}}>{t.charts.importData.toUpperCase()}</div>
+                <div style={{display:"flex",gap:7,flexWrap:"wrap"}}>
+                  {["Excel .xlsx","CSV","Google Sheets","Base de datos","API JSON"].map(src=>(
+                    <button key={src} onClick={()=>notify(`Importar: ${src}`)} style={{background:acc,border:"none",borderRadius:7,padding:"6px 11px",cursor:"pointer",color:"#fff",fontSize:10,fontWeight:600}}>{src}</button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ══ TRANSLATE ═════════════════════════════════════════ */}
+          {tab==="translate"&&(
+            <div style={{maxWidth:600}}>
+              <h2 style={{fontSize:20,fontWeight:900,marginBottom:5}}>🌍 {t.translate.title}</h2>
+              <p style={{color:muted,fontSize:13,marginBottom:20}}>{t.translate.desc}</p>
+              <div style={{...card,marginBottom:14}}>
+                <div style={{fontSize:10,fontWeight:700,color:muted,marginBottom:10}}>{t.translate.targetLang.toUpperCase()}</div>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:7,marginBottom:14}}>
+                  {LANGS.filter(l=>l.code!==lang).map(l=>(
+                    <button key={l.code} onClick={()=>setTransLang(l.code)} style={{background:transLang===l.code?`${acc}18`:surf2,border:`2px solid ${transLang===l.code?acc:bord}`,borderRadius:8,padding:"9px 5px",cursor:"pointer",color:transLang===l.code?acc:txt,fontSize:11,fontWeight:transLang===l.code?700:400}}>{l.flag} {l.name}</button>
+                  ))}
+                </div>
+                <textarea defaultValue={lang==="en"?"Welcome to our corporate presentation. Today we analyze the financial results.":"Bienvenidos a nuestra presentación corporativa. Hoy analizaremos los resultados financieros del año."} style={{width:"100%",background:surf2,border:`1px solid ${bord}`,borderRadius:8,padding:11,color:txt,fontSize:12,resize:"none",height:80,boxSizing:"border-box",marginBottom:11}}/>
+                <button onClick={handleTranslate} style={btnPrimary}>🌍 {t.translate.btn}</button>
+              </div>
+              {translated&&(
+                <div style={{background:`${acc}0e`,border:`1px solid ${acc}33`,borderRadius:11,padding:14,marginBottom:14}}>
+                  <div style={{fontSize:9,fontWeight:700,color:acc,marginBottom:6}}>{t.translate.result}</div>
+                  <div style={{fontSize:13,lineHeight:1.7}}>{translated}</div>
+                </div>
+              )}
+              <div style={card}>
+                <div style={{fontSize:11,fontWeight:700,color:muted,marginBottom:6}}>{t.translate.indigenous}</div>
+                <p style={{fontSize:11,color:muted,lineHeight:1.6,margin:0}}>{t.translate.indigenousDesc}</p>
+              </div>
+            </div>
+          )}
+
+          {/* ══ EXPORT ════════════════════════════════════════════ */}
+          {tab==="export"&&(
+            <div style={{maxWidth:500}}>
+              <h2 style={{fontSize:20,fontWeight:900,marginBottom:18}}>📤 {t.export.title}</h2>
+              <div style={{display:"grid",gap:9}}>
+                {t.export.opts.map(opt=>(
+                  <button key={opt.l} onClick={()=>notify(`${opt.l} — ${t.misc.notify}`)} style={{...card,cursor:"pointer",display:"flex",gap:13,alignItems:"center",textAlign:"left",color:txt,width:"100%"}}>
+                    <div style={{width:42,height:42,borderRadius:9,background:`${opt.c}18`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>{opt.icon}</div>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:12,fontWeight:700}}>{opt.l}</div>
+                      <div style={{fontSize:10,color:muted}}>{opt.d}</div>
+                    </div>
+                    <div style={{color:muted}}>→</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ══ ECOSYSTEM ═════════════════════════════════════════ */}
+          {tab==="ecosystem"&&(
+            <div style={{maxWidth:680}}>
+              <h2 style={{fontSize:20,fontWeight:900,marginBottom:5}}>🔗 {t.ecosystem.title}</h2>
+              <p style={{color:muted,fontSize:13,marginBottom:20}}>{t.ecosystem.desc}</p>
+
+              <div style={{display:"grid",gap:14,marginBottom:24}}>
+                {t.ecosystem.apps.map(app=>(
+                  <div key={app.name} style={{...card,border:`1px solid ${app.color}44`,background:dark?`${app.color}08`:surf}}>
+                    <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12}}>
+                      <div style={{width:44,height:44,borderRadius:10,background:`${app.color}18`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>{app.icon}</div>
+                      <div>
+                        <div style={{fontSize:14,fontWeight:800,color:app.color}}>{app.name}</div>
+                        <div style={{fontSize:11,color:muted}}>{app.desc}</div>
+                      </div>
+                      {app.name==="Voltara"&&<div style={{marginLeft:"auto",fontSize:10,fontWeight:700,color:"#0ea96b",background:"#0ea96b15",padding:"3px 9px",borderRadius:18}}>● Activo</div>}
+                    </div>
+                    <div style={{display:"flex",gap:7,flexWrap:"wrap"}}>
+                      {app.actions.map(action=>(
+                        <button key={action} onClick={()=>notify(`${action} — ${t.misc.notify}`)} style={{background:`${app.color}18`,border:`1px solid ${app.color}44`,borderRadius:7,padding:"6px 11px",cursor:"pointer",color:app.color,fontSize:10,fontWeight:600}}>
+                          {action}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div style={card}>
+                <div style={{fontSize:11,fontWeight:700,color:muted,marginBottom:11}}>{t.ecosystem.integrations.toUpperCase()}</div>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8}}>
+                  {t.ecosystem.extList.map(app=>(
+                    <button key={app} onClick={()=>notify(`Conectando: ${app}`)} style={{background:surf2,border:`1px solid ${bord}`,borderRadius:8,padding:"10px 6px",cursor:"pointer",color:txt,fontSize:10,fontWeight:600,textAlign:"center"}}>
+                      🔌 {app}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ══ SETTINGS ══════════════════════════════════════════ */}
+          {tab==="settings"&&(
+            <div style={{maxWidth:520}}>
+              <h2 style={{fontSize:20,fontWeight:900,marginBottom:18}}>⚙️ {t.settings.title}</h2>
+
+              {/* AI Chat */}
+              <div style={{...card,marginBottom:14}}>
+                <div style={{fontSize:12,fontWeight:700,marginBottom:11}}>💬 {t.settings.aiChat}</div>
+                <div style={{height:200,overflowY:"auto",marginBottom:11,display:"flex",flexDirection:"column",gap:7,paddingRight:4}}>
+                  {chat.map((msg,i)=>(
+                    <div key={i} style={{background:msg.r==="ai"?surf2:`${acc}18`,border:`1px solid ${msg.r==="ai"?bord:`${acc}44`}`,borderRadius:9,padding:"8px 11px",fontSize:11,lineHeight:1.5,alignSelf:msg.r==="ai"?"flex-start":"flex-end",maxWidth:"85%"}}>
+                      {msg.r==="ai"&&<span style={{color:acc,fontWeight:700}}>🤖 IA  </span>}
+                      {msg.m}
+                    </div>
+                  ))}
+                  <div ref={chatEnd}/>
+                </div>
+                <div style={{display:"flex",gap:7}}>
+                  <input value={chatInput} onChange={e=>setChatInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleChat()} placeholder={t.settings.chatPh} style={{flex:1,background:surf2,border:`1px solid ${bord}`,borderRadius:7,padding:"8px 11px",color:txt,fontSize:11}}/>
+                  <button onClick={handleChat} style={{background:acc,border:"none",borderRadius:7,padding:"8px 13px",color:"#fff",fontSize:12,cursor:"pointer",fontWeight:600}}>→</button>
+                </div>
+              </div>
+
+              {/* Preferences */}
+              <div style={{...card,marginBottom:14}}>
+                <div style={{fontSize:12,fontWeight:700,marginBottom:11}}>{t.settings.prefs}</div>
+                {t.settings.prefList.map(pref=>(
+                  <div key={pref.l} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"9px 0",borderBottom:`1px solid ${bord}`}}>
+                    <span style={{fontSize:12}}>{pref.l}</span>
+                    <div style={{width:38,height:21,borderRadius:11,background:pref.v?acc:bord,cursor:"pointer",position:"relative",flexShrink:0}}>
+                      <div style={{position:"absolute",top:3,left:pref.v?19:3,width:15,height:15,borderRadius:"50%",background:"#fff",transition:"left .2s"}}/>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Account */}
+              <div style={{...card,background:`linear-gradient(135deg,${acc}18,#f4511e18)`,border:`1px solid ${acc}33`}}>
+                <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:10}}>
+                  <VoltaraLogo size={36}/>
+                  <div>
+                    <div style={{fontSize:14,fontWeight:800}}>{t.settings.account}</div>
+                    <div style={{fontSize:10,color:muted}}>Todos los idiomas · Ecosistema WC · IA ilimitada</div>
+                  </div>
+                </div>
+                <div style={{display:"flex",gap:7}}>
+                  {["Gestionar plan","Facturación","Soporte"].map(btn=>(
+                    <button key={btn} onClick={()=>notify(btn)} style={{background:acc,border:"none",borderRadius:7,padding:"6px 12px",cursor:"pointer",color:"#fff",fontSize:10,fontWeight:600}}>{btn}</button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+        </main>
+      </div>
+
+      <style>{`
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+        @keyframes slideIn{from{transform:translateX(20px);opacity:0}to{transform:translateX(0);opacity:1}}
+        @keyframes progress{0%{width:5%}50%{width:75%}100%{width:95%}}
+        *{box-sizing:border-box}
+        ::-webkit-scrollbar{width:4px}
+        ::-webkit-scrollbar-track{background:transparent}
+        ::-webkit-scrollbar-thumb{background:#333;border-radius:2px}
+        button:hover{filter:brightness(1.09);transform:translateY(-0.5px)}
+        input,textarea,select{outline:none}
+        button{transition:all .15s ease}
+      `}</style>
+    </div>
+  );
+}
