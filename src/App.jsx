@@ -13,7 +13,7 @@ function App() {
         <a href="https://github.com/kacn1z-del/Voltara" className="github-link">Visítanos en GitHub</a>
       </main>
       <footer className="footer">
-        <p>&copy; 2026 Voltara Inc. Todos los derechos reservados.</p>
+        <p>&copy; 2026 Voltara Inc Keny Chinchilla Navarro . Todos los derechos reservados.</p>
       </footer>
     </>
   )
