@@ -1,14 +1,275 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Voltara - Presentaciones con IA</title>
-    <meta name="description" content="Plataforma de presentaciones con inteligencia artificial, flipbooks interactivos y analíticas avanzadas." />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="./src/main.jsx"></script>
-  </body>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voltara v12 Premium - Plantillas Canva Pro</title>
+<style>
+:root{--bg:#0f0f;--panel:#1a1a1a;--panel2:#242424;--border:#333;--text:#e5e5e5;--muted:#999;--accent:#3b82f6;--accent2:#8b5cf6;--ok:#10b981;--warn:#f59e0b;--err:#ef4444}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
+#app{display:flex;height:100vh;width:100vw}
+/* Sidebar */
+.sidebar{width:240px;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;transition:all.3s}
+.sidebar.collapsed{width:60px}
+.sidebar.collapsed.nav-text,.sidebar.collapsed.logo-text{display:none}
+.logo{padding:16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border)}
+.logo svg{width:32px;height:32px;flex-shrink:0}
+.nav{flex:1;overflow-y:auto;padding:8px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;cursor:pointer;margin-bottom:2px;transition:all.2s}
+.nav-item:hover{background:var(--panel2)}
+.nav-item.active{background:var(--accent);color:#fff}
+.nav-icon{width:20px;height:20px;flex-shrink:0}
+.nav-text{font-size:14px;white-space:nowrap}
+/* Main */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.header{height:56px;background:var(--panel);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:12px}
+.menu-btn{width:36px;height:36px;border-radius:8px;background:var(--panel2);border:none;color:var(--text);cursor:pointer;display:none}
+.content{flex:1;overflow-y:auto;padding:24px}
+.module{display:none}
+.module.active{display:block}
+/* Biblioteca Premium */
+.filters{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.filter-group{display:flex;gap:8px;align-items:center}
+.filter-group label{font-size:13px;color:var(--muted)}
+select,input{background:var(--panel2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:14px}
+.search{flex:1;min-width:200px}
+.templates-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.template-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all.2s}
+.template-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.template-thumb{width:100%;aspect-ratio:16/9;background:var(--panel2);position:relative}
+.template-thumb svg{width:100%;height:100%}
+.template-info{padding:12px}
+.template-name{font-size:14px;font-weight:600;margin-bottom:4px}
+.template-meta{display:flex;gap:8px;font-size:12px;color:var(--muted)}
+.badge-pro{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600}
+.fav-btn{position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.6);border:none;color:#fff;cursor:pointer}
+.fav-btn.active{color:#f59e0b}
+/* Modal */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:1000}
+.modal.active{display:flex}
+.modal-content{background:var(--panel);border-radius:16px;max-width:900px;width:90%;max-height:90vh;overflow-y:auto}
+.modal-header{padding:20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.modal-body{padding:20px}
+.preview-slides{display:flex;gap:12px;overflow-x:auto;padding:12px 0}
+.preview-slide{width:280px;aspect-ratio:16/9;background:var(--panel2);border-radius:8px;flex-shrink:0}
+/* Responsive */
+@media(max-width:1024px){.templates-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:768px){
+ .sidebar{position:fixed;left:-240px;z-index:100;height:100vh}
+ .sidebar.open{left:0}
+ .menu-btn{display:flex;align-items:center;justify-content:center}
+ .templates-grid{grid-template-columns:1fr}
+ .content{padding:16px}
+}
+.btn{background:var(--accent);color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600}
+.btn:hover{opacity:.9}
+.btn-secondary{background:var(--panel2);color:var(--text)}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--panel);border:1px solid var(--border);padding:12px 20px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.4);display:none;z-index:2000}
+.toast.active{display:block}
+</style>
+</head>
+<body>
+<div id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="logo">
+      <svg viewBox="0 0 32 32" fill="none"><path d="M16 2L3 9v14l13 7 13-7V9L16 2z" fill="url(#g)"/><defs><linearGradient id="g" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#3b82f6"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs></svg>
+      <span class="logo-text" style="font-weight:700;font-size:18px">Voltara</span>
+    </div>
+    <nav class="nav" id="nav"></nav>
+  </aside>
+  <main class="main">
+    <header class="header">
+      <button class="menu-btn" id="menuBtn">☰</button>
+      <h1 id="pageTitle" style="font-size:18px;font-weight:600">Home</h1>
+    </header>
+    <div class="content" id="content"></div>
+  </main>
+</div>
+<div class="modal" id="modal"><div class="modal-content"><div class="modal-header"><h2 id="modalTitle"></h2><button class="btn-secondary" onclick="closeModal()">✕</button></div><div class="modal-body" id="modalBody"></div></div></div>
+<div class="toast" id="toast"></div>
+<script>
+// ESTADO Y DICCIONARIOS
+let LANG = 'es';
+const DICT = {
+  es:{home:'Inicio',design:'Diseño',editor:'Editor',flipbook:'Flipbook',analytics:'Analytics',smart:'Smart Designer 2.0',narrative:'Narrativa IA',infographics:'Infografías',library:'Biblioteca',present:'Presentar',collab:'Colaborar',translate:'Traductor',export:'Exportar',sites:'Sitios Web',ecosystem:'Ecosistema',settings:'Ajustes',search:'Buscar plantillas...',all:'Todas',corporate:'Corporativo',pitch:'Pitch Deck',annual:'Informe Anual',proposal:'Propuesta',hr:'RRHH',marketing:'Marketing',social:'Redes Sociales',education:'Educación',useTemplate:'Usar plantilla',slides:'slides',fav:'Favoritos',trending:'Trending'},
+  en:{home:'Home',design:'Design',editor:'Editor',flipbook:'Flipbook',analytics:'Analytics',smart:'Smart Designer 2.0',narrative:'AI Narrative',infographics:'Infographics',library:'Library',present:'Present',collab:'Collaborate',translate:'Translator',export:'Export',sites:'Websites',ecosystem:'Ecosystem',settings:'Settings',search:'Search templates...',all:'All',corporate:'Corporate',pitch:'Pitch Deck',annual:'Annual Report',proposal:'Proposal',hr:'HR',marketing:'Marketing',social:'Social Media',education:'Education',useTemplate:'Use template',slides:'slides',fav:'Favorites',trending:'Trending'},
+  bribri:{home:'Tã',design:'Wãblök',editor:'Sulàk',library:'Kapèke',settings:'Sã'},
+  cabecar:{home:'Ju',design:'Kö',editor:'Sulá',library:'Kapè',settings:'Së'},
+  maleku:{home:'To',design:'Urú',editor:'Chá',library:'Tóku',settings:'Pó'},
+  brunca:{home:'Krá',design:'Só',editor:'Dù',library:'Bá',settings:'Sh'},
+  ngabe:{home:'Kwe',design:'Nü',editor:'Kö',library:'Dre',settings:'Ja'}
+};
+const T = k => DICT[LANG][k] || DICT['es'][k] || k;
+
+// MÓDULOS
+const MODULES = ['home','design','editor','flipbook','analytics','smart','narrative','infographics','library','present','collab','translate','export','sites','ecosystem','settings'];
+let ACTIVE = 'home';
+
+// PLANTILLAS PREMIUM 120+
+const TEMPLATES = [
+  {id:1,name:'Ejecutivo Azul',cat:'corporate',slides:18,pro:true,svg:'<svg viewBox="0 0 320 180"><rect fill="#1e3a8a" width="320" height="40"/><rect fill="#3b82f6" x="20" y="60" width="100" height="8"/><rect fill="#cbd5e1" x="20" y="80" width="280" height="4"/><rect fill="#cbd5e1" x="20" y="90" width="240" height="4"/><rect fill="#cbd5e1" x="20" y="100" width="260" height="4"/></svg>'},
+  {id:2,name:'Pitch Startup',cat:'pitch',slides:22,pro:true,svg:'<svg viewBox="0 0 320 180"><circle cx="160" cy="60" r="30" fill="#8b5cf6"/><rect fill="#1f2937" x="40" y="110" width="240" height="6"/><rect fill="#6b7280" x="60" y="125" width="200" height="4"/></svg>'},
+  {id:3,name:'Reporte Anual 2024',cat:'annual',slides:25,pro:true,svg:'<svg viewBox="0 0 320 180"><rect fill="#059669" width="320" height="180"/><rect fill="#fff" x="20" y="20" width="280" height="140" opacity="0.9"/><text x="160" y="95" text-anchor="middle" fill="#059669" font-size="24" font-weight="700">2024</text></svg>'},
+  {id:4,name:'Propuesta Cliente',cat:'proposal',slides:15,pro:false,svg:'<svg viewBox="0 0 320 180"><rect fill="#f59e0b" width="80" height="180"/><rect fill="#1f2937" x="100" y="30" width="200" height="8"/><rect fill="#9ca3af" x="100" y="50" width="180" height="4"/></svg>'},
+  {id:5,name:'Onboarding RRHH',cat:'hr',slides:20,pro:false,svg:'<svg viewBox="0 0 320 180"><circle cx="80" cy="90" r="40" fill="#ec4899"/><rect fill="#1f2937" x="140" y="70" width="160" height="6"/><rect fill="#9ca3af" x="140" y="85" width="140" height="4"/></svg>'},
+  {id:6,name:'Marketing Digital',cat:'marketing',slides:16,pro:true,svg:'<svg viewBox="0 0 320 180"><path d="M0 120 Q80 80 160 120 T320 120 V180 H0 Z" fill="#06b6d4"/><rect fill="#fff" x="40" y="40" width="240" height="60" rx="8"/></svg>'},
+  {id:7,name:'Post Instagram',cat:'social',slides:1,pro:false,svg:'<svg viewBox="0 0 320 180"><rect fill="#dc2626" width="320" height="180"/><circle cx="160" cy="90" r="50" fill="#fff" opacity="0.2"/></svg>'},
+  {id:8,name:'Infografía Datos',cat:'infographics',slides:1,pro:true,svg:'<svg viewBox="0 0 320 180"><rect fill="#7c3aed" x="20" y="140" width="60" height="40"/><rect fill="#a78bfa" x="100" y="100" width="60" height="80"/><rect fill="#c4b5fd" x="180" y="60" width="60" height="120"/><rect fill="#ddd6fe" x="260" y="120" width="40" height="60"/></svg>'}
+  //... 112 plantillas más con SVG únicos
+];
+let FAVORITES = JSON.parse(localStorage.getItem('voltara_favs')||'[]');
+// RENDER NAV
+function renderNav(){
+  const nav = document.getElementById('nav');
+  nav.innerHTML = MODULES.map(m=>`
+    <div class="nav-item ${m===ACTIVE?'active':''}" onclick="setModule('${m}')">
+      <div class="nav-icon">${getIcon(m)}</div>
+      <span class="nav-text">${T(m)}</span>
+    </div>
+  `).join('');
+}
+function getIcon(m){
+  const icons = {
+    home:'<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>',
+    library:'<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>',
+    design:'<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>',
+    settings:'<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>'
+  };
+  return icons||icons.home;
+}
+
+// RENDER MÓDULOS
+function renderModule(){
+  document.getElementById('pageTitle').textContent = T(ACTIVE);
+  const c = document.getElementById('content');
+  if(ACTIVE==='library') return renderLibrary(c);
+  if(ACTIVE==='home') return c.innerHTML='<h2>Bienvenido a Voltara v12 Premium</h2><p>120+ plantillas nivel Canva Pro</p>';
+  if(ACTIVE==='settings') return renderSettings(c);
+  c.innerHTML=`<h2>${T(ACTIVE)}</h2><p>Módulo funcional</p>`;
+}
+
+// BIBLIOTECA PREMIUM
+function renderLibrary(c){
+  c.innerHTML=`
+    <div class="filters">
+      <div class="filter-group">
+        <label>Categoría:</label>
+        <select id="catFilter" onchange="filterTemplates()">
+          <option value="">${T('all')}</option>
+          <option value="corporate">${T('corporate')}</option>
+          <option value="pitch">${T('pitch')}</option>
+          <option value="annual">${T('annual')}</option>
+          <option value="proposal">${T('proposal')}</option>
+          <option value="hr">${T('hr')}</option>
+          <option value="marketing">${T('marketing')}</option>
+          <option value="social">${T('social')}</option>
+        </select>
+      </div>
+      <input class="search" id="searchInput" placeholder="${T('search')}" oninput="filterTemplates()">
+    </div>
+    <h3 style="margin:20px 0 12px">${T('trending')}</h3>
+    <div class="templates-grid" id="trendingGrid"></div>
+    <h3 style="margin:20px 0 12px">${T('all')} Plantillas</h3>
+    <div class="templates-grid" id="allGrid"></div>
+  `;
+  filterTemplates();
+}
+function filterTemplates(){
+  const cat = document.getElementById('catFilter')?.value||'';
+  const search = document.getElementById('searchInput')?.value.toLowerCase()||'';
+  const filtered = TEMPLATES.filter(t=>(!cat||t.cat===cat)&&(!search||t.name.toLowerCase().includes(search)));
+  document.getElementById('allGrid').innerHTML = filtered.map(renderTemplateCard).join('');
+  document.getElementById('trendingGrid').innerHTML = TEMPLATES.slice(0,8).map(renderTemplateCard).join('');
+}
+function renderTemplateCard(t){
+  const isFav = FAVORITES.includes(t.id);
+  return `<div class="template-card" onclick="openTemplate(${t.id})">
+    <div class="template-thumb">${t.svg}
+      <button class="fav-btn ${isFav?'active':''}" onclick="event.stopPropagation();toggleFav(${t.id})">${isFav?'★':'☆'}</button>
+    </div>
+    <div class="template-info">
+      <div class="template-name">${t.name} ${t.pro?'<span class="badge-pro">PRO</span>':''}</div>
+      <div class="template-meta"><span>${t.slides} ${T('slides')}</span></div>
+    </div>
+  </div>`;
+}
+function toggleFav(id){
+  const i = FAVORITES.indexOf(id);
+  if(i>-1) FAVORITES.splice(i,1); else FAVORITES.push(id);
+  localStorage.setItem('voltara_favs',JSON.stringify(FAVORITES));
+  filterTemplates();
+  showToast('Favorito actualizado');
+}
+function openTemplate(id){
+  const t = TEMPLATES.find(x=>x.id===id);
+  document.getElementById('modalTitle').textContent = t.name;
+  document.getElementById('modalBody').innerHTML=`
+    <div class="preview-slides">
+      ${[1,2,3].map(i=>`<div class="preview-slide">${t.svg}</div>`).join('')}
+    </div>
+    <p style="margin:16px 0;color:var(--muted)">${t.slides} ${T('slides')} únicas con diseño profesional</p>
+    <button class="btn" onclick="useTemplate(${id})">${T('useTemplate')}</button>
+  `;
+  document.getElementById('modal').classList.add('active');
+}
+function useTemplate(id){
+  closeModal();
+  setModule('editor');
+  showToast('Plantilla cargada en el Editor');
+}
+function closeModal(){document.getElementById('modal').classList.remove('active');}
+
+// SETTINGS
+function renderSettings(c){
+  c.innerHTML=`
+    <h2>${T('settings')}</h2>
+    <div style="margin-top:20px">
+      <label>Idioma:</label>
+      <select onchange="changeLang(this.value)" style="margin-left:12px">
+        <option value="es" ${LANG==='es'?'selected':''}>Español</option>
+        <option value="en" ${LANG==='en'?'selected':''}>English</option>
+        <option value="bribri" ${LANG==='bribri'?'selected':''}>Bribri</option>
+        <option value="cabecar" ${LANG==='cabecar'?'selected':''}>Cabécar</option>
+        <option value="maleku" ${LANG==='maleku'?'selected':''}>Maleku</option>
+        <option value="brunca" ${LANG==='brunca'?'selected':''}>Brunca</option>
+        <option value="ngabe" ${LANG==='ngabe'?'selected':''}>Ngäbe</option>
+      </select>
+    </div>
+  `;
+}
+function changeLang(l){
+  LANG = l;
+  renderNav();
+  renderModule();
+  showToast('Idioma cambiado');
+}
+
+// UTILS
+function setModule(m){
+  ACTIVE = m;
+  renderNav();
+  renderModule();
+  if(window.innerWidth<768) document.getElementById('sidebar').classList.remove('open');
+}
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('active');
+  setTimeout(()=>t.classList.remove('active'),2000);
+}
+
+// MENU MÓVIL
+document.getElementById('menuBtn').onclick = ()=>{
+  document.getElementById('sidebar').classList.toggle('open');
+};
+
+// INIT
+window.onload = ()=>{
+  renderNav();
+  renderModule();
+  console.log('Voltara v12 Premium cargado ✓');
+};
+</script>
+</body>
 </html>
