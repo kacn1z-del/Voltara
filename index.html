@@ -3,398 +3,129 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Voltara v12 Final - Creative Studio Completo</title>
-
+<title>Voltara v12</title>
 <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-
-<script>
-// Initialize PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-</script>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
-* { font-family: 'Plus Jakarta Sans', sans-serif; }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
+* { font-family: 'Inter', sans-serif; }
 .font-display { font-family: 'Space Grotesk', sans-serif; }
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: #f1f5f9; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-.dark ::-webkit-scrollbar-track { background: #1e293b; }
-.dark ::-webkit-scrollbar-thumb { background: #475569; }
-.gradient-text { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.canvas-grid { background-image: linear-gradient(#e2e8f0 1px, transparent 1px), linear-gradient(90deg, #e2e8f0 1px, transparent 1px); background-size: 20px 20px; }
-.dark .canvas-grid { background-image: linear-gradient(#334155 1px, transparent 1px), linear-gradient(90deg, #334155 1px, transparent 1px); }
-.canvas-element { position: absolute; cursor: move; user-select: none; }
-.canvas-element.selected { outline: 2px solid #6366f1; }
-.drawing-canvas { cursor: crosshair; }
 </style>
 </head>
-<body>
+<body class="bg-zinc-950 text-white">
 <div id="root"></div>
+
 <script type="text/babel">
-const { useState, useEffect, useRef, useCallback } = React;
+const { useState } = React;
 
-// ==================== TRADUCCIONES ====================
-const LANGS = {
-  'es': 'Español (Latinoamérica)',
-  'en': 'English',
-  'bribri': 'Bribri',
-  'cabecar': 'Cabécar',
-  'maleku': 'Maleku',
-  'brunca': 'Brunca',
-  'ngabe': 'Ngäbe'
-};
-
-const TRANSLATIONS = {
-  es: {
-    home: 'Inicio', creative: 'IA Creativa', design: 'Diseño', editor: 'Editor', 
-    flipbook: 'Flipbook', analytics: 'Analítica', smart: 'Smart Designer 2.0', 
-    narrative: 'Narrativa IA', infographic: 'Infografías', library: 'Biblioteca',
-    present: 'Presentar', collaborate: 'Colaborar', translator: 'Traductor', 
-    export: 'Exportar', website: 'Sitios Web', ecosystem: 'Ecosistema', 
-    settings: 'Ajustes', search: 'Buscar plantillas...', createDesign: 'Crear un diseño',
-    newProject: 'Nuevo Proyecto', generate: 'Generar con IA', save: 'Guardar',
-    download: 'Descargar', upload: 'Subir', draw: 'Dibujar', text: 'Texto',
-    shapes: 'Formas', photos: 'Fotos', icons: 'Íconos', background: 'Fondo',
-    layers: 'Capas', pages: 'Páginas'
-  },
-  en: { /* ... versión en inglés ... */ },
-  // (Las otras traducciones a lenguas indígenas están recortadas para ahorrar espacio)
-  bribri: { home: 'I kũẽ̱', creative: 'SI Ká tö', /* ... */ },
-  // ... (puedes pedir las traducciones completas después si las necesitas)
-};
-
-const TEMPLATES = [ /* ... 50 plantillas ... */ ]; // Se omiten aquí por brevedad, pero están en el original
-
-const MODULES = [
-  { id: 'home', icon: 'fa-home', color: 'text-indigo-500' },
-  { id: 'library', icon: 'fa-layer-group', color: 'text-purple-500' },
-  { id: 'editor', icon: 'fa-pen-ruler', color: 'text-pink-500' },
-  { id: 'creative', icon: 'fa-wand-magic-sparkles', color: 'text-violet-500' },
-  { id: 'smart', icon: 'fa-robot', color: 'text-blue-500' },
-  { id: 'translator', icon: 'fa-language', color: 'text-rose-500' },
-  { id: 'ecosystem', icon: 'fa-diagram-project', color: 'text-indigo-600' },
-  { id: 'settings', icon: 'fa-gear', color: 'text-slate-500' },
-];
-
-// ==================== COMPONENTE PRINCIPAL ====================
 function App() {
-  const [lang, setLang] = useState('es');
-  const [dark, setDark] = useState(false);
-  const [activeModule, setActiveModule] = useState('home');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [active, setActive] = useState('home');
 
-  const t = TRANSLATIONS[lang] || TRANSLATIONS.es;
-
-  useEffect(() => {
-    const savedLang = localStorage.getItem('voltara_lang');
-    const savedDark = localStorage.getItem('voltara_dark');
-    if (savedLang) setLang(savedLang);
-    if (savedDark === 'true') setDark(true);
-    setTimeout(() => setLoading(false), 800);
-  }, []);
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', dark);
-    localStorage.setItem('voltara_lang', lang);
-    localStorage.setItem('voltara_dark', dark);
-  }, [lang, dark]);
-
-  if (loading) {
-    return (
-      <div className={`min-h-screen flex items-center justify-center ${dark ? 'dark bg-slate-900' : 'bg-slate-50'}`}>
-        <div className="text-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center mx-auto mb-6 animate-pulse">
-            <i className="fas fa-bolt text-white text-3xl"></i>
-          </div>
-          <p className="font-display text-3xl font-bold gradient-text">Voltara v12</p>
-        </div>
-      </div>
-    );
-  }
+  const menu = [
+    { id: 'home', icon: 'fa-home', label: 'Inicio' },
+    { id: 'library', icon: 'fa-layer-group', label: 'Biblioteca' },
+    { id: 'editor', icon: 'fa-pen-ruler', label: 'Editor' },
+    { id: 'creative', icon: 'fa-wand-magic-sparkles', label: 'IA Creativa' },
+    { id: 'smart', icon: 'fa-robot', label: 'Smart Designer 2.0' },
+    { id: 'design', icon: 'fa-palette', label: 'Diseño' },
+    { id: 'flipbook', icon: 'fa-book', label: 'Flipbook' },
+    { id: 'translator', icon: 'fa-language', label: 'Traductor' },
+  ];
 
   return (
-    <div className={`min-h-screen ${dark ? 'dark bg-slate-900' : 'bg-slate-50'}`}>
-      {/* Header */}
-      <header className={`fixed top-0 left-0 right-0 z-50 ${dark ? 'bg-slate-900/95' : 'bg-white/95'} backdrop-blur-xl border-b ${dark ? 'border-slate-700' : 'border-slate-200'}`}>
-        <div className="flex items-center justify-between px-6 h-16">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center">
-                <i className="fas fa-bolt text-white"></i>
-              </div>
-              <span className="font-display font-bold text-2xl gradient-text">Voltara</span>
-            </div>
+    <div className="flex h-screen bg-zinc-950 overflow-hidden">
+      {/* Sidebar estilo Canva */}
+      <div className="w-72 border-r border-zinc-800 bg-zinc-900 flex flex-col">
+        <div className="p-5 flex items-center gap-3 border-b border-zinc-800">
+          <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-fuchsia-500 rounded-2xl flex items-center justify-center shadow-lg">
+            <i className="fas fa-bolt text-white text-2xl"></i>
           </div>
-          
-          <div className="flex items-center gap-4">
-            <select value={lang} onChange={(e) => setLang(e.target.value)} className="bg-transparent border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1 text-sm">
-              {Object.entries(LANGS).map(([code, name]) => (
-                <option key={code} value={code}>{name}</option>
-              ))}
-            </select>
-            <button onClick={() => setDark(!dark)} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
-              <i className={`fas ${dark ? 'fa-sun' : 'fa-moon'}`}></i>
-            </button>
-          </div>
+          <div className="font-display text-3xl font-semibold tracking-tighter">Voltara</div>
+          <div className="text-xs px-3 py-1 bg-violet-600 text-white rounded-full font-medium">v12</div>
         </div>
-      </header>
 
-      {/* Sidebar */}
-      <aside className={`fixed left-0 top-16 bottom-0 w-64 ${dark ? 'bg-slate-900 border-r border-slate-700' : 'bg-white border-r border-slate-200'} z-40 overflow-y-auto`}>
-        <div className="p-4">
-          {MODULES.map(mod => (
+        <div className="flex-1 overflow-y-auto py-3 px-3">
+          {menu.map(item => (
             <button
-              key={mod.id}
-              onClick={() => setActiveModule(mod.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl mb-1 transition-all ${activeModule === mod.id ? 'bg-indigo-500 text-white' : 'hover:bg-slate-100 dark:hover:bg-slate-800'}`}
+              key={item.id}
+              onClick={() => setActive(item.id)}
+              className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-2xl mb-1 text-left transition-all ${active === item.id ? 'bg-zinc-800 text-white' : 'hover:bg-zinc-800/70 text-zinc-300'}`}
             >
-              <i className={`fas ${mod.icon} ${activeModule === mod.id ? 'text-white' : mod.color}`}></i>
-              <span>{t[mod.id] || mod.id}</span>
+              <i className={`fas ${item.icon} w-5 text-lg`}></i>
+              <span className="font-medium">{item.label}</span>
             </button>
           ))}
         </div>
-      </aside>
-
-      <main className="ml-64 pt-16 p-8">
-        {activeModule === 'home' && <HomeModule t={t} dark={dark} setActiveModule={setActiveModule} />}
-        {activeModule === 'editor' && <EditorModule t={t} dark={dark} />}
-        {activeModule === 'creative' && <CreativeAIModule t={t} dark={dark} />}
-        {activeModule === 'translator' && <TranslatorModule t={t} dark={dark} />}
-        {activeModule === 'ecosystem' && <EcosystemModule t={t} dark={dark} />}
-        {/* Otros módulos se pueden agregar */}
-      </main>
-    </div>
-  );
-}
-{/* ==================== MÓDULOS ==================== */}
-
-function HomeModule({ t, dark, setActiveModule }) {
-  return (
-    <div className="space-y-8">
-      <div className="text-center py-12">
-        <h1 className="text-5xl font-bold gradient-text mb-4">Bienvenido a Voltara v12</h1>
-        <p className="text-xl text-slate-600 dark:text-slate-400">Crea diseños profesionales con IA</p>
-      </div>
-      
-      <div className="max-w-xl mx-auto">
-        <button 
-          onClick={() => setActiveModule('editor')}
-          className="w-full py-6 text-xl font-semibold rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white hover:scale-105 transition">
-          🚀 Crear Nuevo Proyecto
-        </button>
       </div>
 
-      <div>
-        <h2 className="text-2xl font-bold mb-6">Plantillas Populares</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[1,2,3,4].map(i => (
-            <div key={i} className="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow hover:shadow-xl cursor-pointer" onClick={() => setActiveModule('editor')}>
-              <img src="https://picsum.photos/300/200" className="w-full h-32 object-cover" />
-              <div className="p-4">
-                <p className="font-semibold">Plantilla {i}</p>
+      {/* Contenido Principal */}
+      <div className="flex-1 flex flex-col">
+        {/* Barra superior */}
+        <div className="h-14 border-b border-zinc-800 bg-zinc-900 px-6 flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <select className="bg-zinc-800 text-sm border border-zinc-700 rounded-xl px-4 py-2">
+              <option>Español (Latinoamérica)</option>
+            </select>
+          </div>
+          <div className="flex items-center gap-4">
+            <button className="flex items-center gap-2 px-5 py-2 bg-white text-black rounded-2xl font-semibold hover:bg-zinc-100">
+              <i className="fas fa-plus"></i> Nuevo diseño
+            </button>
+          </div>
+        </div>
+
+        {/* Buscador + Botón IA */}
+        <div className="p-6 border-b border-zinc-800 bg-zinc-900">
+          <div className="max-w-5xl mx-auto flex gap-4">
+            <div className="flex-1 relative">
+              <i className="fas fa-search absolute left-5 top-4 text-zinc-500"></i>
+              <input 
+                type="text" 
+                placeholder="Buscar plantillas..." 
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-3xl py-4 pl-12 pr-6 text-lg focus:outline-none focus:border-violet-500"
+              />
+            </div>
+            <button className="px-10 bg-gradient-to-r from-violet-600 to-purple-600 rounded-3xl font-semibold text-lg flex items-center gap-3 hover:brightness-110 transition">
+              <i className="fas fa-wand-magic-sparkles"></i>
+              Generar con IA
+            </button>
+          </div>
+        </div>
+
+        {/* Área de contenido */}
+        <div className="flex-1 overflow-auto p-8">
+          <h2 className="text-3xl font-semibold mb-8 flex items-center gap-3">
+            <span className="text-orange-500">🔥</span> Recientes
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {[
+              { title: "Pitch Deck Moderno", img: "https://picsum.photos/id/1015/600/380" },
+              { title: "Reporte Anual", img: "https://picsum.photos/id/201/600/380" },
+              { title: "Post Instagram", img: "https://picsum.photos/id/237/600/380" },
+              { title: "Historia Facebook", img: "https://picsum.photos/id/669/600/380" },
+              { title: "Portafolio Creativo", img: "https://picsum.photos/id/870/600/380" },
+            ].map((item, i) => (
+              <div key={i} className="group bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-800 hover:border-violet-500 hover:shadow-2xl transition-all cursor-pointer">
+                <img src={item.img} className="w-full h-48 object-cover" />
+                <div className="p-5">
+                  <p className="font-semibold text-lg mb-1">{item.title}</p>
+                  <p className="text-zinc-500 text-sm">1080 × 1080 px</p>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function EditorModule({ t, dark }) {
-  const [elements, setElements] = useState([]);
-  const [selectedTool, setSelectedTool] = useState('select');
-  const [selectedElement, setSelectedElement] = useState(null);
-  const canvasRef = useRef(null);
-
-  const addText = () => {
-    setElements([...elements, {
-      id: Date.now(),
-      type: 'text',
-      text: 'Nuevo texto',
-      x: 100,
-      y: 100,
-      fontSize: 24,
-      color: '#000000'
-    }]);
-  };
-
-  return (
-    <div className="h-[calc(100vh-100px)] flex gap-4">
-      {/* Barra de herramientas */}
-      <div className="w-16 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 p-2 flex flex-col gap-2">
-        <button onClick={() => setSelectedTool('select')} className="aspect-square rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700">↟</button>
-        <button onClick={addText} className="aspect-square rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700">Aa</button>
-        <button onClick={() => setSelectedTool('draw')} className="aspect-square rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700">✏️</button>
-      </div>
-
-      {/* Lienzo */}
-      <div className="flex-1 bg-slate-100 dark:bg-slate-900 rounded-3xl p-8 overflow-auto">
-        <div className="mx-auto bg-white shadow-2xl rounded-2xl relative" style={{width: '800px', height: '500px'}}>
-          {elements.map(el => (
-            <div
-              key={el.id}
-              className="absolute cursor-move p-2 border border-dashed border-transparent hover:border-indigo-400"
-              style={{ left: el.x, top: el.y }}
-              onClick={() => setSelectedElement(el.id)}
-            >
-              {el.type === 'text' && <div style={{fontSize: el.fontSize, color: el.color}}>{el.text}</div>}
-            </div>
-          ))}
-          {elements.length === 0 && (
-            <div className="h-full flex items-center justify-center text-slate-400">
-              Selecciona una herramienta para comenzar
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Panel derecho */}
-      <div className="w-72 bg-white dark:bg-slate-800 border-l border-slate-200 dark:border-slate-700 p-4">
-        <h3 className="font-bold mb-4">Propiedades</h3>
-        {selectedElement && <p>Elemento seleccionado</p>}
-        {!selectedElement && <p className="text-slate-500">Selecciona un elemento</p>}
-      </div>
-    </div>
-  );
-}
-
-function CreativeAIModule({ t, dark }) {
-  const [prompt, setPrompt] = useState('');
-  const [result, setResult] = useState(null);
-  const [generating, setGenerating] = useState(false);
-
-  const generate = () => {
-    setGenerating(true);
-    setTimeout(() => {
-      setResult('https://picsum.photos/id/1015/800/600');
-      setGenerating(false);
-    }, 1500);
-  };
-
-  return (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-4xl font-bold gradient-text mb-8">IA Creativa</h1>
-      <textarea 
-        value={prompt} 
-        onChange={(e) => setPrompt(e.target.value)}
-        placeholder="Describe lo que quieres crear..."
-        className="w-full h-40 p-6 rounded-2xl border dark:bg-slate-900"
-      />
-      <button 
-        onClick={generate}
-        disabled={generating || !prompt}
-        className="mt-6 w-full py-4 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-2xl font-semibold text-lg disabled:opacity-50"
-      >
-        {generating ? 'Generando...' : '✨ Generar con IA'}
-      </button>
-      {result && <img src={result} className="mt-8 rounded-2xl shadow-xl" />}
-    </div>
-  );
-}
-function TranslatorModule({ t, dark }) {
-  const [text, setText] = useState('');
-  const [fromLang, setFromLang] = useState('es');
-  const [toLang, setToLang] = useState('bribri');
-  const [result, setResult] = useState('');
-
-  const translate = () => {
-    // Simulación simple de traducción a lenguas indígenas
-    const translations = {
-      bribri: { hola: 'Ì shã', adiós: 'Be tso̱', agua: 'di\'', sol: 'dí wö' },
-      cabecar: { hola: 'Je̱i̱', adiós: 'Be kë̱i̱', agua: 'di\'', sol: 'jú' },
-      maleku: { hola: 'Ma cuíjú', adiós: 'Lajá yój' }
-    };
-    
-    const dict = translations[toLang] || {};
-    const words = text.toLowerCase().split(' ');
-    const translated = words.map(w => dict[w] || w).join(' ');
-    setResult(translated || 'Traducción simulada...');
-  };
-
-  return (
-    <div className="max-w-3xl mx-auto space-y-6">
-      <h1 className="text-4xl font-bold gradient-text text-center">Traductor de Lenguas Indígenas</h1>
-      <div className={`p-8 rounded-3xl ${dark ? 'bg-slate-800' : 'bg-white'} shadow-xl`}>
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <div>
-            <label className="block mb-2 font-medium">De</label>
-            <select value={fromLang} onChange={e => setFromLang(e.target.value)} className="w-full p-3 rounded-xl border">
-              <option value="es">Español</option>
-            </select>
-          </div>
-          <div>
-            <label className="block mb-2 font-medium">A</label>
-            <select value={toLang} onChange={e => setToLang(e.target.value)} className="w-full p-3 rounded-xl border">
-              <option value="bribri">Bribri</option>
-              <option value="cabecar">Cabécar</option>
-              <option value="maleku">Maleku</option>
-            </select>
+            ))}
           </div>
         </div>
-
-        <textarea 
-          value={text} 
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Escribe aquí (ej: hola agua sol)..."
-          className="w-full h-40 p-6 rounded-2xl border dark:bg-slate-900"
-        />
-
-        <button 
-          onClick={translate}
-          className="mt-6 w-full py-4 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-2xl font-semibold"
-        >
-          Traducir
-        </button>
-
-        {result && (
-          <div className="mt-8 p-6 bg-emerald-50 dark:bg-emerald-950 rounded-2xl border border-emerald-200">
-            <p className="font-semibold text-lg">{result}</p>
-          </div>
-        )}
       </div>
     </div>
   );
 }
 
-function EcosystemModule({ t, dark }) {
-  return (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-4xl font-bold gradient-text mb-8">Ecosistema Voltara</h1>
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className={`p-8 rounded-3xl ${dark ? 'bg-slate-800' : 'bg-white'} shadow-xl`}>
-          <h2 className="text-2xl font-bold mb-4">Importar Archivos</h2>
-          <p className="text-slate-500 mb-6">PDF, Word, Excel → Slides editables</p>
-          <button className="w-full py-4 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-2xl font-semibold">
-            Subir Archivo
-          </button>
-        </div>
-        <div className={`p-8 rounded-3xl ${dark ? 'bg-slate-800' : 'bg-white'} shadow-xl`}>
-          <h2 className="text-2xl font-bold mb-4">Matriz Contable</h2>
-          <p className="text-slate-500">Importa Excel y genera reportes automáticos</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ==================== CIERRE DE LA APLICACIÓN ====================
-ReactDOM.render(
-  <App />,
-  document.getElementById('root')
-);
+ReactDOM.render(<App />, document.getElementById('root'));
 </script>
 </body>
 </html>
