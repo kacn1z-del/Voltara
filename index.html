@@ -4,24 +4,38 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Voltara v12</title>
-<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
 * { font-family: 'Inter', sans-serif; }
 .font-display { font-family: 'Space Grotesk', sans-serif; }
-.canvas-container { background-size: cover; background-position: center; background-repeat: no-repeat; }
+
+.canvas-container {
+  background-size: cover;
+  background-position: center;
+  box-shadow: inset 0 0 80px rgba(0,0,0,0.6);
+  position: relative;
+  overflow: hidden;
+}
+.element {
+  position: absolute;
+  cursor: move;
+  user-select: none;
+  touch-action: none;
+}
 </style>
 </head>
 <body class="bg-zinc-950 text-white">
 <div id="root"></div>
 
 <script type="text/babel">
-const { useState } = React;
+const { useState, useRef, useEffect } = React;
 
 const TEMPLATES = [
   { id: 1, category: "nature", title: "Bosque Místico", thumb: "https://picsum.photos/id/1016/600/380", bg: "https://picsum.photos/id/1016/1200/800" },
@@ -29,8 +43,7 @@ const TEMPLATES = [
   { id: 3, category: "infographic", title: "Infografía Datos", thumb: "https://picsum.photos/id/1015/600/380", bg: "https://picsum.photos/id/1015/1200/800" },
   { id: 4, category: "presentations", title: "Pitch Deck", thumb: "https://picsum.photos/id/201/600/380", bg: "https://picsum.photos/id/201/1200/800" },
   { id: 5, category: "social", title: "Post Instagram", thumb: "https://picsum.photos/id/237/600/380", bg: "https://picsum.photos/id/237/1200/800" },
-  // 40 más (total ~45)
-  ...Array.from({length: 40}, (_, i) => ({
+  ...Array.from({length: 25}, (_, i) => ({
     id: 6 + i,
     category: ["nature","social","marketing","infographic","business"][i%5],
     title: ["Paisaje", "Redes", "Marketing", "Datos", "Negocios"][i%5] + " " + (i+1),
@@ -45,7 +58,12 @@ function App() {
   const [elements, setElements] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedElementId, setSelectedElementId] = useState(null);
-  const fileInputRef = React.useRef(null);
+  const [slides, setSlides] = useState([]);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  const fileInputRef = useRef(null);
+  const canvasRef = useRef(null);
+  const dragRef = useRef({ isDragging: false, elementId: null, startX: 0, startY: 0, startLeft: 0, startTop: 0 });
 
   const openTemplate = (tpl) => {
     setSelectedTemplate(tpl);
@@ -54,22 +72,24 @@ function App() {
       id: Date.now(),
       type: 'text',
       content: tpl.title,
-      x: 120,
+      x: 140,
       y: 180,
-      size: 42,
-      color: '#ffffff'
+      size: 52,
+      color: '#ffffff',
+      fontWeight: '700'
     }]);
   };
 
   const addText = () => {
-    const newEl = { id: Date.now(), type: 'text', content: 'Nuevo texto', x: 150, y: 250, size: 28, color: '#ffffff' };
-    setElements([...elements, newEl]);
+    const newEl = { id: Date.now(), type: 'text', content: 'Nuevo texto', x: 160, y: 220, size: 36, color: '#ffffff' };
+    setElements(prev => [...prev, newEl]);
     setSelectedElementId(newEl.id);
   };
 
   const addShape = (shape) => {
-    const newEl = { id: Date.now(), type: 'shape', shape, x: 180, y: 200, width: 160, height: 100, color: '#6366f1' };
-    setElements([...elements, newEl]);
+    const newEl = { id: Date.now(), type: 'shape', shape, x: 200, y: 200, width: 180, height: 120, color: '#6366f1' };
+    setElements(prev => [...prev, newEl]);
+    setSelectedElementId(newEl.id);
   };
 
   const addImage = (e) => {
@@ -77,145 +97,210 @@ function App() {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (ev) => {
-      const newEl = { id: Date.now(), type: 'image', src: ev.target.result, x: 150, y: 150, width: 280, height: 200 };
-      setElements([...elements, newEl]);
+      const newEl = { id: Date.now(), type: 'image', src: ev.target.result, x: 150, y: 150, width: 300, height: 220 };
+      setElements(prev => [...prev, newEl]);
+      setSelectedElementId(newEl.id);
     };
     reader.readAsDataURL(file);
   };
 
   const deleteElement = () => {
-    if (selectedElementId) {
-      setElements(elements.filter(el => el.id !== selectedElementId));
-      setSelectedElementId(null);
-    }
+    if (!selectedElementId) return;
+    setElements(prev => prev.filter(el => el.id !== selectedElementId));
+    setSelectedElementId(null);
   };
 
   const updateElement = (id, updates) => {
-    setElements(elements.map(el => el.id === id ? {...el, ...updates} : el));
+    setElements(prev => prev.map(el => el.id === id ? {...el, ...updates} : el));
   };
 
-  return (
-    <div className="flex h-screen bg-zinc-950 overflow-hidden">
-      {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:static z-50 w-72 h-full bg-zinc-900 border-r border-zinc-800 transition-transform flex flex-col`}>
-        <div className="p-5 flex items-center gap-3 border-b border-zinc-800">
-          <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-fuchsia-500 rounded-2xl flex items-center justify-center">
-            <i className="fas fa-bolt text-white text-2xl"></i>
-          </div>
-          <div className="font-display text-3xl font-semibold">Voltara <span className="text-sm bg-violet-600 px-2 py-0.5 rounded-full">v12</span></div>
-        </div>
+  const handlePointerDown = (e, id) => {
+    e.stopPropagation();
+    const el = elements.find(elem => elem.id === id);
+    if (!el) return;
+    setSelectedElementId(id);
+    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+    dragRef.current = { isDragging: true, elementId: id, startX: clientX, startY: clientY, startLeft: el.x, startTop: el.y };
+  };
 
-        <div className="flex-1 overflow-y-auto p-3">
-          {[
-            {id:'home', icon:'fa-home', label:'Inicio'},
-            {id:'library', icon:'fa-layer-group', label:'Biblioteca'},
-            {id:'editor', icon:'fa-pen-ruler', label:'Editor'},
-            {id:'creative', icon:'fa-wand-magic-sparkles', label:'IA Creativa'},
-            {id:'present', icon:'fa-display', label:'Presentar'},
-          ].map(item => (
-            <button key={item.id} onClick={() => {setActive(item.id); setSidebarOpen(false);}}
-              className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl mb-1 ${active === item.id ? 'bg-violet-600 text-white' : 'hover:bg-zinc-800 text-zinc-300'}`}>
-              <i className={`fas ${item.icon}`}></i>
-              <span>{item.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
+  const handlePointerMove = (e) => {
+    if (!dragRef.current.isDragging) return;
+    const { startX, startY, startLeft, startTop, elementId } = dragRef.current;
+    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+    const dx = clientX - startX;
+    const dy = clientY - startY;
+    updateElement(elementId, { x: Math.max(20, startLeft + dx), y: Math.max(20, startTop + dy) });
+  };
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="h-14 border-b border-zinc-800 bg-zinc-900 px-4 flex items-center justify-between">
-          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="lg:hidden text-2xl"><i className="fas fa-bars"></i></button>
-        </div>
+  const handlePointerUp = () => { dragRef.current.isDragging = false; };
 
-        <div className="flex-1 overflow-auto p-4">
-          {active === 'library' && (
-            <div>
-              <h2 className="text-3xl font-semibold mb-8">Plantillas ({TEMPLATES.length})</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                {TEMPLATES.map(tpl => (
-                  <div key={tpl.id} onClick={() => openTemplate(tpl)} className="cursor-pointer bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-800 hover:border-violet-500 transition">
-                    <img src={tpl.thumb} className="w-full h-52 object-cover" />
-                    <div className="p-4">
-                      <p className="font-medium text-sm">{tpl.title}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+  useEffect(() => {
+    document.addEventListener('mousemove', handlePointerMove);
+    document.addEventListener('mouseup', handlePointerUp);
+    document.addEventListener('touchmove', handlePointerMove, { passive: false });
+    document.addEventListener('touchend', handlePointerUp);
+    return () => {
+      document.removeEventListener('mousemove', handlePointerMove);
+      document.removeEventListener('mouseup', handlePointerUp);
+      document.removeEventListener('touchmove', handlePointerMove);
+      document.removeEventListener('touchend', handlePointerUp);
+    };
+  }, [elements]);
 
-          {active === 'editor' && selectedTemplate && (
-            <div className="relative h-full">
-              <div className="canvas-container absolute inset-0" style={{backgroundImage: `url(${selectedTemplate.bg})`}}>
-                {elements.map(el => (
-                  <div
-                    key={el.id}
-                    className={`absolute p-3 rounded border-2 cursor-move ${selectedElementId === el.id ? 'border-violet-400' : 'border-transparent hover:border-white/50'}`}
-                    style={{
-                      left: el.x, top: el.y,
-                      color: el.color,
-                      fontSize: el.size + 'px',
-                      textShadow: '2px 2px 4px rgba(0,0,0,0.8)'
-                    }}
-                    onClick={() => setSelectedElementId(el.id)}
-                    onDoubleClick={() => {
-                      const newText = prompt("Editar texto:", el.content);
-                      if (newText !== null) updateElement(el.id, {content: newText});
-                    }}
-                  >
-                    {el.content}
-                  </div>
-                ))}
-              </div>
+  const exportPNG = async () => {
+    if (!canvasRef.current) return alert("Canvas no encontrado");
+    try {
+      const canvas = await html2canvas(canvasRef.current, { scale: 2, useCORS: true });
+      const link = document.createElement('a');
+      link.download = 'voltara-design.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (err) {
+      alert("Error al exportar: " + err.message);
+    }
+  };
 
-              {/* Toolbar */}
-              <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-zinc-900/95 backdrop-blur border border-zinc-700 rounded-3xl px-6 py-3 flex gap-3 z-20 shadow-2xl">
-                <button onClick={addText} className="flex items-center gap-2 px-5 py-2 hover:bg-zinc-800 rounded-2xl">
-                  <i className="fas fa-font"></i> Texto
-                </button>
-                <button onClick={() => addShape('rect')} className="flex items-center gap-2 px-5 py-2 hover:bg-zinc-800 rounded-2xl">
-                  <i className="fas fa-square"></i> Rect
-                </button>
-                <button onClick={() => addShape('circle')} className="flex items-center gap-2 px-5 py-2 hover:bg-zinc-800 rounded-2xl">
-                  <i className="fas fa-circle"></i> Círculo
-                </button>
-                <button onClick={() => fileInputRef.current.click()} className="flex items-center gap-2 px-5 py-2 hover:bg-zinc-800 rounded-2xl">
-                  <i className="fas fa-image"></i> Imagen
-                </button>
-                {selectedElementId && (
-                  <button onClick={deleteElement} className="flex items-center gap-2 px-5 py-2 hover:bg-red-900 text-red-400 rounded-2xl">
-                    <i className="fas fa-trash"></i> Eliminar
-                  </button>
-                )}
-                <input type="file" ref={fileInputRef} accept="image/*" onChange={addImage} className="hidden" />
-              </div>
-            </div>
-          )}
+  const generatePresentation = () => {
+    const prompt = prompt("¿Qué tema quieres para la presentación?");
+    if (!prompt) return;
+    alert(`🤖 IA generando presentación sobre: "${prompt}"`);
+    setSlides([
+      { title: "Introducción", content: prompt },
+      { title: "Puntos Clave", content: "• Punto 1\n• Punto 2\n• Punto 3" },
+      { title: "Conclusión", content: "¡Gracias por tu atención!" }
+    ]);
+    setActive('present');
+    setCurrentSlide(0);
+  };
 
-          {active === 'present' && (
-            <div className="p-8 max-w-2xl mx-auto">
-              <h2 className="text-3xl font-semibold mb-8">Presentaciones</h2>
-              <div className="bg-zinc-900 rounded-3xl p-8">
-                <textarea className="w-full h-40 bg-zinc-800 rounded-2xl p-6 text-lg" placeholder="Describe la presentación que quieres (ej: Presentación de 10 slides sobre inteligencia artificial...)"></textarea>
-                <button className="mt-6 w-full bg-gradient-to-r from-violet-600 to-purple-600 py-4 rounded-2xl font-semibold text-lg">Generar Presentación con IA</button>
-              </div>
-            </div>
-          )}
+  const renderElement = (el) => {
+    const isSelected = selectedElementId === el.id;
+    const commonStyle = { left: el.x + 'px', top: el.y + 'px' };
 
-          {active === 'home' && (
-            <div className="p-8 text-center">
-              <h1 className="text-4xl font-semibold mb-4">Bienvenido a Voltara v12</h1>
-              <p className="text-zinc-400">Explora la biblioteca para comenzar</p>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+    if (el.type === 'text') {
+      return React.createElement('div', {
+        key: el.id,
+        className: `element ${isSelected ? 'ring-2 ring-violet-400' : ''}`,
+        style: {
+          ...commonStyle,
+          color: el.color,
+          fontSize: `${el.size}px`,
+          fontWeight: el.fontWeight || 500,
+          textShadow: '2px 2px 6px rgba(0,0,0,0.8)',
+          padding: '8px 12px'
+        },
+        onPointerDown: (e) => handlePointerDown(e, el.id),
+        onDoubleClick: () => {
+          const txt = prompt("Editar texto:", el.content);
+          if (txt !== null) updateElement(el.id, {content: txt});
+        }
+      }, el.content);
+    }
+
+    if (el.type === 'shape') {
+      return React.createElement('div', {
+        key: el.id,
+        className: `element ${isSelected ? 'ring-2 ring-violet-400' : ''}`,
+        style: {
+          ...commonStyle,
+          width: el.width + 'px',
+          height: el.height + 'px',
+          backgroundColor: el.color,
+          borderRadius: el.shape === 'circle' ? '50%' : '12px'
+        },
+        onPointerDown: (e) => handlePointerDown(e, el.id)
+      });
+    }
+
+    if (el.type === 'image') {
+      return React.createElement('img', {
+        key: el.id,
+        src: el.src,
+        className: `element object-contain ${isSelected ? 'ring-2 ring-violet-400' : ''}`,
+        style: { ...commonStyle, width: el.width + 'px', height: el.height + 'px' },
+        onPointerDown: (e) => handlePointerDown(e, el.id)
+      });
+    }
+    return null;
+  };
+
+  return React.createElement('div', { className: "flex h-screen bg-zinc-950 overflow-hidden" },
+    // Sidebar
+    React.createElement('div', {
+      className: `${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:static z-50 w-72 h-full bg-zinc-900 border-r border-zinc-800 transition-all flex flex-col`
+    },
+      React.createElement('div', { className: "p-6 border-b border-zinc-800" },
+        React.createElement('div', { className: "flex items-center gap-3" },
+          React.createElement('img', {
+            src: "https://i.imgur.com/0zK8vL9.png", // ← Reemplaza esta URL con la tuya si quieres
+            alt: "Voltara Logo",
+            className: "h-12 w-auto"
+          }),
+          React.createElement('div', { className: "font-display text-3xl font-semibold" }, "Voltara")
+        )
+      ),
+      React.createElement('div', { className: "flex-1 overflow-y-auto p-3 space-y-1" },
+        ['home','library','editor','creative','present'].map((page, i) => {
+          const labels = ['Inicio','Biblioteca','Editor','IA Creativa','Presentar'];
+          const icons = ['fa-home','fa-layer-group','fa-pen-ruler','fa-wand-magic-sparkles','fa-display'];
+          return React.createElement('button', {
+            key: i,
+            onClick: () => { setActive(page); setSidebarOpen(false); },
+            className: `w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl ${active === page ? 'bg-violet-600 text-white' : 'hover:bg-zinc-800 text-zinc-300'}`
+          },
+            React.createElement('i', { className: `fas ${icons[i]}` }),
+            React.createElement('span', null, labels[i])
+          );
+        })
+      ),
+      React.createElement('div', { className: "p-4 text-xs text-zinc-500 border-t border-zinc-800 text-center" },
+        "© Keny Chinchilla Navarro" React.createElement('div', { className: "p-4 text-xs text-zinc-500 border-t border-zinc-800 text-center" },
+)
+      )
+    ),
+
+    // Main Content
+    React.createElement('div', { className: "flex-1 flex flex-col overflow-hidden" },
+      React.createElement('div', { className: "h-14 border-b border-zinc-800 bg-zinc-900 px-4 flex items-center justify-between" },
+        React.createElement('button', {
+          onClick: () => setSidebarOpen(!sidebarOpen),
+          className: "lg:hidden text-2xl"
+        }, React.createElement('i', { className: "fas fa-bars" })),
+        active === 'editor' && React.createElement('div', { className: "flex gap-3" },
+          React.createElement('button', {
+            onClick: exportPNG,
+            className: "bg-white text-black px-5 py-2 rounded-2xl font-medium flex items-center gap-2"
+          }, React.createElement('i', { className: "fas fa-download" }), "Exportar PNG")
+        )
+      ),
+
+      React.createElement('div', { className: "flex-1 overflow-auto p-6" },
+        // ... (El resto de secciones: library, editor, present, home)
+        active === 'library' && /* plantillas */,
+        active === 'editor' && selectedTemplate && React.createElement('div', { className: "relative h-full" },
+          React.createElement('div', {
+            ref: canvasRef,
+            className: "canvas-container w-full max-w-5xl mx-auto h-[620px] bg-zinc-900 rounded-3xl overflow-hidden relative",
+            style: { backgroundImage: `url(${selectedTemplate.bg})` }
+          }, elements.map(renderElement)),
+
+          // Toolbar
+          React.createElement('div', { className: "absolute top-6 left-1/2 -translate-x-1/2 bg-zinc-900/95 backdrop-blur border border-zinc-700 rounded-3xl px-6 py-3 flex gap-3 z-30" },
+            React.createElement('button', { onClick: addText, className: "flex items-center gap-2 px-5 py-2.5 hover:bg-zinc-800 rounded-2xl" }, "Texto"),
+            React.createElement('button', { onClick: () => addShape('rect'), className: "flex items-center gap-2 px-5 py-2.5 hover:bg-zinc-800 rounded-2xl" }, "Rectángulo"),
+            React.createElement('button', { onClick: () => addShape('circle'), className: "flex items-center gap-2 px-5 py-2.5 hover:bg-zinc-800 rounded-2xl" }, "Círculo"),
+            React.createElement('button', { onClick: () => fileInputRef.current.click(), className: "flex items-center gap-2 px-5 py-2.5 hover:bg-zinc-800 rounded-2xl" }, "Imagen")
+          )
+        ),
+        // ... resto de secciones
+      )
+    )
   );
 }
 
-ReactDOM.render(<App />, document.getElementById('root'));
+ReactDOM.render(React.createElement(App), document.getElementById('root'));
 </script>
 </body>
 </html>
