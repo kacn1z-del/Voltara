@@ -29,7 +29,7 @@ const TEMPLATES = [
   { id: 3, category: "infographic", title: "Infografía Datos", thumb: "https://picsum.photos/id/1015/600/380", bg: "https://picsum.photos/id/1015/1200/800" },
   { id: 4, category: "presentations", title: "Pitch Deck", thumb: "https://picsum.photos/id/201/600/380", bg: "https://picsum.photos/id/201/1200/800" },
   { id: 5, category: "social", title: "Post Instagram", thumb: "https://picsum.photos/id/237/600/380", bg: "https://picsum.photos/id/237/1200/800" },
-  // Más plantillas (45 en total)
+  // 40 más (total ~45)
   ...Array.from({length: 40}, (_, i) => ({
     id: 6 + i,
     category: ["nature","social","marketing","infographic","business"][i%5],
@@ -128,9 +128,9 @@ function App() {
           <button onClick={() => setSidebarOpen(!sidebarOpen)} className="lg:hidden text-2xl"><i className="fas fa-bars"></i></button>
         </div>
 
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-auto p-4">
           {active === 'library' && (
-            <div className="p-6">
+            <div>
               <h2 className="text-3xl font-semibold mb-8">Plantillas ({TEMPLATES.length})</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                 {TEMPLATES.map(tpl => (
@@ -169,7 +169,7 @@ function App() {
                 ))}
               </div>
 
-              {/* Toolbar Mejorado */}
+              {/* Toolbar */}
               <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-zinc-900/95 backdrop-blur border border-zinc-700 rounded-3xl px-6 py-3 flex gap-3 z-20 shadow-2xl">
                 <button onClick={addText} className="flex items-center gap-2 px-5 py-2 hover:bg-zinc-800 rounded-2xl">
                   <i className="fas fa-font"></i> Texto
@@ -195,11 +195,10 @@ function App() {
 
           {active === 'present' && (
             <div className="p-8 max-w-2xl mx-auto">
-              <h2 className="text-3xl font-semibold mb-8">Presentar</h2>
+              <h2 className="text-3xl font-semibold mb-8">Presentaciones</h2>
               <div className="bg-zinc-900 rounded-3xl p-8">
-                <p className="mb-6">Describe qué presentación quieres crear:</p>
-                <textarea className="w-full h-32 bg-zinc-800 rounded-2xl p-4" placeholder="Ej: Presentación sobre inteligencia artificial para 10 slides..."></textarea>
-                <button className="mt-6 w-full bg-gradient-to-r from-violet-600 to-purple-600 py-4 rounded-2xl font-semibold">Generar Presentación con IA</button>
+                <textarea className="w-full h-40 bg-zinc-800 rounded-2xl p-6 text-lg" placeholder="Describe la presentación que quieres (ej: Presentación de 10 slides sobre inteligencia artificial...)"></textarea>
+                <button className="mt-6 w-full bg-gradient-to-r from-violet-600 to-purple-600 py-4 rounded-2xl font-semibold text-lg">Generar Presentación con IA</button>
               </div>
             </div>
           )}
@@ -207,7 +206,7 @@ function App() {
           {active === 'home' && (
             <div className="p-8 text-center">
               <h1 className="text-4xl font-semibold mb-4">Bienvenido a Voltara v12</h1>
-              <p className="text-zinc-400">Ve a Biblioteca para empezar</p>
+              <p className="text-zinc-400">Explora la biblioteca para comenzar</p>
             </div>
           )}
         </div>
