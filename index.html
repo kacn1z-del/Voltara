@@ -2,10 +2,10 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Voltara v12</title>
 <style>
-:root{--bg:#0f0f0f;--panel:#1a1a1a;--panel2:#242424;--border:#333;--text:#e5e5e5;--muted:#999;--accent:#3b82f6;--accent2:#8b5cf6;--ok:#10b981}
+:root{--bg:#0f0f0f;--panel:#1a1a1a;--panel2:#242424;--border:#333;--text:#e5e5e5;--muted:#999;--accent:#3b82f6;--accent2:#8b5cf6}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
 #app{display:flex;height:100vh;width:100vw}
@@ -50,7 +50,7 @@ input,select,textarea{background:var(--panel2);border:1px solid var(--border);co
 .tool-icon{font-size:32px;margin-bottom:8px}
 .tool-name{font-size:13px}
 @media(max-width:1024px){.templates-grid,.grid-4{grid-template-columns:repeat(2,1fr)}.grid-3{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:768px){.sidebar{position:fixed;left:-240px;z-index:100;height:100vh}.sidebar.open{left:0}.menu-btn{display:flex}.templates-grid,.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}.content{padding:16px}}
+@media(max-width:768px){.sidebar{position:fixed;left:-240px;z-index:100;height:100vh;transition:.3s}.sidebar.open{left:0}.menu-btn{display:flex}.templates-grid,.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}.content{padding:16px}}
 .toast{position:fixed;bottom:20px;right:20px;background:var(--panel);border:1px solid var(--border);padding:12px 20px;border-radius:8px;display:none;z-index:2000}
 .toast.active{display:block}
 h2{margin-bottom:16px}h3{margin:16px 0 12px}
@@ -76,113 +76,96 @@ h2{margin-bottom:16px}h3{margin:16px 0 12px}
 <div class="modal" id="modal"><div class="modal-content"><div class="modal-header"><h2 id="modalTitle"></h2><button class="btn-secondary" onclick="closeModal()">✕</button></div><div class="modal-body" id="modalBody"></div></div></div>
 <div class="toast" id="toast"></div>
 <script>
-let LANG='es';
-const DICT={es:{home:'Inicio',design:'Diseño',editor:'Editor',flipbook:'Flipbook',analytics:'Analytics',smart:'Smart Designer 2.0',narrative:'Narrativa IA',infographics:'Infografías',library:'Biblioteca',present:'Presentar',collab:'Colaborar',translate:'Traductor',export:'Exportar',sites:'Sitios Web',ecosystem:'Ecosistema',settings:'Ajustes',welcome:'Bienvenido a Voltara v12',subtitle:'120+ plantillas nivel Canva Pro',recent:'Proyectos recientes',create:'Crear nuevo',search:'Buscar plantillas...',all:'Todas',corporate:'Corporativo',pitch:'Pitch Deck',annual:'Informe Anual',proposal:'Propuesta',hr:'RRHH',marketing:'Marketing',social:'Redes Sociales',education:'Educación',useTemplate:'Usar plantilla',slides:'slides',trending:'Trending',text:'Texto',shapes:'Formas',photos:'Fotos',icons:'Íconos',backgrounds:'Fondos',draw:'Dibujar',stickers:'Stickers',charts:'Gráficos',tables:'Tablas',video:'Video',audio:'Audio',qr:'QR',brandkit:'Brand Kit',aiimage:'Imagen IA'},en:{home:'Home',design:'Design',editor:'Editor',flipbook:'Flipbook',analytics:'Analytics',smart:'Smart Designer 2.0',narrative:'AI Narrative',infographics:'Infographics',library:'Library',present:'Present',collab:'Collaborate',translate:'Translator',export:'Export',sites:'Websites',ecosystem:'Ecosystem',settings:'Settings',welcome:'Welcome to Voltara v12',subtitle:'120+ Canva Pro level templates',recent:'Recent projects',create:'Create new',search:'Search templates...',all:'All',corporate:'Corporate',pitch:'Pitch Deck',annual:'Annual Report',proposal:'Proposal',hr:'HR',marketing:'Marketing',social:'Social Media',education:'Education',useTemplate:'Use template',slides:'slides',trending:'Trending',text:'Text',shapes:'Shapes',photos:'Photos',icons:'Icons',backgrounds:'Backgrounds',draw:'Draw',stickers:'Stickers',charts:'Charts',tables:'Tables',video:'Video',audio:'Audio',qr:'QR',brandkit:'Brand Kit',aiimage:'AI Image'}};
-const T=k=>DICT?.[k]||DICT['es'][k]||k;
-const MODULES=['home','design','editor','flipbook','analytics','smart','narrative','infographics','library','present','collab','translate','export','sites','ecosystem','settings'];
-const ICONS={home:'🏠',design:'🎨',editor:'✏️',flipbook:'📖',analytics:'📊',smart:'✨',narrative:'📝',infographics:'📈',library:'📚',present:'🎬',collab:'👥',translate:'🌐',export:'📤',sites:'🌍',ecosystem:'⚙️',settings:'⚙️'};
-let ACTIVE='home';
-const TEMPLATES=[{id:1,name:'Ejecutivo Azul Corporativo',cat:'corporate',slides:18,pro:true,svg:'<svg viewBox="0 0 320 180"><rect fill="#1e3a8a" width="320" height="40"/><rect fill="#3b82f6" x="20" y="60" width="100" height="8"/><rect fill="#cbd5e1" x="20" y="80" width="280" height="4"/><rect fill="#cbd5e1" x="20" y="90" width="240" height="4"/><rect fill="#cbd5e1" x="20" y="100" width="260" height="4"/><rect fill="#1e3a8a" x="20" y="130" width="80" height="30"/></svg>'},{id:2,name:'Pitch Deck Startup',cat:'pitch',slides:22,pro:true,svg:'<svg viewBox="0 0 320 180"><circle cx="160" cy="60" r="30" fill="#8b5cf6"/><rect fill="#1f2937" x="40" y="110" width="240" height="6"/><rect fill="#6b7280" x="60" y="125" width="200" height="4"/><rect fill="#8b5cf6" x="120" y="145" width="80" height="20" rx="10"/></svg>'},{id:3,name:'Reporte Anual 2024',cat:'annual',slides:25,pro:true,svg:'<svg viewBox="0 0 320 180"><rect fill="#059669" width="320" height="180"/><rect fill="#fff" x="20" y="20" width="280" height="140" opacity="0.95"/><text x="160" y="95" text-anchor="middle" fill="#059669" font-size="28" font-weight="700">2024</text><rect fill="#059669" x="40" y="120" width="240" height="2"/></svg>'},{id:4,name:'Propuesta Comercial',cat:'proposal',slides:15,pro:false,svg:'<svg viewBox="0 0 320 180"><rect fill="#f59e0b" width="80" height="180"/><rect fill="#1f2937" x="100" y="30" width="200" height="8"/><rect fill="#9ca3af" x="100" y="50" width="180" height="4"/><rect fill="#9ca3af" x="100" y="60" width="160" height="4"/></svg>'},{id:5,name:'Onboarding RRHH',cat:'hr',slides:20,pro:false,svg:'<svg viewBox="0 0 320 180"><circle cx="80" cy="90" r="40" fill="#ec4899"/><rect fill="#1f2937" x="140" y="70" width="160" height="6"/><rect fill="#9ca3af" x="140" y="85" width="140" height="4"/><rect fill="#9ca3af" x="140" y="95" width="120" height="4"/></svg>'},{id:6,name:'Marketing Digital',cat:'marketing',slides:16,pro:true,svg:'<svg viewBox="0 0 320 180"><path d="M0 120 Q80 80 160 120 T320 120 V180 H0 Z" fill="#06b6d4"/><rect fill="#fff" x="40" y="40" width="240" height="60" rx="8"/><circle cx="80" cy="70" r="15" fill="#06b6d4"/><circle cx="160" cy="70" r="15" fill="#06b6d4"/><circle cx="240" cy="70" r="15" fill="#06b6d4"/></svg>'},{id:7,name:'Post Instagram',cat:'social',slides:1,pro:false,svg:'<svg viewBox="0 0 320 180"><rect fill="#dc2626" width="320" height="180"/><circle cx="160" cy="90" r="50" fill="#fff" opacity="0.2"/><rect fill="#fff" x="110" y="140" width="100" height="8" rx="4"/></svg>'},{id:8,name:'Infografía Datos',cat:'infographics',slides:1,pro:true,svg:'<svg viewBox="0 0 320 180"><rect fill="#7c3aed" x="20" y="140" width="60" height="40"/><rect fill="#a78bfa" x="100" y="100" width="60" height="80"/><rect fill="#c4b5fd" x="180" y="60" width="60" height="120"/><rect fill="#ddd6fe" x="260" y="120" width="40" height="60"/></svg>'}];
-let FAVORITES=JSON.parse(localStorage.getItem('voltara_favs')||'[]');
-const DESIGN_TOOLS=['text','shapes','photos','icons','backgrounds','draw','stickers','charts','tables','video','audio','qr','brandkit','aiimage'];
+var LANG='es';
+var DICT={es:{home:'Inicio',design:'Diseño',editor:'Editor',flipbook:'Flipbook',analytics:'Analytics',smart:'Smart Designer 2.0',narrative:'Narrativa IA',infographics:'Infografías',library:'Biblioteca',present:'Presentar',collab:'Colaborar',translate:'Traductor',export:'Exportar',sites:'Sitios Web',ecosystem:'Ecosistema',settings:'Ajustes',welcome:'Bienvenido a Voltara v12',subtitle:'120+ plantillas nivel Canva Pro',recent:'Proyectos recientes',create:'Crear nuevo',search:'Buscar plantillas...',all:'Todas',corporate:'Corporativo',pitch:'Pitch Deck',annual:'Informe Anual',proposal:'Propuesta',hr:'RRHH',marketing:'Marketing',social:'Redes Sociales',useTemplate:'Usar plantilla',slides:'slides',trending:'Trending',text:'Texto',shapes:'Formas',photos:'Fotos',icons:'Íconos',backgrounds:'Fondos',draw:'Dibujar',stickers:'Stickers',charts:'Gráficos',tables:'Tablas',video:'Video',audio:'Audio',qr:'QR',brandkit:'Brand Kit',aiimage:'Imagen IA'},en:{home:'Home',design:'Design',editor:'Editor',flipbook:'Flipbook',analytics:'Analytics',smart:'Smart Designer 2.0',narrative:'AI Narrative',infographics:'Infographics',library:'Library',present:'Present',collab:'Collaborate',translate:'Translator',export:'Export',sites:'Websites',ecosystem:'Ecosystem',settings:'Settings',welcome:'Welcome to Voltara v12',subtitle:'120+ Canva Pro level templates',recent:'Recent projects',create:'Create new',search:'Search templates...',all:'All',corporate:'Corporate',pitch:'Pitch Deck',annual:'Annual Report',proposal:'Proposal',hr:'HR',marketing:'Marketing',social:'Social Media',useTemplate:'Use template',slides:'slides',trending:'Trending',text:'Text',shapes:'Shapes',photos:'Photos',icons:'Icons',backgrounds:'Backgrounds',draw:'Draw',stickers:'Stickers',charts:'Charts',tables:'Tables',video:'Video',audio:'Audio',qr:'QR',brandkit:'Brand Kit',aiimage:'AI Image'}};
+function T(k){return DICT[k]||DICT['es'][k]||k}
+var MODULES=['home','design','editor','flipbook','analytics','smart','narrative','infographics','library','present','collab','translate','export','sites','ecosystem','settings'];
+var ICONS={home:'🏠',design:'🎨',editor:'✏️',flipbook:'📖',analytics:'📊',smart:'✨',narrative:'📝',infographics:'📈',library:'📚',present:'🎬',collab:'👥',translate:'🌐',export:'📤',sites:'🌍',ecosystem:'⚙️',settings:'⚙️'};
+var ACTIVE='home';
+var TEMPLATES=[{id:1,name:'Ejecutivo Azul Corporativo',cat:'corporate',slides:18,pro:true,svg:'<svg viewBox="0 0 320 180"><rect fill="#1e3a8a" width="320" height="40"/><rect fill="#3b82f6" x="20" y="60" width="100" height="8"/><rect fill="#cbd5e1" x="20" y="80" width="280" height="4"/><rect fill="#cbd5e1" x="20" y="90" width="240" height="4"/><rect fill="#1e3a8a" x="20" y="130" width="80" height="30"/></svg>'},{id:2,name:'Pitch Deck Startup',cat:'pitch',slides:22,pro:true,svg:'<svg viewBox="0 0 320 180"><circle cx="160" cy="60" r="30" fill="#8b5cf6"/><rect fill="#1f2937" x="40" y="110" width="240" height="6"/><rect fill="#6b7280" x="60" y="125" width="200" height="4"/><rect fill="#8b5cf6" x="120" y="145" width="80" height="20" rx="10"/></svg>'},{id:3,name:'Reporte Anual 2024',cat:'annual',slides:25,pro:true,svg:'<svg viewBox="0 0 320 180"><rect fill="#059669" width="320" height="180"/><rect fill="#fff" x="20" y="20" width="280" height="140" opacity="0.95"/><text x="160" y="95" text-anchor="middle" fill="#059669" font-size="28" font-weight="700">2024</text><rect fill="#059669" x="40" y="120" width="240" height="2"/></svg>'},{id:4,name:'Propuesta Comercial',cat:'proposal',slides:15,pro:false,svg:'<svg viewBox="0 0 320 180"><rect fill="#f59e0b" width="80" height="180"/><rect fill="#1f2937" x="100" y="30" width="200" height="8"/><rect fill="#9ca3af" x="100" y="50" width="180" height="4"/></svg>'},{id:5,name:'Onboarding RRHH',cat:'hr',slides:20,pro:false,svg:'<svg viewBox="0 0 320 180"><circle cx="80" cy="90" r="40" fill="#ec4899"/><rect fill="#1f2937" x="140" y="70" width="160" height="6"/><rect fill="#9ca3af" x="140" y="85" width="140" height="4"/></svg>'},{id:6,name:'Marketing Digital',cat:'marketing',slides:16,pro:true,svg:'<svg viewBox="0 0 320 180"><path d="M0 120 Q80 80 160 120 T320 120 V180 H0 Z" fill="#06b6d4"/><rect fill="#fff" x="40" y="40" width="240" height="60" rx="8"/><circle cx="80" cy="70" r="15" fill="#06b6d4"/><circle cx="160" cy="70" r="15" fill="#06b6d4"/><circle cx="240" cy="70" r="15" fill="#06b6d4"/></svg>'}];
+var FAVORITES=[];
+var DESIGN_TOOLS=['text','shapes','photos','icons','backgrounds','draw','stickers','charts','tables','video','audio','qr','brandkit','aiimage'];
 
-function renderNav(){document.getElementById('nav').innerHTML=MODULES.map(m=>`<div class="nav-item ${m===ACTIVE?'active':''}" onclick="setModule('${m}')"><div class="nav-icon">${ICONS[m]}</div><span class="nav-text">${T(m)}</span></div>`).join('')}
+function renderNav(){document.getElementById('nav').innerHTML=MODULES.map(function(m){return '<div class="nav-item '+(m===ACTIVE?'active':'')+'" onclick="setModule(\''+m+'\')"><div class="nav-icon">'+ICONS[m]+'</div><span class="nav-text">'+T(m)+'</span></div>'}).join('')}
 
 function renderModule(){
   document.getElementById('pageTitle').textContent=T(ACTIVE);
-  const c=document.getElementById('content');
-  const renders={home:renderHome,design:renderDesign,library:renderLibrary,settings:renderSettings,editor:()=>c.innerHTML='<h2>Editor</h2><div class="card"><p>Canvas de edición. Seleccioná una plantilla en Biblioteca.</p></div>',flipbook:()=>c.innerHTML='<h2>Flipbook</h2><div class="card"><p>Subí un PDF para convertir a flipbook 3D</p><input type="file" accept=".pdf"></div>',analytics:()=>c.innerHTML='<h2>Analytics</h2><div class="grid grid-4"><div class="card"><h3>Vistas</h3><p style="font-size:32px;font-weight:700">1,234</p></div><div class="card"><h3>Shares</h3><p style="font-size:32px;font-weight:700">89</p></div><div class="card"><h3>Tiempo</h3><p style="font-size:32px;font-weight:700">2:34</p></div><div class="card"><h3>CTR</h3><p style="font-size:32px;font-weight:700">12%</p></div></div>',ecosystem:()=>c.innerHTML='<h2>Ecosistema</h2><div class="grid grid-2"><div class="card"><h3>WC Corporate Editor</h3><p>Subí PDF, Word, Excel, PowerPoint</p><input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" multiple></div><div class="card"><h3>Matriz Contable</h3><p>Importá Excel/CSV y genera dashboards</p><input type="file" accept=".csv,.xlsx"></div></div>'};
-  (renders[ACTIVE]||(()=>c.innerHTML=`<h2>${T(ACTIVE)}</h2><div class="card"><p>Módulo funcional</p></div>`))(c);
+  var c=document.getElementById('content');
+  if(ACTIVE==='home')return renderHome(c);
+  if(ACTIVE==='design')return renderDesign(c);
+  if(ACTIVE==='library')return renderLibrary(c);
+  if(ACTIVE==='settings')return renderSettings(c);
+  if(ACTIVE==='editor')return c.innerHTML='<h2>Editor</h2><div class="card"><p>Canvas de edición. Seleccioná una plantilla en Biblioteca.</p></div>';
+  if(ACTIVE==='flipbook')return c.innerHTML='<h2>Flipbook</h2><div class="card"><p>Subí un PDF para convertir a flipbook 3D</p><input type="file" accept=".pdf"></div>';
+  if(ACTIVE==='analytics')return c.innerHTML='<h2>Analytics</h2><div class="grid grid-4"><div class="card"><h3>Vistas</h3><p style="font-size:32px;font-weight:700">1,234</p></div><div class="card"><h3>Shares</h3><p style="font-size:32px;font-weight:700">89</p></div><div class="card"><h3>Tiempo</h3><p style="font-size:32px;font-weight:700">2:34</p></div><div class="card"><h3>CTR</h3><p style="font-size:32px;font-weight:700">12%</p></div></div>';
+  if(ACTIVE==='ecosystem')return c.innerHTML='<h2>Ecosistema</h2><div class="grid grid-2"><div class="card"><h3>WC Corporate Editor</h3><p>Subí PDF, Word, Excel, PowerPoint</p><input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" multiple></div><div class="card"><h3>Matriz Contable</h3><p>Importá Excel/CSV y genera dashboards</p><input type="file" accept=".csv,.xlsx"></div></div>';
+  c.innerHTML='<h2>'+T(ACTIVE)+'</h2><div class="card"><p>Módulo funcional</p></div>';
 }
 
-function renderHome(c){c.innerHTML=`<h2>${T('welcome')}</h2><p style="color:var(--muted);margin-bottom:24px">${T('subtitle')}</p><div class="grid grid-3"><div class="card" onclick="setModule('library')"><h3>📚 ${T('library')}</h3><p>120+ plantillas premium</p></div><div class="card" onclick="setModule('design')"><h3>🎨 ${T('design')}</h3><p>14 herramientas</p></div><div class="card" onclick="setModule('editor')"><h3>✏️ ${T('editor')}</h3><p>Editor avanzado</p></div></div><h3 style="margin-top:24px">${T('recent')}</h3><div class="card"><p>No hay proyectos recientes</p><button class="btn" onclick="setModule('library')" style="margin-top:12px">${T('create')}</button></div>`}
+function renderHome(c){c.innerHTML='<h2>'+T('welcome')+'</h2><p style="color:var(--muted);margin-bottom:24px">'+T('subtitle')+'</p><div class="grid grid-3"><div class="card" onclick="setModule(\'library\')"><h3>📚 '+T('library')+'</h3><p>120+ plantillas premium</p></div><div class="card" onclick="setModule(\'design\')"><h3>🎨 '+T('design')+'</h3><p>14 herramientas</p></div><div class="card" onclick="setModule(\'editor\')"><h3>✏️ '+T('editor')+'</h3><p>Editor avanzado</p></div></div><h3 style="margin-top:24px">'+T('recent')+'</h3><div class="card"><p>No hay proyectos recientes</p><button class="btn" onclick="setModule(\'library\')" style="margin-top:12px">'+T('create')+'</button></div>'}
 
-function renderDesign(c){
-  c.innerHTML=`<h2>${T('design')}</h2>
-  <div class="tool-grid">
-    ${DESIGN_TOOLS.map(t=>`<div class="tool-item" onclick="openTool('${t}')"><div class="tool-icon">${getToolIcon(t)}</div><div class="tool-name">${T(t)}</div></div>`).join('')}
-  </div>
-  <div id="toolPanel" style="margin-top:20px"></div>`;
-}
+function renderDesign(c){c.innerHTML='<h2>'+T('design')+'</h2><div class="tool-grid">'+DESIGN_TOOLS.map(function(t){return '<div class="tool-item" onclick="openTool(\''+t+'\')"><div class="tool-icon">'+getToolIcon(t)+'</div><div class="tool-name">'+T(t)+'</div></div>'}).join('')+'</div><div id="toolPanel" style="margin-top:20px"></div>'}
 
-function getToolIcon(t){
-  const i={text:'📝',shapes:'⬛',photos:'🖼️',icons:'⭐',backgrounds:'🎨',draw:'✏️',stickers:'🏷️',charts:'📊',tables:'📋',video:'🎬',audio:'🎵',qr:'📱',brandkit:'🎯',aiimage:'✨'};
-  return i||'📦';
-}
+function getToolIcon(t){var i={text:'📝',shapes:'⬛',photos:'🖼️',icons:'⭐',backgrounds:'🎨',draw:'✏️',stickers:'🏷️',charts:'📊',tables:'📋',video:'🎬',audio:'🎵',qr:'📱',brandkit:'🎯',aiimage:'✨'};return i||'📦'}
 
 function openTool(tool){
-  const p=document.getElementById('toolPanel');
-  const panels={
-    text:`<div class="card"><h3>Agregar Texto</h3>
-      <select id="textStyle"><option>Título</option><option>Subtítulo</option><option>Párrafo</option><option>Cita</option></select>
-      <select id="textFont" style="margin:8px 0"><option>Arial</option><option>Helvetica</option><option>Georgia</option><option>Courier</option></select>
-      <textarea id="textContent" placeholder="Escribí tu texto..." rows="3"></textarea>
-      <button class="btn" onclick="addText()" style="margin-top:12px">Agregar al Canvas</button></div>`,
-    
-    shapes:`<div class="card"><h3>Formas</h3><div class="grid grid-4">
-      ${['Rectángulo','Círculo','Triángulo','Línea','Flecha','Estrella','Corazón','Nube'].map(s=>`<button class="btn-secondary" onclick="addShape('${s}')">${s}</button>`).join('')}
-    </div></div>`,
-    
-    photos:`<div class="card"><h3>Fotos</h3>
-      <input type="file" id="photoUpload" accept="image/*" onchange="uploadPhoto()">
-      <p style="margin:12px 0;color:var(--muted)">O pegá URL:</p>
-      <input type="text" id="photoUrl" placeholder="https://...">
-      <button class="btn" onclick="addPhotoUrl()" style="margin-top:8px">Agregar URL</button></div>`,
-    
-    icons:`<div class="card"><h3>Íconos - 500+</h3><div class="grid grid-4">
-      ${'⭐❤️🔥💡🎯🚀📌📍🎁💎⚡🔔🎨🎭🎪🎫🎬🎮🎧🎤📱💻⌚📷🎥'.split('').map(i=>`<button class="btn-secondary" onclick="addIcon('${i}')" style="font-size:24px">${i}</button>`).join('')}
-    </div></div>`,
-    
-    backgrounds:`<div class="card"><h3>Fondos</h3><div class="grid grid-4">
-      ${['#1e3a8a','#dc2626','#059669','#7c3aed','#ea580c','#0891b2','#be123c','#4338ca'].map(c=>`<div onclick="setBg('${c}')" style="height:60px;background:${c};border-radius:8px;cursor:pointer"></div>`).join('')}
-    </div><p style="margin-top:12px">Gradientes:</p><div class="grid grid-2">
-      <div onclick="setBg('linear-gradient(135deg,#3b82f6,#8b5cf6)')" style="height:60px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);border-radius:8px;cursor:pointer"></div>
-      <div onclick="setBg('linear-gradient(135deg,#ec4899,#f59e0b)')" style="height:60px;background:linear-gradient(135deg,#ec4899,#f59e0b);border-radius:8px;cursor:pointer"></div>
-    </div></div>`,
-    
-    draw:`<div class="card"><h3>Dibujar</h3><canvas id="drawCanvas" width="400" height="300" style="border:1px solid var(--border);border-radius:8px;background:#fff;cursor:crosshair;width:100%"></canvas>
-      <div style="display:flex;gap:8px;margin-top:12px"><input type="color" id="drawColor" value="#000000"><button class="btn-secondary" onclick="clearCanvas()">Borrar</button><button class="btn" onclick="saveDrawing()">Guardar</button></div></div>`,
-    
-    charts:`<div class="card"><h3>Gráficos</h3>
-      <select id="chartType"><option>Barras</option><option>Pie</option><option>Líneas</option></select>
-      <textarea id="chartData" rows="4" placeholder="Etiqueta,Valor\nEnero,100\nFebrero,150" style="margin:8px 0"></textarea>
-      <button class="btn" onclick="createChart()">Crear Gráfico</button></div>`,
-    
-    tables:`<div class="card"><h3>Tablas</h3>
-      <div style="display:flex;gap:8px;margin-bottom:12px"><input type="number" id="rows" placeholder="Filas" value="3" style="width:80px"><input type="number" id="cols" placeholder="Columnas" value="3" style="width:80px"></div>
-      <button class="btn" onclick="createTable()">Crear Tabla</button></div>`,
-    
-    video:`<div class="card"><h3>Video</h3><input type="text" id="videoUrl" placeholder="URL de YouTube/Vimeo"><button class="btn" onclick="addVideo()" style="margin-top:8px">Embed Video</button></div>`,
-    
-    audio:`<div class="card"><h3>Audio</h3><input type="file" id="audioUpload" accept="audio/*" onchange="uploadAudio()"><p style="margin:12px 0;color:var(--muted)">O URL:</p><input type="text" id="audioUrl" placeholder="https://..."><button class="btn" onclick="addAudioUrl()" style="margin-top:8px">Agregar</button></div>`,
-    
-    qr:`<div class="card"><h3>Generador QR</h3><input type="text" id="qrText" placeholder="Texto o URL"><button class="btn" onclick="generateQR()" style="margin:8px 0">Generar QR</button><div id="qrResult"></div></div>`,
-    
-    brandkit:`<div class="card"><h3>Brand Kit</h3><p>Colores de marca:</p><div class="grid grid-4" style="margin:12px 0">${['#3b82f6','#8b5cf6','#10b981','#f59e0b'].map(c=>`<div style="height:40px;background:${c};border-radius:8px"></div>`).join('')}</div><button class="btn-secondary">Subir Logo</button></div>`,
-    
-    aiimage:`<div class="card"><h3>Imagen IA</h3><textarea id="aiPrompt" rows="3" placeholder="Describe la imagen que querés generar..."></textarea><button class="btn" onclick="generateAIImage()" style="margin-top:8px">Generar</button><div id="aiResult" style="margin-top:12px"></div></div>`
+  var p=document.getElementById('toolPanel');
+  var panels={
+    text:'<div class="card"><h3>Agregar Texto</h3><select id="textStyle"><option>Título</option><option>Subtítulo</option><option>Párrafo</option><option>Cita</option></select><select id="textFont" style="margin:8px 0"><option>Arial</option><option>Helvetica</option><option>Georgia</option><option>Courier</option></select><textarea id="textContent" placeholder="Escribí tu texto..." rows="3"></textarea><button class="btn" onclick="addText()" style="margin-top:12px">Agregar al Canvas</button></div>',
+    shapes:'<div class="card"><h3>Formas</h3><div class="grid grid-4">'+['Rectángulo','Círculo','Triángulo','Línea','Flecha','Estrella','Corazón','Nube'].map(function(s){return '<button class="btn-secondary" onclick="addShape(\''+s+'\')">'+s+'</button>'}).join('')+'</div></div>',
+    photos:'<div class="card"><h3>Fotos</h3><input type="file" id="photoUpload" accept="image/*" onchange="uploadPhoto()"><p style="margin:12px 0;color:var(--muted)">O pegá URL:</p><input type="text" id="photoUrl" placeholder="https://..."><button class="btn" onclick="addPhotoUrl()" style="margin-top:8px">Agregar URL</button></div>',
+    icons:'<div class="card"><h3>Íconos - 500+</h3><div class="grid grid-4">'+'⭐❤️🔥💡🎯🚀📌📍🎁💎⚡🔔🎨🎭🎪🎫🎬🎮🎧🎤📱💻⌚📷🎥'.split('').map(function(i){return '<button class="btn-secondary" onclick="addIcon(\''+i+'\')" style="font-size:24px">'+i+'</button>'}).join('')+'</div></div>',
+    backgrounds:'<div class="card"><h3>Fondos</h3><div class="grid grid-4">'+['#1e3a8a','#dc2626','#059669','#7c3aed','#ea580c','#0891b2','#be123c','#4338ca'].map(function(c){return '<div onclick="setBg(\''+c+'\')" style="height:60px;background:'+c+';border-radius:8px;cursor:pointer"></div>'}).join('')+'</div><p style="margin-top:12px">Gradientes:</p><div class="grid grid-2"><div onclick="setBg(\'linear-gradient(135deg,#3b82f6,#8b5cf6)\')" style="height:60px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);border-radius:8px;cursor:pointer"></div><div onclick="setBg(\'linear-gradient(135deg,#ec4899,#f59e0b)\')" style="height:60px;background:linear-gradient(135deg,#ec4899,#f59e0b);border-radius:8px;cursor:pointer"></div></div>',
+    draw:'<div class="card"><h3>Dibujar</h3><canvas id="drawCanvas" width="400" height="300" style="border:1px solid var(--border);border-radius:8px;background:#fff;cursor:crosshair;width:100%"></canvas><div style="display:flex;gap:8px;margin-top:12px"><input type="color" id="drawColor" value="#000000"><button class="btn-secondary" onclick="clearCanvas()">Borrar</button><button class="btn" onclick="saveDrawing()">Guardar</button></div></div>',
+    charts:'<div class="card"><h3>Gráficos</h3><select id="chartType"><option>Barras</option><option>Pie</option><option>Líneas</option></select><textarea id="chartData" rows="4" placeholder="Etiqueta,Valor\nEnero,100\nFebrero,150" style="margin:8px 0"></textarea><button class="btn" onclick="createChart()">Crear Gráfico</button></div>',
+    tables:'<div class="card"><h3>Tablas</h3><div style="display:flex;gap:8px;margin-bottom:12px"><input type="number" id="rows" placeholder="Filas" value="3" style="width:80px"><input type="number" id="cols" placeholder="Columnas" value="3" style="width:80px"></div><button class="btn" onclick="createTable()">Crear Tabla</button></div>',
+    video:'<div class="card"><h3>Video</h3><input type="text" id="videoUrl" placeholder="URL de YouTube/Vimeo"><button class="btn" onclick="addVideo()" style="margin-top:8px">Embed Video</button></div>',
+    audio:'<div class="card"><h3>Audio</h3><input type="file" id="audioUpload" accept="audio/*" onchange="uploadAudio()"><p style="margin:12px 0;color:var(--muted)">O URL:</p><input type="text" id="audioUrl" placeholder="https://..."><button class="btn" onclick="addAudioUrl()" style="margin-top:8px">Agregar</button></div>',
+    qr:'<div class="card"><h3>Generador QR</h3><input type="text" id="qrText" placeholder="Texto o URL"><button class="btn" onclick="generateQR()" style="margin:8px 0">Generar QR</button><div id="qrResult"></div></div>',
+    brandkit:'<div class="card"><h3>Brand Kit</h3><p>Colores de marca:</p><div class="grid grid-4" style="margin:12px 0">'+['#3b82f6','#8b5cf6','#10b981','#f59e0b'].map(function(c){return '<div style="height:40px;background:'+c+';border-radius:8px"></div>'}).join('')+'</div><button class="btn-secondary">Subir Logo</button></div>',
+    aiimage:'<div class="card"><h3>Imagen IA</h3><textarea id="aiPrompt" rows="3" placeholder="Describe la imagen que querés generar..."></textarea><button class="btn" onclick="generateAIImage()" style="margin-top:8px">Generar</button><div id="aiResult" style="margin-top:12px"></div></div>'
   };
   p.innerHTML=panels||'<div class="card"><p>Herramienta en desarrollo</p></div>';
-  if(tool==='draw') initCanvas();
+  if(tool==='draw')initCanvas();
 }
 
-// FUNCIONES DE HERRAMIENTAS
-function addText(){showToast('Texto agregado: '+document.getElementById('textContent').value)}
+function addText(){showToast('Texto agregado')}
 function addShape(s){showToast('Forma agregada: '+s)}
 function uploadPhoto(){showToast('Foto subida')}
 function addPhotoUrl(){showToast('Foto agregada desde URL')}
 function addIcon(i){showToast('Ícono agregado: '+i)}
 function setBg(c){document.body.style.background=c;showToast('Fondo cambiado')}
-function initCanvas(){const c=document.getElementById('drawCanvas');if(!c)return;const ctx=c.getContext('2d');let d=false;c.onmousedown=()=>d=true;c.onmouseup=()=>d=false;c.onmousemove=e=>{if(!d)return;const r=c.getBoundingClientRect();ctx.fillStyle=document.getElementById('drawColor').value;ctx.beginPath();ctx.arc(e.clientX-r.left,e.clientY-r.top,2,0,Math.PI*2);ctx.fill()}}
-function clearCanvas(){const c=document.getElementById('drawCanvas');c.getContext('2d').clearRect(0,0,c.width,c.height)}
+function initCanvas(){var c=document.getElementById('drawCanvas');if(!c)return;var ctx=c.getContext('2d');var d=false;c.onmousedown=function(){d=true};c.onmouseup=function(){d=false};c.onmousemove=function(e){if(!d)return;var r=c.getBoundingClientRect();ctx.fillStyle=document.getElementById('drawColor').value;ctx.beginPath();ctx.arc(e.clientX-r.left,e.clientY-r.top,2,0,Math.PI*2);ctx.fill()}}
+function clearCanvas(){var c=document.getElementById('drawCanvas');c.getContext('2d').clearRect(0,0,c.width,c.height)}
 function saveDrawing(){showToast('Dibujo guardado')}
 function createChart(){showToast('Gráfico creado')}
-function createTable(){const r=document.getElementById('rows').value,c=document.getElementById('cols').value;showToast(`Tabla ${r}x${c} creada`)}
+function createTable(){var r=document.getElementById('rows').value,c=document.getElementById('cols').value;showToast('Tabla '+r+'x'+c+' creada')}
 function addVideo(){showToast('Video agregado')}
 function uploadAudio(){showToast('Audio subido')}
 function addAudioUrl(){showToast('Audio agregado')}
-function generateQR(){const t=document.getElementById('qrText').value;document.getElementById('qrResult').innerHTML=`<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(t)}" style="margin-top:12px">`;showToast('QR generado')}
+function generateQR(){var t=document.getElementById('qrText').value;document.getElementById('qrResult').innerHTML='<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(t)+'" style="margin-top:12px">';showToast('QR generado')}
 function generateAIImage(){showToast('Generando imagen IA...')}
+
+function renderLibrary(c){c.innerHTML='<div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap"><div class="filter-group"><label>Categoría:</label><select id="catFilter" onchange="filterTemplates()"><option value="">'+T('all')+'</option><option value="corporate">'+T('corporate')+'</option><option value="pitch">'+T('pitch')+'</option><option value="annual">'+T('annual')+'</option><option value="proposal">'+T('proposal')+'</option><option value="hr">'+T('hr')+'</option><option value="marketing">'+T('marketing')+'</option><option value="social">'+T('social')+'</option></select></div><input class="search" id="searchInput" placeholder="'+T('search')+'" oninput="filterTemplates()" style="flex:1;min-width:200px"></div><h3>'+T('trending')+'</h3><div class="templates-grid" id="trendingGrid"></div><h3 style="margin-top:24px">'+T('all')+' Plantillas</h3><div class="templates-grid" id="allGrid"></div>';filterTemplates()}
+
+function filterTemplates(){var cat=document.getElementById('catFilter').value;var search=document.getElementById('searchInput').value.toLowerCase();var filtered=TEMPLATES.filter(function(t){return(!cat||t.cat===cat)&&(!search||t.name.toLowerCase().indexOf(search)>-1)});document.getElementById('allGrid').innerHTML=filtered.map(renderTemplateCard).join('');document.getElementById('trendingGrid').innerHTML=TEMPLATES.slice(0,8).map(renderTemplateCard).join('')}
+
+function renderTemplateCard(t){var isFav=FAVORITES.indexOf(t.id)>-1;return '<div class="template-card" onclick="openTemplate('+t.id+')"><div class="template-thumb">'+t.svg+'<button class="fav-btn '+(isFav?'active':'')+'" onclick="event.stopPropagation();toggleFav('+t.id+')">'+(isFav?'★':'☆')+'</button></div><div class="template-info"><div class="template-name">'+t.name+' '+(t.pro?'<span class="badge-pro">PRO</span>':'')+'</div><div class="template-meta"><span>'+t.slides+' '+T('slides')+'</span></div></div></div>'}
+
+function toggleFav(id){var i=FAVORITES.indexOf(id);if(i>-1)FAVORITES.splice(i,1);else FAVORITES.push(id);filterTemplates();showToast('Favorito actualizado')}
+
+function openTemplate(id){var t=TEMPLATES.find(function(x){return x.id===id});document.getElementById('modalTitle').textContent=t.name;document.getElementById('modalBody').innerHTML='<div class="preview-slides">'+[1,2,3].map(function(i){return '<div class="preview-slide">'+t.svg+'</div>'}).join('')+'</div><p style="margin:16px 0;color:var(--muted)">'+t.slides+' '+T('slides')+' únicas con diseño profesional</p><button class="btn" onclick="useTemplate('+id+')">'+T('useTemplate')+'</button>';document.getElementById('modal').classList.add('active')}
+
+function useTemplate(id){closeModal();setModule('editor');showToast('Plantilla cargada en el Editor')}
+function closeModal(){document.getElementById('modal').classList.remove('active')}
+
+function renderSettings(c){c.innerHTML='<h2>'+T('settings')+'</h2><div class="card"><label>Idioma:</label><select onchange="changeLang(this.value)" style="margin-left:12px;max-width:200px"><option value="es" '+(LANG==='es'?'selected':'')+'>Español</option><option value="en" '+(LANG==='en'?'selected':'')+'>English</option></select></div>'}
+
+function changeLang(l){LANG=l;renderNav();renderModule();showToast('Idioma cambiado')}
+function setModule(m){ACTIVE=m;renderNav();renderModule();if(window.innerWidth<768)document.getElementById('sidebar').classList.remove('open')}
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('active');setTimeout(function(){t.classList.remove('active')},2000)}
+document.getElementById('menuBtn').onclick=function(){document.getElementById('sidebar').classList.toggle('open')};
+window.onload=function(){renderNav();renderModule()};
 </script>
 </body>
 </html>
