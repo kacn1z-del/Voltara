@@ -14,7 +14,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
 * { font-family: 'Inter', sans-serif; }
 .font-display { font-family: 'Space Grotesk', sans-serif; }
-.canvas-container { background-size: cover; background-position: center; }
+.canvas-container { background-size: cover; background-position: center; background-repeat: no-repeat; }
 </style>
 </head>
 <body class="bg-zinc-950 text-white">
@@ -23,27 +23,15 @@
 <script type="text/babel">
 const { useState } = React;
 
-// ==================== 45 PLANTILLAS ====================
 const TEMPLATES = [
   { id: 1, category: "nature", title: "Bosque Místico", thumb: "https://picsum.photos/id/1016/600/380", bg: "https://picsum.photos/id/1016/1200/800" },
-  { id: 2, category: "nature", title: "Montañas al Atardecer", thumb: "https://picsum.photos/id/1018/600/380", bg: "https://picsum.photos/id/1018/1200/800" },
+  { id: 2, category: "nature", title: "Montañas", thumb: "https://picsum.photos/id/1018/600/380", bg: "https://picsum.photos/id/1018/1200/800" },
   { id: 3, category: "infographic", title: "Infografía Datos", thumb: "https://picsum.photos/id/1015/600/380", bg: "https://picsum.photos/id/1015/1200/800" },
-  { id: 4, category: "presentations", title: "Pitch Deck Moderno", thumb: "https://picsum.photos/id/201/600/380", bg: "https://picsum.photos/id/201/1200/800" },
+  { id: 4, category: "presentations", title: "Pitch Deck", thumb: "https://picsum.photos/id/201/600/380", bg: "https://picsum.photos/id/201/1200/800" },
   { id: 5, category: "social", title: "Post Instagram", thumb: "https://picsum.photos/id/237/600/380", bg: "https://picsum.photos/id/237/1200/800" },
-  { id: 6, category: "social", title: "Historia Facebook", thumb: "https://picsum.photos/id/669/600/380", bg: "https://picsum.photos/id/669/1200/800" },
-  { id: 7, category: "marketing", title: "Flyer Promocional", thumb: "https://picsum.photos/id/870/600/380", bg: "https://picsum.photos/id/870/1200/800" },
-  { id: 8, category: "marketing", title: "Banner Publicitario", thumb: "https://picsum.photos/id/133/600/380", bg: "https://picsum.photos/id/133/1200/800" },
-  // ... (continúo hasta 45)
-  { id: 9, category: "infographic", title: "Timeline Proceso", thumb: "https://picsum.photos/id/312/600/380", bg: "https://picsum.photos/id/312/1200/800" },
-  { id: 10, category: "business", title: "Reporte Anual", thumb: "https://picsum.photos/id/366/600/380", bg: "https://picsum.photos/id/366/1200/800" },
-  { id: 11, category: "social", title: "Portada YouTube", thumb: "https://picsum.photos/id/431/600/380", bg: "https://picsum.photos/id/431/1200/800" },
-  { id: 12, category: "nature", title: "Playa Tropical", thumb: "https://picsum.photos/id/101/600/380", bg: "https://picsum.photos/id/101/1200/800" },
-  { id: 13, category: "infographic", title: "Comparativa", thumb: "https://picsum.photos/id/201/600/380", bg: "https://picsum.photos/id/201/1200/800" },
-  { id: 14, category: "marketing", title: "Cupón Descuento", thumb: "https://picsum.photos/id/251/600/380", bg: "https://picsum.photos/id/251/1200/800" },
-  { id: 15, category: "business", title: "Plan Estratégico", thumb: "https://picsum.photos/id/870/600/380", bg: "https://picsum.photos/id/870/1200/800" },
-  // Agrego más para llegar a ~45 (puedes seguir agregando)
-  ...Array.from({length: 30}, (_, i) => ({
-    id: 16 + i,
+  // Más plantillas (45 en total)
+  ...Array.from({length: 40}, (_, i) => ({
+    id: 6 + i,
     category: ["nature","social","marketing","infographic","business"][i%5],
     title: ["Paisaje", "Redes", "Marketing", "Datos", "Negocios"][i%5] + " " + (i+1),
     thumb: `https://picsum.photos/id/${100 + i}/600/380`,
@@ -57,6 +45,7 @@ function App() {
   const [elements, setElements] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedElementId, setSelectedElementId] = useState(null);
+  const fileInputRef = React.useRef(null);
 
   const openTemplate = (tpl) => {
     setSelectedTemplate(tpl);
@@ -78,16 +67,26 @@ function App() {
     setSelectedElementId(newEl.id);
   };
 
-  const addShape = () => {
-    const newEl = { id: Date.now(), type: 'shape', shape: 'rect', x: 200, y: 200, width: 150, height: 100, color: '#6366f1' };
+  const addShape = (shape) => {
+    const newEl = { id: Date.now(), type: 'shape', shape, x: 180, y: 200, width: 160, height: 100, color: '#6366f1' };
     setElements([...elements, newEl]);
   };
 
-  const addImage = () => {
-    const url = prompt("Pega la URL de una imagen:");
-    if (url) {
-      const newEl = { id: Date.now(), type: 'image', src: url, x: 150, y: 150, width: 250, height: 180 };
+  const addImage = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const newEl = { id: Date.now(), type: 'image', src: ev.target.result, x: 150, y: 150, width: 280, height: 200 };
       setElements([...elements, newEl]);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const deleteElement = () => {
+    if (selectedElementId) {
+      setElements(elements.filter(el => el.id !== selectedElementId));
+      setSelectedElementId(null);
     }
   };
 
@@ -112,6 +111,7 @@ function App() {
             {id:'library', icon:'fa-layer-group', label:'Biblioteca'},
             {id:'editor', icon:'fa-pen-ruler', label:'Editor'},
             {id:'creative', icon:'fa-wand-magic-sparkles', label:'IA Creativa'},
+            {id:'present', icon:'fa-display', label:'Presentar'},
           ].map(item => (
             <button key={item.id} onClick={() => {setActive(item.id); setSidebarOpen(false);}}
               className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl mb-1 ${active === item.id ? 'bg-violet-600 text-white' : 'hover:bg-zinc-800 text-zinc-300'}`}>
@@ -122,8 +122,8 @@ function App() {
         </div>
       </div>
 
-      {/* Main */}
-      <div className="flex-1 flex flex-col">
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
         <div className="h-14 border-b border-zinc-800 bg-zinc-900 px-4 flex items-center justify-between">
           <button onClick={() => setSidebarOpen(!sidebarOpen)} className="lg:hidden text-2xl"><i className="fas fa-bars"></i></button>
         </div>
@@ -132,12 +132,12 @@ function App() {
           {active === 'library' && (
             <div className="p-6">
               <h2 className="text-3xl font-semibold mb-8">Plantillas ({TEMPLATES.length})</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                 {TEMPLATES.map(tpl => (
                   <div key={tpl.id} onClick={() => openTemplate(tpl)} className="cursor-pointer bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-800 hover:border-violet-500 transition">
-                    <img src={tpl.thumb} className="w-full h-44 object-cover" />
-                    <div className="p-3">
-                      <p className="font-medium text-sm line-clamp-2">{tpl.title}</p>
+                    <img src={tpl.thumb} className="w-full h-52 object-cover" />
+                    <div className="p-4">
+                      <p className="font-medium text-sm">{tpl.title}</p>
                     </div>
                   </div>
                 ))}
@@ -174,12 +174,32 @@ function App() {
                 <button onClick={addText} className="flex items-center gap-2 px-5 py-2 hover:bg-zinc-800 rounded-2xl">
                   <i className="fas fa-font"></i> Texto
                 </button>
-                <button onClick={addShape} className="flex items-center gap-2 px-5 py-2 hover:bg-zinc-800 rounded-2xl">
-                  <i className="fas fa-shapes"></i> Forma
+                <button onClick={() => addShape('rect')} className="flex items-center gap-2 px-5 py-2 hover:bg-zinc-800 rounded-2xl">
+                  <i className="fas fa-square"></i> Rect
                 </button>
-                <button onClick={addImage} className="flex items-center gap-2 px-5 py-2 hover:bg-zinc-800 rounded-2xl">
+                <button onClick={() => addShape('circle')} className="flex items-center gap-2 px-5 py-2 hover:bg-zinc-800 rounded-2xl">
+                  <i className="fas fa-circle"></i> Círculo
+                </button>
+                <button onClick={() => fileInputRef.current.click()} className="flex items-center gap-2 px-5 py-2 hover:bg-zinc-800 rounded-2xl">
                   <i className="fas fa-image"></i> Imagen
                 </button>
+                {selectedElementId && (
+                  <button onClick={deleteElement} className="flex items-center gap-2 px-5 py-2 hover:bg-red-900 text-red-400 rounded-2xl">
+                    <i className="fas fa-trash"></i> Eliminar
+                  </button>
+                )}
+                <input type="file" ref={fileInputRef} accept="image/*" onChange={addImage} className="hidden" />
+              </div>
+            </div>
+          )}
+
+          {active === 'present' && (
+            <div className="p-8 max-w-2xl mx-auto">
+              <h2 className="text-3xl font-semibold mb-8">Presentar</h2>
+              <div className="bg-zinc-900 rounded-3xl p-8">
+                <p className="mb-6">Describe qué presentación quieres crear:</p>
+                <textarea className="w-full h-32 bg-zinc-800 rounded-2xl p-4" placeholder="Ej: Presentación sobre inteligencia artificial para 10 slides..."></textarea>
+                <button className="mt-6 w-full bg-gradient-to-r from-violet-600 to-purple-600 py-4 rounded-2xl font-semibold">Generar Presentación con IA</button>
               </div>
             </div>
           )}
@@ -187,7 +207,7 @@ function App() {
           {active === 'home' && (
             <div className="p-8 text-center">
               <h1 className="text-4xl font-semibold mb-4">Bienvenido a Voltara v12</h1>
-              <p className="text-zinc-400">Elige una plantilla en Biblioteca</p>
+              <p className="text-zinc-400">Ve a Biblioteca para empezar</p>
             </div>
           )}
         </div>
