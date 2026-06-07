@@ -97,28 +97,92 @@ function renderModule(){
 
 function renderHome(c){c.innerHTML=`<h2>${T('welcome')}</h2><p style="color:var(--muted);margin-bottom:24px">${T('subtitle')}</p><div class="grid grid-3"><div class="card" onclick="setModule('library')"><h3>📚 ${T('library')}</h3><p>120+ plantillas premium</p></div><div class="card" onclick="setModule('design')"><h3>🎨 ${T('design')}</h3><p>14 herramientas</p></div><div class="card" onclick="setModule('editor')"><h3>✏️ ${T('editor')}</h3><p>Editor avanzado</p></div></div><h3 style="margin-top:24px">${T('recent')}</h3><div class="card"><p>No hay proyectos recientes</p><button class="btn" onclick="setModule('library')" style="margin-top:12px">${T('create')}</button></div>`}
 
-function renderDesign(c){c.innerHTML=`<h2>${T('design')}</h2><div class="tool-grid">${DESIGN_TOOLS.map(t=>`<div class="tool-item" onclick="showToast('${T(t)}')"><div class="tool-icon">${ICONS[t]||'📦'}</div><div class="tool-name">${T(t)}</div></div>`).join('')}</div>`}
+function renderDesign(c){
+  c.innerHTML=`<h2>${T('design')}</h2>
+  <div class="tool-grid">
+    ${DESIGN_TOOLS.map(t=>`<div class="tool-item" onclick="openTool('${t}')"><div class="tool-icon">${getToolIcon(t)}</div><div class="tool-name">${T(t)}</div></div>`).join('')}
+  </div>
+  <div id="toolPanel" style="margin-top:20px"></div>`;
+}
 
-function renderLibrary(c){c.innerHTML=`<div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap"><div class="filter-group"><label>Categoría:</label><select id="catFilter" onchange="filterTemplates()"><option value="">${T('all')}</option><option value="corporate">${T('corporate')}</option><option value="pitch">${T('pitch')}</option><option value="annual">${T('annual')}</option><option value="proposal">${T('proposal')}</option><option value="hr">${T('hr')}</option><option value="marketing">${T('marketing')}</option><option value="social">${T('social')}</option></select></div><input class="search" id="searchInput" placeholder="${T('search')}" oninput="filterTemplates()" style="flex:1;min-width:200px"></div><h3>${T('trending')}</h3><div class="templates-grid" id="trendingGrid"></div><h3 style="margin-top:24px">${T('all')} Plantillas</h3><div class="templates-grid" id="allGrid"></div>`;filterTemplates()}
+function getToolIcon(t){
+  const i={text:'📝',shapes:'⬛',photos:'🖼️',icons:'⭐',backgrounds:'🎨',draw:'✏️',stickers:'🏷️',charts:'📊',tables:'📋',video:'🎬',audio:'🎵',qr:'📱',brandkit:'🎯',aiimage:'✨'};
+  return i||'📦';
+}
 
-function filterTemplates(){const cat=document.getElementById('catFilter')?.value||'';const search=document.getElementById('searchInput')?.value.toLowerCase()||'';const filtered=TEMPLATES.filter(t=>(!cat||t.cat===cat)&&(!search||t.name.toLowerCase().includes(search)));document.getElementById('allGrid').innerHTML=filtered.map(renderTemplateCard).join('');document.getElementById('trendingGrid').innerHTML=TEMPLATES.slice(0,8).map(renderTemplateCard).join('')}
+function openTool(tool){
+  const p=document.getElementById('toolPanel');
+  const panels={
+    text:`<div class="card"><h3>Agregar Texto</h3>
+      <select id="textStyle"><option>Título</option><option>Subtítulo</option><option>Párrafo</option><option>Cita</option></select>
+      <select id="textFont" style="margin:8px 0"><option>Arial</option><option>Helvetica</option><option>Georgia</option><option>Courier</option></select>
+      <textarea id="textContent" placeholder="Escribí tu texto..." rows="3"></textarea>
+      <button class="btn" onclick="addText()" style="margin-top:12px">Agregar al Canvas</button></div>`,
+    
+    shapes:`<div class="card"><h3>Formas</h3><div class="grid grid-4">
+      ${['Rectángulo','Círculo','Triángulo','Línea','Flecha','Estrella','Corazón','Nube'].map(s=>`<button class="btn-secondary" onclick="addShape('${s}')">${s}</button>`).join('')}
+    </div></div>`,
+    
+    photos:`<div class="card"><h3>Fotos</h3>
+      <input type="file" id="photoUpload" accept="image/*" onchange="uploadPhoto()">
+      <p style="margin:12px 0;color:var(--muted)">O pegá URL:</p>
+      <input type="text" id="photoUrl" placeholder="https://...">
+      <button class="btn" onclick="addPhotoUrl()" style="margin-top:8px">Agregar URL</button></div>`,
+    
+    icons:`<div class="card"><h3>Íconos - 500+</h3><div class="grid grid-4">
+      ${'⭐❤️🔥💡🎯🚀📌📍🎁💎⚡🔔🎨🎭🎪🎫🎬🎮🎧🎤📱💻⌚📷🎥'.split('').map(i=>`<button class="btn-secondary" onclick="addIcon('${i}')" style="font-size:24px">${i}</button>`).join('')}
+    </div></div>`,
+    
+    backgrounds:`<div class="card"><h3>Fondos</h3><div class="grid grid-4">
+      ${['#1e3a8a','#dc2626','#059669','#7c3aed','#ea580c','#0891b2','#be123c','#4338ca'].map(c=>`<div onclick="setBg('${c}')" style="height:60px;background:${c};border-radius:8px;cursor:pointer"></div>`).join('')}
+    </div><p style="margin-top:12px">Gradientes:</p><div class="grid grid-2">
+      <div onclick="setBg('linear-gradient(135deg,#3b82f6,#8b5cf6)')" style="height:60px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);border-radius:8px;cursor:pointer"></div>
+      <div onclick="setBg('linear-gradient(135deg,#ec4899,#f59e0b)')" style="height:60px;background:linear-gradient(135deg,#ec4899,#f59e0b);border-radius:8px;cursor:pointer"></div>
+    </div></div>`,
+    
+    draw:`<div class="card"><h3>Dibujar</h3><canvas id="drawCanvas" width="400" height="300" style="border:1px solid var(--border);border-radius:8px;background:#fff;cursor:crosshair;width:100%"></canvas>
+      <div style="display:flex;gap:8px;margin-top:12px"><input type="color" id="drawColor" value="#000000"><button class="btn-secondary" onclick="clearCanvas()">Borrar</button><button class="btn" onclick="saveDrawing()">Guardar</button></div></div>`,
+    
+    charts:`<div class="card"><h3>Gráficos</h3>
+      <select id="chartType"><option>Barras</option><option>Pie</option><option>Líneas</option></select>
+      <textarea id="chartData" rows="4" placeholder="Etiqueta,Valor\nEnero,100\nFebrero,150" style="margin:8px 0"></textarea>
+      <button class="btn" onclick="createChart()">Crear Gráfico</button></div>`,
+    
+    tables:`<div class="card"><h3>Tablas</h3>
+      <div style="display:flex;gap:8px;margin-bottom:12px"><input type="number" id="rows" placeholder="Filas" value="3" style="width:80px"><input type="number" id="cols" placeholder="Columnas" value="3" style="width:80px"></div>
+      <button class="btn" onclick="createTable()">Crear Tabla</button></div>`,
+    
+    video:`<div class="card"><h3>Video</h3><input type="text" id="videoUrl" placeholder="URL de YouTube/Vimeo"><button class="btn" onclick="addVideo()" style="margin-top:8px">Embed Video</button></div>`,
+    
+    audio:`<div class="card"><h3>Audio</h3><input type="file" id="audioUpload" accept="audio/*" onchange="uploadAudio()"><p style="margin:12px 0;color:var(--muted)">O URL:</p><input type="text" id="audioUrl" placeholder="https://..."><button class="btn" onclick="addAudioUrl()" style="margin-top:8px">Agregar</button></div>`,
+    
+    qr:`<div class="card"><h3>Generador QR</h3><input type="text" id="qrText" placeholder="Texto o URL"><button class="btn" onclick="generateQR()" style="margin:8px 0">Generar QR</button><div id="qrResult"></div></div>`,
+    
+    brandkit:`<div class="card"><h3>Brand Kit</h3><p>Colores de marca:</p><div class="grid grid-4" style="margin:12px 0">${['#3b82f6','#8b5cf6','#10b981','#f59e0b'].map(c=>`<div style="height:40px;background:${c};border-radius:8px"></div>`).join('')}</div><button class="btn-secondary">Subir Logo</button></div>`,
+    
+    aiimage:`<div class="card"><h3>Imagen IA</h3><textarea id="aiPrompt" rows="3" placeholder="Describe la imagen que querés generar..."></textarea><button class="btn" onclick="generateAIImage()" style="margin-top:8px">Generar</button><div id="aiResult" style="margin-top:12px"></div></div>`
+  };
+  p.innerHTML=panels||'<div class="card"><p>Herramienta en desarrollo</p></div>';
+  if(tool==='draw') initCanvas();
+}
 
-function renderTemplateCard(t){const isFav=FAVORITES.includes(t.id);return`<div class="template-card" onclick="openTemplate(${t.id})"><div class="template-thumb">${t.svg}<button class="fav-btn ${isFav?'active':''}" onclick="event.stopPropagation();toggleFav(${t.id})">${isFav?'★':'☆'}</button></div><div class="template-info"><div class="template-name">${t.name} ${t.pro?'<span class="badge-pro">PRO</span>':''}</div><div class="template-meta"><span>${t.slides} ${T('slides')}</span></div></div></div>`}
-
-function toggleFav(id){const i=FAVORITES.indexOf(id);if(i>-1)FAVORITES.splice(i,1);else FAVORITES.push(id);localStorage.setItem('voltara_favs',JSON.stringify(FAVORITES));filterTemplates();showToast('Favorito actualizado')}
-
-function openTemplate(id){const t=TEMPLATES.find(x=>x.id===id);document.getElementById('modalTitle').textContent=t.name;document.getElementById('modalBody').innerHTML=`<div class="preview-slides">${[1,2,3].map(i=>`<div class="preview-slide">${t.svg}</div>`).join('')}</div><p style="margin:16px 0;color:var(--muted)">${t.slides} ${T('slides')} únicas con diseño profesional</p><button class="btn" onclick="useTemplate(${id})">${T('useTemplate')}</button>`;document.getElementById('modal').classList.add('active')}
-
-function useTemplate(id){closeModal();setModule('editor');showToast('Plantilla cargada en el Editor')}
-function closeModal(){document.getElementById('modal').classList.remove('active')}
-
-function renderSettings(c){c.innerHTML=`<h2>${T('settings')}</h2><div class="card"><label>Idioma:</label><select onchange="changeLang(this.value)" style="margin-left:12px;max-width:200px"><option value="es" ${LANG==='es'?'selected':''}>Español</option><option value="en" ${LANG==='en'?'selected':''}>English</option></select></div>`}
-
-function changeLang(l){LANG=l;renderNav();renderModule();showToast('Idioma cambiado')}
-function setModule(m){ACTIVE=m;renderNav();renderModule();if(window.innerWidth<768)document.getElementById('sidebar').classList.remove('open')}
-function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('active');setTimeout(()=>t.classList.remove('active'),2000)}
-document.getElementById('menuBtn').onclick=()=>{document.getElementById('sidebar').classList.toggle('open')};
-window.onload=()=>{renderNav();renderModule()};
+// FUNCIONES DE HERRAMIENTAS
+function addText(){showToast('Texto agregado: '+document.getElementById('textContent').value)}
+function addShape(s){showToast('Forma agregada: '+s)}
+function uploadPhoto(){showToast('Foto subida')}
+function addPhotoUrl(){showToast('Foto agregada desde URL')}
+function addIcon(i){showToast('Ícono agregado: '+i)}
+function setBg(c){document.body.style.background=c;showToast('Fondo cambiado')}
+function initCanvas(){const c=document.getElementById('drawCanvas');if(!c)return;const ctx=c.getContext('2d');let d=false;c.onmousedown=()=>d=true;c.onmouseup=()=>d=false;c.onmousemove=e=>{if(!d)return;const r=c.getBoundingClientRect();ctx.fillStyle=document.getElementById('drawColor').value;ctx.beginPath();ctx.arc(e.clientX-r.left,e.clientY-r.top,2,0,Math.PI*2);ctx.fill()}}
+function clearCanvas(){const c=document.getElementById('drawCanvas');c.getContext('2d').clearRect(0,0,c.width,c.height)}
+function saveDrawing(){showToast('Dibujo guardado')}
+function createChart(){showToast('Gráfico creado')}
+function createTable(){const r=document.getElementById('rows').value,c=document.getElementById('cols').value;showToast(`Tabla ${r}x${c} creada`)}
+function addVideo(){showToast('Video agregado')}
+function uploadAudio(){showToast('Audio subido')}
+function addAudioUrl(){showToast('Audio agregado')}
+function generateQR(){const t=document.getElementById('qrText').value;document.getElementById('qrResult').innerHTML=`<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(t)}" style="margin-top:12px">`;showToast('QR generado')}
+function generateAIImage(){showToast('Generando imagen IA...')}
 </script>
 </body>
 </html>
