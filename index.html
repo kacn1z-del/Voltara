@@ -14,57 +14,66 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
 * { font-family: 'Inter', sans-serif; }
 .font-display { font-family: 'Space Grotesk', sans-serif; }
+.canvas-container { background-size: cover; background-position: center; }
 </style>
 </head>
 <body class="bg-zinc-950 text-white">
 <div id="root"></div>
 
 <script type="text/babel">
-const { useState } = React;
+const { useState, useRef, useEffect } = React;
 
-// ==================== PLANTILLAS (45+ tipo Canva) ====================
 const TEMPLATES = [
-  { id: 1, category: "presentations", title: "Pitch Deck Moderno", thumb: "https://picsum.photos/id/1015/600/380" },
-  { id: 2, category: "presentations", title: "Reporte Anual Profesional", thumb: "https://picsum.photos/id/201/600/380" },
-  { id: 3, category: "presentations", title: "Propuesta de Negocios", thumb: "https://picsum.photos/id/237/600/380" },
-  { id: 4, category: "social", title: "Post Instagram Carrusel", thumb: "https://picsum.photos/id/669/600/380" },
-  { id: 5, category: "social", title: "Historia Facebook", thumb: "https://picsum.photos/id/870/600/380" },
-  { id: 6, category: "social", title: "Banner LinkedIn", thumb: "https://picsum.photos/id/133/600/380" },
-  { id: 7, category: "marketing", title: "Flyer Promocional", thumb: "https://picsum.photos/id/201/600/380" },
-  { id: 8, category: "marketing", title: "Landing Page", thumb: "https://picsum.photos/id/251/600/380" },
-  { id: 9, category: "infographic", title: "Infografía Datos", thumb: "https://picsum.photos/id/312/600/380" },
-  { id: 10, category: "infographic", title: "Timeline Proceso", thumb: "https://picsum.photos/id/366/600/380" },
-  // ... (puedes agregar más aquí fácilmente)
+  { id: 1, category: "infographic", title: "Infografía Datos", thumb: "https://picsum.photos/id/1015/800/600", bg: "https://picsum.photos/id/1015/1200/800" },
+  { id: 2, category: "nature", title: "Bosque Místico", thumb: "https://picsum.photos/id/1016/800/600", bg: "https://picsum.photos/id/1016/1200/800" },
+  { id: 3, category: "presentations", title: "Pitch Deck Moderno", thumb: "https://picsum.photos/id/201/800/600", bg: "https://picsum.photos/id/201/1200/800" },
+  { id: 4, category: "social", title: "Post Instagram", thumb: "https://picsum.photos/id/237/800/600", bg: "https://picsum.photos/id/237/1200/800" },
+  { id: 5, category: "marketing", title: "Flyer Promocional", thumb: "https://picsum.photos/id/870/800/600", bg: "https://picsum.photos/id/870/1200/800" },
 ];
 
 function App() {
   const [active, setActive] = useState('home');
   const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [elements, setElements] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const categories = [
-    { id: 'all', label: 'Todas' },
-    { id: 'presentations', label: 'Presentaciones' },
-    { id: 'social', label: 'Redes Sociales' },
-    { id: 'marketing', label: 'Marketing' },
-    { id: 'infographic', label: 'Infografías' },
-  ];
-
-  const [filter, setFilter] = useState('all');
-
-  const filteredTemplates = filter === 'all' 
-    ? TEMPLATES 
-    : TEMPLATES.filter(t => t.category === filter);
+  const [selectedElementId, setSelectedElementId] = useState(null);
 
   const openTemplate = (tpl) => {
     setSelectedTemplate(tpl);
     setActive('editor');
+    setElements([{
+      id: Date.now(),
+      type: 'text',
+      content: tpl.title,
+      x: 100,
+      y: 150,
+      size: 42,
+      color: '#ffffff'
+    }]);
+  };
+
+  const addText = () => {
+    const newEl = {
+      id: Date.now(),
+      type: 'text',
+      content: 'Nuevo texto',
+      x: 150,
+      y: 200,
+      size: 28,
+      color: '#ffffff'
+    };
+    setElements([...elements, newEl]);
+    setSelectedElementId(newEl.id);
+  };
+
+  const updateElement = (id, updates) => {
+    setElements(elements.map(el => el.id === id ? {...el, ...updates} : el));
   };
 
   return (
     <div className="flex h-screen bg-zinc-950 overflow-hidden">
       {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:relative z-50 w-72 h-full border-r border-zinc-800 bg-zinc-900 transition-transform flex flex-col`}>
+      <div className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:static z-50 w-72 h-full bg-zinc-900 border-r border-zinc-800 transition-transform flex flex-col`}>
         <div className="p-5 flex items-center gap-3 border-b border-zinc-800">
           <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-fuchsia-500 rounded-2xl flex items-center justify-center">
             <i className="fas fa-bolt text-white text-2xl"></i>
@@ -78,12 +87,9 @@ function App() {
             {id:'library', icon:'fa-layer-group', label:'Biblioteca'},
             {id:'editor', icon:'fa-pen-ruler', label:'Editor'},
             {id:'creative', icon:'fa-wand-magic-sparkles', label:'IA Creativa'},
-            {id:'smart', icon:'fa-robot', label:'Smart Designer'},
-            {id:'flipbook', icon:'fa-book', label:'Flipbook'},
-            {id:'translator', icon:'fa-language', label:'Traductor'},
           ].map(item => (
             <button key={item.id} onClick={() => {setActive(item.id); setSidebarOpen(false);}}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl mb-1 ${active === item.id ? 'bg-violet-600 text-white' : 'hover:bg-zinc-800 text-zinc-300'}`}>
+              className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl mb-1 ${active === item.id ? 'bg-violet-600 text-white' : 'hover:bg-zinc-800 text-zinc-300'}`}>
               <i className={`fas ${item.icon}`}></i>
               <span>{item.label}</span>
             </button>
@@ -91,42 +97,100 @@ function App() {
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Main Area */}
       <div className="flex-1 flex flex-col">
         {/* Top Bar */}
         <div className="h-14 border-b border-zinc-800 bg-zinc-900 px-4 flex items-center justify-between">
-          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="lg:hidden text-2xl p-2"><i className="fas fa-bars"></i></button>
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="lg:hidden text-2xl"><i className="fas fa-bars"></i></button>
           <div className="font-display text-2xl font-semibold lg:hidden">Voltara</div>
-          <div className="flex items-center gap-4">
-            <select className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2 text-sm hidden md:block">
-              <option>Español (Latinoamérica)</option>
-            </select>
-            <button className="bg-white text-black px-5 py-2 rounded-2xl font-semibold flex items-center gap-2">
-              <i className="fas fa-plus"></i> Nuevo
-            </button>
-          </div>
         </div>
 
-        {/* Buscador */}
-        <div className="p-4 border-b border-zinc-800 bg-zinc-900">
-          <div className="max-w-5xl mx-auto flex gap-3">
-            <div className="flex-1 relative">
-              <i className="fas fa-search absolute left-5 top-4 text-zinc-500"></i>
-              <input type="text" placeholder="Buscar plantillas..." className="w-full bg-zinc-800 border border-zinc-700 rounded-3xl py-4 pl-12 text-base" />
+        {/* Content */}
+        <div className="flex-1 overflow-auto">
+          {active === 'library' && (
+            <div className="p-6">
+              <h2 className="text-3xl font-semibold mb-8">Plantillas</h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {TEMPLATES.map(tpl => (
+                  <div key={tpl.id} onClick={() => openTemplate(tpl)}
+                    className="cursor-pointer bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-800 hover:border-violet-500 transition group">
+                    <img src={tpl.thumb} className="w-full h-52 object-cover" />
+                    <div className="p-4">
+                      <p className="font-semibold">{tpl.title}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-            <button className="px-8 bg-gradient-to-r from-violet-600 to-purple-600 rounded-3xl font-semibold flex items-center gap-2">
-              Generar con IA
-            </button>
-          </div>
-        </div>
+          )}
 
-        {/* Contenido */}
-        <div className="flex-1 overflow-auto p-6">
+          {active === 'editor' && selectedTemplate && (
+            <div className="h-full relative">
+              {/* Canvas con fondo de plantilla */}
+              <div 
+                className="canvas-container w-full h-full relative overflow-hidden"
+                style={{ backgroundImage: `url(${selectedTemplate.bg})` }}
+              >
+                {elements.map(el => (
+                  <div
+                    key={el.id}
+                    className={`absolute cursor-move p-3 rounded-lg border-2 ${selectedElementId === el.id ? 'border-violet-500' : 'border-transparent hover:border-white/50'}`}
+                    style={{
+                      left: el.x + 'px',
+                      top: el.y + 'px',
+                      color: el.color,
+                      fontSize: el.size + 'px',
+                      fontWeight: 'bold',
+                      textShadow: '0 2px 4px rgba(0,0,0,0.7)'
+                    }}
+                    onClick={() => setSelectedElementId(el.id)}
+                  >
+                    {el.content}
+                  </div>
+                ))}
+              </div>
+
+              {/* Toolbar */}
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-zinc-900/90 backdrop-blur-md border border-zinc-700 rounded-2xl px-6 py-3 flex gap-4 z-10">
+                <button onClick={addText} className="flex items-center gap-2 px-5 py-2 hover:bg-zinc-800 rounded-xl">
+                  <i className="fas fa-font"></i> Texto
+                </button>
+                <button className="flex items-center gap-2 px-5 py-2 hover:bg-zinc-800 rounded-xl">
+                  <i className="fas fa-image"></i> Imagen
+                </button>
+                <button className="flex items-center gap-2 px-5 py-2 hover:bg-zinc-800 rounded-xl">
+                  <i className="fas fa-shapes"></i> Forma
+                </button>
+              </div>
+
+              {selectedElementId && (
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-zinc-900 border border-zinc-700 rounded-2xl p-4 flex gap-4">
+                  <input 
+                    type="color" 
+                    value={elements.find(e => e.id === selectedElementId)?.color || '#ffffff'}
+                    onChange={(e) => {
+                      updateElement(selectedElementId, {color: e.target.value});
+                    }}
+                    className="w-12 h-10 bg-transparent border-0 cursor-pointer"
+                  />
+                  <input 
+                    type="range" 
+                    min="12" 
+                    max="80" 
+                    value={elements.find(e => e.id === selectedElementId)?.size || 24}
+                    onChange={(e) => updateElement(selectedElementId, {size: parseInt(e.target.value)})}
+                    className="w-40"
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
           {active === 'home' && (
-            <div>
+            <div className="p-8">
               <h1 className="text-4xl font-semibold mb-8">Bienvenido a Voltara v12</h1>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {TEMPLATES.slice(0,6).map(t => (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {TEMPLATES.map(t => (
                   <div key={t.id} onClick={() => openTemplate(t)} className="cursor-pointer bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-800 hover:border-violet-500">
                     <img src={t.thumb} className="w-full h-48 object-cover" />
                     <div className="p-4">
@@ -134,50 +198,6 @@ function App() {
                     </div>
                   </div>
                 ))}
-              </div>
-            </div>
-          )}
-
-          {active === 'library' && (
-            <div>
-              <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
-                {categories.map(cat => (
-                  <button key={cat.id} onClick={() => setFilter(cat.id)}
-                    className={`px-6 py-2 rounded-2xl whitespace-nowrap ${filter === cat.id ? 'bg-violet-600' : 'bg-zinc-800'}`}>
-                    {cat.label}
-                  </button>
-                ))}
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredTemplates.map(t => (
-                  <div key={t.id} onClick={() => openTemplate(t)} className="cursor-pointer bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-800 hover:border-violet-500 transition">
-                    <img src={t.thumb} className="w-full h-48 object-cover" />
-                    <div className="p-4">
-                      <p className="font-semibold">{t.title}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {active === 'editor' && (
-            <div className="h-full flex flex-col items-center justify-center bg-zinc-900 rounded-3xl">
-              <h2 className="text-3xl mb-4">Editor de Diseño</h2>
-              {selectedTemplate ? (
-                <p>Plantilla cargada: <strong>{selectedTemplate.title}</strong></p>
-              ) : (
-                <p>Selecciona una plantilla desde Biblioteca</p>
-              )}
-            </div>
-          )}
-
-          {active !== 'home' && active !== 'library' && active !== 'editor' && (
-            <div className="flex items-center justify-center h-full">
-              <div className="text-center">
-                <h2 className="text-4xl mb-4">🚧 {active.toUpperCase()}</h2>
-                <p className="text-zinc-400">Módulo en desarrollo</p>
               </div>
             </div>
           )}
