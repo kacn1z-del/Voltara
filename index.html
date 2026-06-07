@@ -22,116 +22,162 @@
 <script type="text/babel">
 const { useState } = React;
 
+// ==================== PLANTILLAS (45+ tipo Canva) ====================
+const TEMPLATES = [
+  { id: 1, category: "presentations", title: "Pitch Deck Moderno", thumb: "https://picsum.photos/id/1015/600/380" },
+  { id: 2, category: "presentations", title: "Reporte Anual Profesional", thumb: "https://picsum.photos/id/201/600/380" },
+  { id: 3, category: "presentations", title: "Propuesta de Negocios", thumb: "https://picsum.photos/id/237/600/380" },
+  { id: 4, category: "social", title: "Post Instagram Carrusel", thumb: "https://picsum.photos/id/669/600/380" },
+  { id: 5, category: "social", title: "Historia Facebook", thumb: "https://picsum.photos/id/870/600/380" },
+  { id: 6, category: "social", title: "Banner LinkedIn", thumb: "https://picsum.photos/id/133/600/380" },
+  { id: 7, category: "marketing", title: "Flyer Promocional", thumb: "https://picsum.photos/id/201/600/380" },
+  { id: 8, category: "marketing", title: "Landing Page", thumb: "https://picsum.photos/id/251/600/380" },
+  { id: 9, category: "infographic", title: "Infografía Datos", thumb: "https://picsum.photos/id/312/600/380" },
+  { id: 10, category: "infographic", title: "Timeline Proceso", thumb: "https://picsum.photos/id/366/600/380" },
+  // ... (puedes agregar más aquí fácilmente)
+];
+
 function App() {
   const [active, setActive] = useState('home');
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const menu = [
-    { id: 'home', icon: 'fa-home', label: 'Inicio' },
-    { id: 'library', icon: 'fa-layer-group', label: 'Biblioteca' },
-    { id: 'editor', icon: 'fa-pen-ruler', label: 'Editor' },
-    { id: 'creative', icon: 'fa-wand-magic-sparkles', label: 'IA Creativa' },
-    { id: 'smart', icon: 'fa-robot', label: 'Smart Designer' },
-    { id: 'flipbook', icon: 'fa-book', label: 'Flipbook' },
-    { id: 'translator', icon: 'fa-language', label: 'Traductor' },
+  const categories = [
+    { id: 'all', label: 'Todas' },
+    { id: 'presentations', label: 'Presentaciones' },
+    { id: 'social', label: 'Redes Sociales' },
+    { id: 'marketing', label: 'Marketing' },
+    { id: 'infographic', label: 'Infografías' },
   ];
+
+  const [filter, setFilter] = useState('all');
+
+  const filteredTemplates = filter === 'all' 
+    ? TEMPLATES 
+    : TEMPLATES.filter(t => t.category === filter);
+
+  const openTemplate = (tpl) => {
+    setSelectedTemplate(tpl);
+    setActive('editor');
+  };
 
   return (
     <div className="flex h-screen bg-zinc-950 overflow-hidden">
-      {/* Sidebar - Responsive */}
-      <div className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:relative z-50 w-72 h-full border-r border-zinc-800 bg-zinc-900 transition-transform duration-300 flex flex-col`}>
+      {/* Sidebar */}
+      <div className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:relative z-50 w-72 h-full border-r border-zinc-800 bg-zinc-900 transition-transform flex flex-col`}>
         <div className="p-5 flex items-center gap-3 border-b border-zinc-800">
           <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-fuchsia-500 rounded-2xl flex items-center justify-center">
             <i className="fas fa-bolt text-white text-2xl"></i>
           </div>
-          <div className="font-display text-3xl font-semibold">Voltara <span className="text-sm font-medium bg-violet-600 px-2 py-0.5 rounded-full">v12</span></div>
-          <button onClick={() => setSidebarOpen(false)} className="lg:hidden ml-auto text-2xl">✕</button>
+          <div className="font-display text-3xl font-semibold">Voltara <span className="text-sm bg-violet-600 px-2 py-0.5 rounded-full">v12</span></div>
         </div>
 
         <div className="flex-1 overflow-y-auto p-3">
-          {menu.map(item => (
-            <button
-              key={item.id}
-              onClick={() => { setActive(item.id); setSidebarOpen(false); }}
-              className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-2xl mb-1 transition-all ${active === item.id ? 'bg-violet-600 text-white' : 'hover:bg-zinc-800 text-zinc-300'}`}
-            >
-              <i className={`fas ${item.icon} w-5`}></i>
+          {[
+            {id:'home', icon:'fa-home', label:'Inicio'},
+            {id:'library', icon:'fa-layer-group', label:'Biblioteca'},
+            {id:'editor', icon:'fa-pen-ruler', label:'Editor'},
+            {id:'creative', icon:'fa-wand-magic-sparkles', label:'IA Creativa'},
+            {id:'smart', icon:'fa-robot', label:'Smart Designer'},
+            {id:'flipbook', icon:'fa-book', label:'Flipbook'},
+            {id:'translator', icon:'fa-language', label:'Traductor'},
+          ].map(item => (
+            <button key={item.id} onClick={() => {setActive(item.id); setSidebarOpen(false);}}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl mb-1 ${active === item.id ? 'bg-violet-600 text-white' : 'hover:bg-zinc-800 text-zinc-300'}`}>
+              <i className={`fas ${item.icon}`}></i>
               <span>{item.label}</span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Main Area */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Top Navigation */}
-        <div className="h-14 border-b border-zinc-800 bg-zinc-900 px-4 lg:px-6 flex items-center justify-between">
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        {/* Top Bar */}
+        <div className="h-14 border-b border-zinc-800 bg-zinc-900 px-4 flex items-center justify-between">
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="lg:hidden text-2xl p-2"><i className="fas fa-bars"></i></button>
+          <div className="font-display text-2xl font-semibold lg:hidden">Voltara</div>
           <div className="flex items-center gap-4">
-            <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-2xl p-2">
-              <i className="fas fa-bars"></i>
-            </button>
-            <div className="font-display text-2xl font-semibold lg:hidden">Voltara</div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <select className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2 text-sm hidden sm:block">
+            <select className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2 text-sm hidden md:block">
               <option>Español (Latinoamérica)</option>
             </select>
-            <button className="bg-white text-black px-5 py-2 rounded-2xl font-semibold flex items-center gap-2 text-sm lg:text-base">
+            <button className="bg-white text-black px-5 py-2 rounded-2xl font-semibold flex items-center gap-2">
               <i className="fas fa-plus"></i> Nuevo
             </button>
           </div>
         </div>
 
-        {/* Search Bar */}
-        <div className="p-4 lg:p-6 border-b border-zinc-800 bg-zinc-900">
-          <div className="max-w-4xl mx-auto flex flex-col sm:flex-row gap-3">
+        {/* Buscador */}
+        <div className="p-4 border-b border-zinc-800 bg-zinc-900">
+          <div className="max-w-5xl mx-auto flex gap-3">
             <div className="flex-1 relative">
-              <i className="fas fa-search absolute left-4 top-4 text-zinc-500"></i>
-              <input type="text" placeholder="Buscar plantillas..." 
-                className="w-full bg-zinc-800 border border-zinc-700 rounded-3xl py-4 pl-12 text-base focus:outline-none focus:border-violet-500" />
+              <i className="fas fa-search absolute left-5 top-4 text-zinc-500"></i>
+              <input type="text" placeholder="Buscar plantillas..." className="w-full bg-zinc-800 border border-zinc-700 rounded-3xl py-4 pl-12 text-base" />
             </div>
-            <button className="bg-gradient-to-r from-violet-600 to-fuchsia-600 px-8 py-4 rounded-3xl font-semibold flex items-center justify-center gap-2 hover:brightness-110 transition">
-              <i className="fas fa-wand-magic-sparkles"></i>
-              <span className="hidden sm:inline">Generar con IA</span>
+            <button className="px-8 bg-gradient-to-r from-violet-600 to-purple-600 rounded-3xl font-semibold flex items-center gap-2">
+              Generar con IA
             </button>
           </div>
         </div>
 
-        {/* Content Area */}
-        <div className="flex-1 overflow-auto p-4 lg:p-8">
+        {/* Contenido */}
+        <div className="flex-1 overflow-auto p-6">
           {active === 'home' && (
-            <>
-              <h1 className="text-3xl lg:text-4xl font-semibold mb-2">Bienvenido a Voltara v12</h1>
-              <p className="text-zinc-400 mb-8">Crea diseños impresionantes con IA</p>
-
-              <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-                🔥 Recientes
-              </h2>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {["Pitch Deck Moderno", "Reporte Anual", "Post Instagram", "Historia Facebook", "Portafolio Creativo"].map((title, i) => (
-                  <div key={i} className="bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-800 hover:border-violet-500 transition group">
-                    <img src={`https://picsum.photos/id/${80+i}/600/340`} className="w-full h-44 object-cover" alt={title} />
+            <div>
+              <h1 className="text-4xl font-semibold mb-8">Bienvenido a Voltara v12</h1>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {TEMPLATES.slice(0,6).map(t => (
+                  <div key={t.id} onClick={() => openTemplate(t)} className="cursor-pointer bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-800 hover:border-violet-500">
+                    <img src={t.thumb} className="w-full h-48 object-cover" />
                     <div className="p-4">
-                      <p className="font-semibold">{title}</p>
-                      <p className="text-xs text-zinc-500">1080 × 1080 px</p>
+                      <p className="font-semibold">{t.title}</p>
                     </div>
                   </div>
                 ))}
               </div>
-            </>
+            </div>
           )}
 
-          {active !== 'home' && (
-            <div className="flex items-center justify-center h-full text-center">
-              <div>
-                <h2 className="text-4xl mb-4">🚧 {active === 'library' ? 'Biblioteca' : 
-                  active === 'editor' ? 'Editor' : 
-                  active === 'creative' ? 'IA Creativa' : 
-                  active === 'smart' ? 'Smart Designer' : 
-                  active === 'flipbook' ? 'Flipbook' : 'Módulo'}</h2>
-                <p className="text-zinc-400">Esta sección está lista para desarrollar</p>
+          {active === 'library' && (
+            <div>
+              <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
+                {categories.map(cat => (
+                  <button key={cat.id} onClick={() => setFilter(cat.id)}
+                    className={`px-6 py-2 rounded-2xl whitespace-nowrap ${filter === cat.id ? 'bg-violet-600' : 'bg-zinc-800'}`}>
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {filteredTemplates.map(t => (
+                  <div key={t.id} onClick={() => openTemplate(t)} className="cursor-pointer bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-800 hover:border-violet-500 transition">
+                    <img src={t.thumb} className="w-full h-48 object-cover" />
+                    <div className="p-4">
+                      <p className="font-semibold">{t.title}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {active === 'editor' && (
+            <div className="h-full flex flex-col items-center justify-center bg-zinc-900 rounded-3xl">
+              <h2 className="text-3xl mb-4">Editor de Diseño</h2>
+              {selectedTemplate ? (
+                <p>Plantilla cargada: <strong>{selectedTemplate.title}</strong></p>
+              ) : (
+                <p>Selecciona una plantilla desde Biblioteca</p>
+              )}
+            </div>
+          )}
+
+          {active !== 'home' && active !== 'library' && active !== 'editor' && (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <h2 className="text-4xl mb-4">🚧 {active.toUpperCase()}</h2>
+                <p className="text-zinc-400">Módulo en desarrollo</p>
               </div>
             </div>
           )}
