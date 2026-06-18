@@ -2,101 +2,558 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Voltara v12</title>
-<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Voltara v25</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
-* { font-family: 'Inter', sans-serif; }
-.font-display { font-family: 'Space Grotesk', sans-serif; }
-.canvas-container { background-size: cover; background-position: center; box-shadow: inset 0 0 80px rgba(0,0,0,0.6); position: relative; overflow: hidden; }
+*,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/*! tailwindcss v3.4.19 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.visible{visibility:visible}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.-left-1{left:-.25rem}.-top-1{top:-.25rem}.bottom-6{bottom:1.5rem}.left-1\/2{left:50%}.left-5{left:1.25rem}.right-0{right:0}.top-1\/2{top:50%}.top-full{top:100%}.z-40{z-index:40}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.mb-1{margin-bottom:.25rem}.mb-10{margin-bottom:2.5rem}.mb-3{margin-bottom:.75rem}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.mb-8{margin-bottom:2rem}.mt-12{margin-top:3rem}.mt-2{margin-top:.5rem}.mt-5{margin-top:1.25rem}.flex{display:flex}.hidden{display:none}.h-14{height:3.5rem}.h-32{height:8rem}.h-36{height:9rem}.h-44{height:11rem}.h-48{height:12rem}.h-6{height:1.5rem}.h-60{height:15rem}.h-7{height:1.75rem}.h-72{height:18rem}.h-8{height:2rem}.h-9{height:2.25rem}.h-full{height:100%}.h-screen{height:100vh}.max-h-72{max-height:18rem}.w-4{width:1rem}.w-44{width:11rem}.w-7{width:1.75rem}.w-8{width:2rem}.w-9{width:2.25rem}.w-\[90\%\]{width:90%}.w-full{width:100%}.w-px{width:1px}.max-w-2xl{max-width:42rem}.max-w-3xl{max-width:48rem}.max-w-5xl{max-width:64rem}.max-w-sm{max-width:24rem}.max-w-xl{max-width:36rem}.flex-1{flex:1 1 0%}.shrink-0{flex-shrink:0}.-translate-x-1\/2{--tw-translate-x:-50%}.-translate-x-1\/2,.-translate-y-1\/2{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.-translate-y-1\/2{--tw-translate-y:-50%}.transform{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.cursor-pointer{cursor:pointer}.columns-2{-moz-columns:2;column-count:2}.break-inside-avoid{-moz-column-break-inside:avoid;break-inside:avoid}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-center{align-items:center}.items-stretch{align-items:stretch}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-0\.5{gap:.125rem}.gap-1{gap:.25rem}.gap-2{gap:.5rem}.gap-3{gap:.75rem}.gap-4{gap:1rem}.overflow-auto{overflow:auto}.overflow-hidden{overflow:hidden}.overflow-x-auto{overflow-x:auto}.overflow-y-auto{overflow-y:auto}.truncate{overflow:hidden;text-overflow:ellipsis}.truncate,.whitespace-nowrap{white-space:nowrap}.whitespace-pre-line{white-space:pre-line}.whitespace-pre-wrap{white-space:pre-wrap}.break-words{overflow-wrap:break-word}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:.5rem}.rounded-md{border-radius:.375rem}.border{border-width:1px}.border-0{border-width:0}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-t{border-top-width:1px}.border-dashed{border-style:dashed}.border-\[\#ea580c\]{--tw-border-opacity:1;border-color:rgb(234 88 12/var(--tw-border-opacity,1))}.border-white\/40{border-color:hsla(0,0%,100%,.4)}.border-white\/60{border-color:hsla(0,0%,100%,.6)}.bg-\[\#0e1318\]{--tw-bg-opacity:1;background-color:rgb(14 19 24/var(--tw-bg-opacity,1))}.bg-\[\#ea580c\]{--tw-bg-opacity:1;background-color:rgb(234 88 12/var(--tw-bg-opacity,1))}.bg-\[\#ea580c\]\/15{background-color:rgba(234,88,12,.15)}.bg-white\/25{background-color:hsla(0,0%,100%,.25)}.bg-white\/40{background-color:hsla(0,0%,100%,.4)}.bg-white\/50{background-color:hsla(0,0%,100%,.5)}.bg-white\/60{background-color:hsla(0,0%,100%,.6)}.bg-gradient-to-br{background-image:linear-gradient(to bottom right,var(--tw-gradient-stops))}.bg-gradient-to-r{background-image:linear-gradient(to right,var(--tw-gradient-stops))}.from-\[\#ea580c\]{--tw-gradient-from:#ea580c var(--tw-gradient-from-position);--tw-gradient-to:rgba(234,88,12,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.to-\[\#16a34a\]{--tw-gradient-to:#16a34a var(--tw-gradient-to-position)}.object-contain{-o-object-fit:contain;object-fit:contain}.object-cover{-o-object-fit:cover;object-fit:cover}.p-0{padding:0}.p-2\.5{padding:.625rem}.p-3{padding:.75rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-8{padding:2rem}.px-1{padding-left:.25rem;padding-right:.25rem}.px-2{padding-left:.5rem;padding-right:.5rem}.px-3{padding-left:.75rem;padding-right:.75rem}.px-4{padding-left:1rem;padding-right:1rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.py-1\.5{padding-top:.375rem;padding-bottom:.375rem}.py-10{padding-top:2.5rem;padding-bottom:2.5rem}.py-2{padding-top:.5rem;padding-bottom:.5rem}.py-2\.5{padding-top:.625rem;padding-bottom:.625rem}.py-20{padding-top:5rem;padding-bottom:5rem}.py-3{padding-top:.75rem;padding-bottom:.75rem}.py-4{padding-top:1rem;padding-bottom:1rem}.pb-1{padding-bottom:.25rem}.pl-12{padding-left:3rem}.pr-4{padding-right:1rem}.text-left{text-align:left}.text-center{text-align:center}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-4xl{font-size:2.25rem;line-height:2.5rem}.text-\[11px\]{font-size:11px}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:.875rem;line-height:1.25rem}.text-xs{font-size:.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-semibold{font-weight:600}.italic{font-style:italic}.tracking-tight{letter-spacing:-.025em}.text-\[\#0e1318\]{--tw-text-opacity:1;color:rgb(14 19 24/var(--tw-text-opacity,1))}.text-\[\#3d4b56\]{--tw-text-opacity:1;color:rgb(61 75 86/var(--tw-text-opacity,1))}.text-\[\#6b7b8a\]{--tw-text-opacity:1;color:rgb(107 123 138/var(--tw-text-opacity,1))}.text-\[\#d1d5db\]{--tw-text-opacity:1;color:rgb(209 213 219/var(--tw-text-opacity,1))}.text-\[\#ea580c\]{--tw-text-opacity:1;color:rgb(234 88 12/var(--tw-text-opacity,1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.opacity-60{opacity:.6}.shadow-\[0_1px_3px_rgba\(0\2c 0\2c 0\2c 0\.08\)\]{--tw-shadow:0 1px 3px rgba(0,0,0,.08);--tw-shadow-colored:0 1px 3px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-\[0_4px_16px_rgba\(0\2c 0\2c 0\2c 0\.12\)\]{--tw-shadow:0 4px 16px rgba(0,0,0,.12);--tw-shadow-colored:0 4px 16px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-\[0_8px_24px_rgba\(0\2c 0\2c 0\2c 0\.12\)\]{--tw-shadow:0 8px 24px rgba(0,0,0,.12);--tw-shadow-colored:0 8px 24px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.outline{outline-style:solid}.filter{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.backdrop-blur-md{--tw-backdrop-blur:blur(12px)}.backdrop-blur-md,.backdrop-blur-xl{-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.backdrop-blur-xl{--tw-backdrop-blur:blur(24px)}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-colors{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke;transition-timing-function:cubic-bezier(.4,0,.2,1)}.duration-150,.transition-colors{transition-duration:.15s}.hover\:border-\[\#ea580c\]:hover{--tw-border-opacity:1;border-color:rgb(234 88 12/var(--tw-border-opacity,1))}.hover\:bg-\[\#c2410c\]:hover{--tw-bg-opacity:1;background-color:rgb(194 65 12/var(--tw-bg-opacity,1))}.hover\:bg-white\/50:hover{background-color:hsla(0,0%,100%,.5)}.hover\:bg-white\/70:hover{background-color:hsla(0,0%,100%,.7)}.hover\:text-\[\#0e1318\]:hover{--tw-text-opacity:1;color:rgb(14 19 24/var(--tw-text-opacity,1))}.hover\:text-\[\#3d4b56\]:hover{--tw-text-opacity:1;color:rgb(61 75 86/var(--tw-text-opacity,1))}.hover\:text-\[\#ea580c\]:hover{--tw-text-opacity:1;color:rgb(234 88 12/var(--tw-text-opacity,1))}.hover\:opacity-100:hover{opacity:1}.hover\:shadow-\[0_4px_12px_rgba\(0\2c 0\2c 0\2c 0\.12\)\]:hover{--tw-shadow:0 4px 12px rgba(0,0,0,.12);--tw-shadow-colored:0 4px 12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.focus\:ring-2:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow,0 0 #0000)}.focus\:ring-\[\#ea580c\]:focus{--tw-ring-opacity:1;--tw-ring-color:rgb(234 88 12/var(--tw-ring-opacity,1))}.active\:bg-white\/50:active{background-color:hsla(0,0%,100%,.5)}@media (min-width:768px){.md\:columns-4{-moz-columns:4;column-count:4}.md\:columns-5{-moz-columns:5;column-count:5}.md\:p-8{padding:2rem}.md\:text-5xl{font-size:3rem;line-height:1}}@media (min-width:1024px){.lg\:columns-5{-moz-columns:5;column-count:5}}
+</style>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
+* { font-family: 'DM Sans', sans-serif; }
+.font-display { font-family: 'DM Sans', sans-serif; font-weight: 700; }
+
+:root {
+  --voltara-orange: #ea580c;
+  --voltara-green: #16a34a;
+  --voltara-gray-50: #f6f7f8;
+  --voltara-gray-100: #eff1f3;
+  --voltara-border: #ebecf0;
+  --voltara-text: #0e1318;
+  --voltara-text-secondary: #6b7b8a;
+}
+
+body {
+  background:
+    radial-gradient(circle at 12% 18%, rgba(234,88,12,0.30), transparent 42%),
+    radial-gradient(circle at 88% 12%, rgba(22,163,74,0.22), transparent 40%),
+    radial-gradient(circle at 80% 85%, rgba(22,163,74,0.28), transparent 45%),
+    radial-gradient(circle at 10% 90%, rgba(234,88,12,0.18), transparent 40%),
+    linear-gradient(135deg, #fff7ed 0%, #fefce8 50%, #f0fdf4 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+.canvas-container {
+  background-size: cover;
+  background-position: center;
+  box-shadow: none;
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+}
 .element { position: absolute; cursor: move; user-select: none; touch-action: none; }
+.element.selected { outline: 2px solid var(--voltara-orange); outline-offset: 2px; }
 </style>
 </head>
-<body class="bg-zinc-950 text-white">
+<body class="text-[#0e1318]">
 <div id="root"></div>
 
-<script type="text/babel">
+<script>
 const { useState, useRef, useEffect } = React;
 
-const TEMPLATES = [
-  { id: 1, category: "nature", title: "Bosque Místico", thumb: "https://picsum.photos/id/1016/600/380", bg: "https://picsum.photos/id/1016/1200/800" },
-  { id: 2, category: "nature", title: "Montañas", thumb: "https://picsum.photos/id/1018/600/380", bg: "https://picsum.photos/id/1018/1200/800" },
-  { id: 3, category: "infographic", title: "Infografía Datos", thumb: "https://picsum.photos/id/1015/600/380", bg: "https://picsum.photos/id/1015/1200/800" },
-  { id: 4, category: "presentations", title: "Pitch Deck", thumb: "https://picsum.photos/id/201/600/380", bg: "https://picsum.photos/id/201/1200/800" },
-  { id: 5, category: "social", title: "Post Instagram", thumb: "https://picsum.photos/id/237/600/380", bg: "https://picsum.photos/id/237/1200/800" },
-  ...Array.from({length: 40}, (_, i) => ({
-    id: 6 + i,
-    category: ["nature","social","marketing","infographic","business"][i%5],
-    title: ["Paisaje", "Redes", "Marketing", "Datos", "Negocios"][i%5] + " " + (i+1),
-    thumb: `https://picsum.photos/id/${100 + i}/600/380`,
-    bg: `https://picsum.photos/id/${100 + i}/1200/800`
-  }))
+const FORMATS = {
+  square:   { w: 640, h: 640 },
+  story:    { w: 400, h: 711 },
+  wide:     { w: 960, h: 540 },
+  card:     { w: 700, h: 400 },
+  portrait: { w: 500, h: 700 },
+  cover:    { w: 820, h: 310 }
+};
+
+const CATEGORY_META = {
+  instagram:    { label: 'Publicación Instagram', icon: 'fa-table-cells', format: 'square' },
+  historia:     { label: 'Historias', icon: 'fa-mobile-screen', format: 'story' },
+  presentations:{ label: 'Presentaciones', icon: 'fa-display', format: 'wide' },
+  poster:       { label: 'Posters', icon: 'fa-image', format: 'portrait' },
+  card:         { label: 'Tarjetas de presentación', icon: 'fa-id-card', format: 'card' },
+  resume:       { label: 'Currículums', icon: 'fa-file-lines', format: 'portrait' },
+  invitation:   { label: 'Invitaciones', icon: 'fa-envelope-open-text', format: 'portrait' },
+  certificate:  { label: 'Certificados', icon: 'fa-award', format: 'card' },
+  marketing:    { label: 'Volantes y marketing', icon: 'fa-bullhorn', format: 'portrait' },
+  cover:        { label: 'Portadas para redes', icon: 'fa-image', format: 'cover' }
+};
+
+function formatDims(category) {
+  const key = (CATEGORY_META[category] && CATEGORY_META[category].format) || 'square';
+  return FORMATS[key] || FORMATS.square;
+}
+
+const TEMPLATE_TITLES = {
+  instagram: ['Oferta de Verano', 'Nuevo Producto', 'Cita Inspiradora', 'Promo Fin de Semana', 'Bienvenida Seguidores'],
+  historia: ['Cuenta Regresiva', 'Detrás de Cámaras', 'Pregúntame Algo', 'Lanzamiento Hoy', 'Encuesta Rápida'],
+  presentations: ['Pitch de Inversión', 'Reporte Trimestral', 'Plan Estratégico', 'Propuesta de Proyecto', 'Resultados del Equipo'],
+  poster: ['Concierto en Vivo', 'Feria de Emprendedores', 'Noche de Cine', 'Torneo Deportivo', 'Exposición de Arte'],
+  card: ['Minimalista Negro', 'Elegante Dorado', 'Creativo Color', 'Profesional Azul', 'Moderno Geométrico'],
+  resume: ['Currículum Ejecutivo', 'Currículum Creativo', 'Currículum Minimalista', 'Currículum Profesional', 'Currículum Moderno'],
+  invitation: ['Cumpleaños Infantil', 'Boda Elegante', 'Baby Shower', 'Graduación', 'Aniversario'],
+  certificate: ['Logro Académico', 'Curso Completado', 'Reconocimiento Laboral', 'Participación en Taller', 'Premio Anual'],
+  marketing: ['Black Friday', 'Apertura de Local', 'Descuento Especial', 'Volante de Servicio', 'Promoción de Temporada'],
+  cover: ['Evento Comunitario', 'Lanzamiento de Marca', 'Webinar en Vivo', 'Feria Virtual']
+};
+
+const TEMPLATES = Object.keys(TEMPLATE_TITLES).flatMap(category =>
+  TEMPLATE_TITLES[category].map((title, i) => {
+    const dims = formatDims(category);
+    const seed = `${category}-${i}`;
+    return {
+      id: `${category}-${i}`, category, title,
+      thumb: `https://picsum.photos/seed/${seed}/${Math.round(dims.w / 2)}/${Math.round(dims.h / 2)}`,
+      bg: `https://picsum.photos/seed/${seed}/${dims.w}/${dims.h}`
+    };
+  })
+);
+
+const CATEGORIES = [...new Set(TEMPLATES.map(t => t.category))];
+
+function matchesFilter(tpl, query) {
+  if (!query) return true;
+  const q = query.toLowerCase();
+  const label = (CATEGORY_META[tpl.category]? CATEGORY_META[tpl.category].label : '').toLowerCase();
+  return tpl.category.toLowerCase().includes(q) || label.includes(q) || tpl.title.toLowerCase().includes(q);
+}
+
+function aspectClass(category) {
+  const format = (CATEGORY_META[category] && CATEGORY_META[category].format) || 'square';
+  if (format === 'story') return 'h-72';
+  if (format === 'portrait') return 'h-60';
+  if (format === 'wide') return 'h-44';
+  if (format === 'card') return 'h-36';
+  if (format === 'cover') return 'h-32';
+  return 'h-48';
+}
+
+
+const RESIZE_HANDLES = [
+  { id: 'nw', x: '0%', y: '0%', cursor: 'nwse-resize' },
+  { id: 'ne', x: '100%', y: '0%', cursor: 'nesw-resize' },
+  { id: 'sw', x: '0%', y: '100%', cursor: 'nesw-resize' },
+  { id: 'se', x: '100%', y: '100%', cursor: 'nwse-resize' }
 ];
+
+const FONT_OPTIONS = [
+  { label: 'Predeterminada', value: "'DM Sans', sans-serif" },
+  { label: 'Clásica', value: "Georgia, serif" },
+  { label: 'Moderna', value: "Helvetica, Arial, sans-serif" },
+  { label: 'Impacto', value: "Impact, sans-serif" },
+  { label: 'Manuscrita', value: "cursive" },
+  { label: 'Monoespaciada', value: "'Courier New', monospace" }
+];
+
+const TEXT_COLORS = ['#ffffff', '#0e1318', '#ea580c', '#16a34a', '#2563eb', '#facc15', '#ec4899', '#6b7280'];
+
+function rotateVector(dx, dy, deg) {
+  const rad = deg * Math.PI / 180;
+  return {
+    x: dx * Math.cos(rad) - dy * Math.sin(rad),
+    y: dx * Math.sin(rad) + dy * Math.cos(rad)
+  };
+}
+
+function angleBetween(cx, cy, px, py) {
+  return Math.atan2(py - cy, px - cx) * 180 / Math.PI;
+}
+
+function computeResize(handle, start, dx, dy) {
+  const MIN = 24;
+  let x = start.x, y = start.y, width = start.width, height = start.height;
+  if (handle.includes('e')) width = Math.max(MIN, start.width + dx);
+  if (handle.includes('w')) { width = Math.max(MIN, start.width - dx); x = start.x + start.width - width; }
+  if (handle.includes('s')) height = Math.max(MIN, start.height + dy);
+  if (handle.includes('n')) { height = Math.max(MIN, start.height - dy); y = start.y + start.height - height; }
+  return { x, y, width, height };
+}
+
+function ElementFrame({ el, isSelected, onDragStart, onResizeStart, onRotateStart, onEditText }) {
+  const style = {
+    left: el.x + 'px',
+    top: el.y + 'px',
+    width: el.width + 'px',
+    height: el.height + 'px',
+    transform: `rotate(${el.rotation || 0}deg)`,
+    transformOrigin: 'center center'
+  };
+
+  let content = null;
+  if (el.type === 'text') {
+    const align = el.textAlign || 'center';
+    const justify = align === 'left'? 'flex-start' : align === 'right'? 'flex-end' : 'center';
+    content = React.createElement('div', {
+      className: "w-full h-full flex items-center px-2 whitespace-pre-wrap break-words",
+      style: {
+        color: el.color, fontSize: `${el.size}px`, fontWeight: el.fontWeight || '400',
+        fontStyle: el.fontStyle || 'normal', fontFamily: el.fontFamily || FONT_OPTIONS[0].value,
+        textAlign: align, justifyContent: justify,
+        textShadow: '2px 2px 6px rgba(0,0,0,0.8)'
+      }
+    }, el.content);
+  } else if (el.type === 'shape') {
+    content = React.createElement('div', {
+      className: "w-full h-full",
+      style: { backgroundColor: el.color, borderRadius: el.shape === 'circle'? '50%' : '8px' }
+    });
+  } else if (el.type === 'image') {
+    content = React.createElement('img', { src: el.src, draggable: false, className: "w-full h-full object-contain" });
+  }
+
+  return React.createElement('div', {
+    className: `element ${isSelected? 'selected' : ''}`,
+    style,
+    onPointerDown: onDragStart,
+    onDoubleClick: el.type === 'text'? onEditText : undefined
+  },
+    content,
+    isSelected && RESIZE_HANDLES.map(h => React.createElement('div', {
+      key: h.id,
+      onPointerDown: (e) => onResizeStart(e, h.id),
+      style: {
+        position: 'absolute', left: h.x, top: h.y, transform: 'translate(-50%,-50%)',
+        width: '8px', height: '8px', background: '#fff', border: '2px solid #ea580c',
+        cursor: h.cursor, touchAction: 'none', zIndex: 40
+      }
+    })),
+    isSelected && React.createElement('div', {
+      onPointerDown: onRotateStart,
+      style: {
+        position: 'absolute', left: '50%', top: 'calc(100% + 16px)', transform: 'translate(-50%,-50%)',
+        width: '20px', height: '20px', background: '#fff', border: '2px solid #ea580c', borderRadius: '50%',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'grab', touchAction: 'none', zIndex: 40
+      }
+    }, React.createElement('i', { className: 'fas fa-rotate-right text-[#ea580c] text-xs' }))
+  );
+}
+
+function typeIcon(type) {
+  if (type === 'text') return 'fa-font';
+  if (type === 'shape') return 'fa-shapes';
+  if (type === 'image') return 'fa-image';
+  return 'fa-square';
+}
+
+function layerLabel(el) {
+  if (el.type === 'text') return el.content || 'Texto';
+  if (el.type === 'shape') return el.shape === 'circle'? 'Círculo' : 'Rectángulo';
+  if (el.type === 'image') return 'Imagen';
+  return 'Elemento';
+}
+
+function LayersPanel({ elements, selectedElementId, onSelect, onToggleVisible, onMoveUp, onMoveDown, onClose }) {
+  const ordered = [...elements].reverse();
+  return React.createElement('div', {
+    className: "absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-sm bg-white/60 backdrop-blur-xl border border-white/40 shadow-[0_4px_16px_rgba(0,0,0,0.12)] rounded-lg p-4 z-40 max-h-72 overflow-y-auto"
+  },
+    React.createElement('div', { className: "flex items-center justify-between mb-3" },
+      React.createElement('span', { className: "font-semibold text-sm text-[#0e1318]" }, "Capas"),
+      React.createElement('button', { onClick: onClose, className: "text-[#6b7b8a] hover:text-[#0e1318] px-1" }, React.createElement('i', { className: "fas fa-xmark" }))
+    ),
+    ordered.length === 0
+     ? React.createElement('p', { className: "text-[#6b7b8a] text-sm text-center py-4" }, "Todavía no hay elementos")
+      : ordered.map(el => React.createElement('div', {
+          key: el.id,
+          className: `flex items-center gap-2 px-3 py-2 rounded-lg mb-1 cursor-pointer ${selectedElementId === el.id? 'bg-[#ea580c]/15 text-[#ea580c]' : 'hover:bg-white/50 text-[#3d4b56]'}`,
+          onClick: () => onSelect(el.id)
+        },
+          React.createElement('i', { className: `fas ${typeIcon(el.type)} text-[#6b7b8a] w-4 text-center` }),
+          React.createElement('span', { className: "flex-1 truncate text-sm" }, layerLabel(el)),
+          React.createElement('button', { onClick: (e) => { e.stopPropagation(); onToggleVisible(el.id); }, className: "px-2 text-[#6b7b8a] hover:text-[#0e1318]" },
+            React.createElement('i', { className: `fas ${el.visible === false? 'fa-eye-slash' : 'fa-eye'}` })
+          ),
+          React.createElement('button', { onClick: (e) => { e.stopPropagation(); onMoveUp(el.id); }, className: "px-2 text-[#6b7b8a] hover:text-[#0e1318]" },
+            React.createElement('i', { className: "fas fa-arrow-up" })
+          ),
+          React.createElement('button', { onClick: (e) => { e.stopPropagation(); onMoveDown(el.id); }, className: "px-2 text-[#6b7b8a] hover:text-[#0e1318]" },
+            React.createElement('i', { className: "fas fa-arrow-down" })
+          )
+        ))
+  );
+}
+
+function PageStrip({ pages, currentPageIndex, onSelect, onAdd, onDelete }) {
+  return React.createElement('div', { className: "flex items-center gap-2 overflow-x-auto px-1 pb-1" },
+    pages.map((p, i) => React.createElement('div', {
+      key: p.id,
+      onClick: () => onSelect(i),
+      className: `flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer whitespace-nowrap border ${i === currentPageIndex? 'bg-[#ea580c] border-[#ea580c] text-white' : 'bg-white/60 backdrop-blur-xl border-white/40 text-[#3d4b56] hover:border-[#ea580c]'}`
+    },
+      React.createElement('span', { className: "text-sm font-medium" }, `Página ${i + 1}`),
+      pages.length > 1 && React.createElement('button', {
+        onClick: (e) => { e.stopPropagation(); onDelete(i); },
+        className: "text-xs opacity-60 hover:opacity-100"
+      }, React.createElement('i', { className: "fas fa-xmark" }))
+    )),
+    React.createElement('button', {
+      onClick: onAdd,
+      className: "flex items-center gap-2 px-4 py-2 rounded-lg bg-white/60 backdrop-blur-xl border border-dashed border-white/40 hover:border-[#ea580c] text-[#6b7b8a] hover:text-[#ea580c] text-sm whitespace-nowrap"
+    }, React.createElement('i', { className: "fas fa-plus" }), "Página")
+  );
+}
+
+function BottomNav({ active, onChange }) {
+  const items = [
+    { key: 'home', label: 'Inicio', icon: 'fa-house' },
+    { key: 'library', label: 'Plantillas', icon: 'fa-grid-2' },
+    { key: 'editor', label: 'Proyecto', icon: 'fa-pen-to-square' },
+    { key: 'creative', label: 'Apps', icon: 'fa-shapes' },
+    { key: 'present', label: 'Presentar', icon: 'fa-display' }
+  ];
+  return React.createElement('div', {
+    className: "shrink-0 bg-white/60 backdrop-blur-xl border-t border-white/40 flex items-stretch",
+    style: { paddingBottom: 'env(safe-area-inset-bottom)' }
+  },
+    items.map(item => {
+      const isActive = active === item.key;
+      return React.createElement('button', {
+        key: item.key,
+        onClick: () => onChange(item.key),
+        className: `flex-1 flex flex-col items-center justify-center gap-0.5 py-2 ${isActive? 'text-[#ea580c]' : 'text-[#6b7b8a] hover:text-[#3d4b56]'}`
+      },
+        React.createElement('i', { className: `fas ${item.icon} text-lg` }),
+        React.createElement('span', { className: "text-[11px] font-medium" }, item.label)
+      );
+    })
+  );
+}
+
+function EditorToolbar({ onAddText, onAddShape, onAddImage }) {
+  const items = [
+    { key: 'text', label: 'Texto', icon: 'fa-font', onClick: onAddText },
+    { key: 'rect', label: 'Rectángulo', icon: 'fa-square', onClick: () => onAddShape('rect') },
+    { key: 'circle', label: 'Círculo', icon: 'fa-circle', onClick: () => onAddShape('circle') },
+    { key: 'image', label: 'Imagen', icon: 'fa-image', onClick: onAddImage }
+  ];
+  return React.createElement('div', {
+    className: "shrink-0 bg-white/60 backdrop-blur-xl border-t border-white/40 flex items-stretch",
+    style: { paddingBottom: 'env(safe-area-inset-bottom)' }
+  },
+    items.map(item => React.createElement('button', {
+      key: item.key,
+      onClick: item.onClick,
+      className: "flex-1 flex flex-col items-center justify-center gap-1 py-2.5 text-[#3d4b56] hover:text-[#ea580c] active:bg-white/50 transition-colors duration-150"
+    },
+      React.createElement('i', { className: `fas ${item.icon} text-lg` }),
+      React.createElement('span', { className: "text-[11px] font-medium" }, item.label)
+    ))
+  );
+}
+
+function TextToolbar({ el, onUpdate, onBack }) {
+  const isBold = el.fontWeight === '700' || el.fontWeight === 700;
+  const isItalic = el.fontStyle === 'italic';
+  const align = el.textAlign || 'center';
+  return React.createElement('div', {
+    className: "shrink-0 bg-white/60 backdrop-blur-xl border-t border-white/40 flex items-center gap-2 px-3 py-2 overflow-x-auto",
+    style: { paddingBottom: 'calc(env(safe-area-inset-bottom) + 8px)' }
+  },
+    React.createElement('button', {
+      onClick: onBack,
+      className: "shrink-0 w-9 h-9 rounded-md flex items-center justify-center text-[#3d4b56] hover:bg-white/50"
+    }, React.createElement('i', { className: "fas fa-arrow-left" })),
+
+    React.createElement('div', { className: "w-px h-6 bg-white/40 shrink-0" }),
+
+    React.createElement('select', {
+      value: el.fontFamily || FONT_OPTIONS[0].value,
+      onChange: (e) => onUpdate({ fontFamily: e.target.value }),
+      className: "shrink-0 h-9 px-2 rounded-md border border-white/40 bg-white/60 text-sm text-[#3d4b56]"
+    }, FONT_OPTIONS.map(f => React.createElement('option', { key: f.value, value: f.value }, f.label))),
+
+    React.createElement('div', { className: "w-px h-6 bg-white/40 shrink-0" }),
+
+    React.createElement('button', {
+      onClick: () => onUpdate({ fontWeight: isBold? '400' : '700' }),
+      className: `shrink-0 w-9 h-9 rounded-md flex items-center justify-center text-sm ${isBold? 'bg-[#ea580c] text-white' : 'text-[#3d4b56] hover:bg-white/50'}`
+    }, React.createElement('i', { className: "fas fa-bold" })),
+
+    React.createElement('button', {
+      onClick: () => onUpdate({ fontStyle: isItalic? 'normal' : 'italic' }),
+      className: `shrink-0 w-9 h-9 rounded-md flex items-center justify-center text-sm ${isItalic? 'bg-[#ea580c] text-white' : 'text-[#3d4b56] hover:bg-white/50'}`
+    }, React.createElement('i', { className: "fas fa-italic" })),
+
+    React.createElement('div', { className: "w-px h-6 bg-white/40 shrink-0" }),
+
+    ['left', 'center', 'right'].map(a => React.createElement('button', {
+      key: a,
+      onClick: () => onUpdate({ textAlign: a }),
+      className: `shrink-0 w-9 h-9 rounded-md flex items-center justify-center text-sm ${align === a? 'bg-[#ea580c] text-white' : 'text-[#3d4b56] hover:bg-white/50'}`
+    }, React.createElement('i', { className: `fas fa-align-${a}` }))),
+
+    React.createElement('div', { className: "w-px h-6 bg-white/40 shrink-0" }),
+
+    TEXT_COLORS.map(c => React.createElement('button', {
+      key: c,
+      onClick: () => onUpdate({ color: c }),
+      className: `shrink-0 w-7 h-7 rounded-full border-2 ${el.color === c? 'border-[#ea580c]' : 'border-white/60'}`,
+      style: { backgroundColor: c }
+    })),
+
+    React.createElement('label', { className: "shrink-0 w-7 h-7 rounded-full border-2 border-white/60 overflow-hidden relative" },
+      React.createElement('input', {
+        type: 'color',
+        value: el.color || '#ffffff',
+        onChange: (e) => onUpdate({ color: e.target.value }),
+        className: "absolute -left-1 -top-1 w-9 h-9 p-0 border-0 cursor-pointer"
+      })
+    )
+  );
+}
 
 function App() {
   const [active, setActive] = useState('home');
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
-  const [elements, setElements] = useState([]);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [pages, setPages] = useState([]);
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [selectedElementId, setSelectedElementId] = useState(null);
+  const [layersOpen, setLayersOpen] = useState(false);
+  const [downloadOpen, setDownloadOpen] = useState(false);
+  const [homeQuery, setHomeQuery] = useState('');
+  const [libraryFilter, setLibraryFilter] = useState('');
   const [slides, setSlides] = useState([]);
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const fileInputRef = useRef(null);
   const canvasRef = useRef(null);
   const dragRef = useRef({ isDragging: false, elementId: null, startX: 0, startY: 0, startLeft: 0, startTop: 0 });
+  const resizeRef = useRef({ isResizing: false, elementId: null, handle: null, startX: 0, startY: 0, startEl: null });
+  const rotateRef = useRef({ isRotating: false, elementId: null, centerX: 0, centerY: 0, startAngle: 0, startRotation: 0 });
+
+  // Autoguardado
+  useEffect(() => {
+    const saved = localStorage.getItem('voltara_pages');
+    if (saved) setPages(JSON.parse(saved));
+  }, []);
+
+  useEffect(() => {
+    if (pages.length > 0) localStorage.setItem('voltara_pages', JSON.stringify(pages));
+  }, [pages]);
+
+  const currentPage = pages[currentPageIndex] || null;
+  const elements = currentPage? currentPage.elements : [];
+  const selectedEl = elements.find(el => el.id === selectedElementId) || null;
+  const visibleTemplates = TEMPLATES.filter(t => matchesFilter(t, libraryFilter));
+
+  const setElements = (updater) => {
+    setPages(prev => prev.map((p, i) => {
+      if (i!== currentPageIndex) return p;
+      const nextElements = typeof updater === 'function'? updater(p.elements) : updater;
+      return {...p, elements: nextElements };
+    }));
+  };
+
+  const changeTab = (key) => {
+    setActive(key);
+    setLayersOpen(false);
+    setDownloadOpen(false);
+  };
+
+  const runSearch = (query) => {
+    setLibraryFilter(query);
+    changeTab('library');
+  };
 
   const openTemplate = (tpl) => {
-    setSelectedTemplate(tpl);
-    setActive('editor');
-    setElements([{
+    const dims = formatDims(tpl.category);
+    const elWidth = Math.round(dims.w * 0.7);
+    const elHeight = Math.round(dims.h * 0.18);
+    setPages([{
       id: Date.now(),
-      type: 'text',
-      content: tpl.title,
-      x: 140, y: 180, size: 52, color: '#ffffff', fontWeight: '700'
+      background: tpl.bg,
+      canvasWidth: dims.w,
+      canvasHeight: dims.h,
+      elements: [{
+        id: Date.now() + 1,
+        type: 'text',
+        content: tpl.title,
+        x: Math.round((dims.w - elWidth) / 2), y: Math.round(dims.h * 0.4),
+        width: elWidth, height: elHeight, rotation: 0,
+        size: Math.max(20, Math.round(dims.w * 0.07)), color: '#ffffff', fontWeight: '700',
+        fontStyle: 'normal', fontFamily: FONT_OPTIONS[0].value, textAlign: 'center', visible: true
+      }]
     }]);
+    setCurrentPageIndex(0);
+    setSelectedElementId(null);
+    setActive('editor');
+  };
+
+  const addPage = () => {
+    const bg = currentPage? currentPage.background : null;
+    const w = currentPage? currentPage.canvasWidth : FORMATS.wide.w;
+    const h = currentPage? currentPage.canvasHeight : FORMATS.wide.h;
+    setPages(prev => [...prev, { id: Date.now(), background: bg, canvasWidth: w, canvasHeight: h, elements: [] }]);
+    setCurrentPageIndex(pages.length);
+    setSelectedElementId(null);
+  };
+
+  const deletePage = (idx) => {
+    if (pages.length <= 1) return;
+    const newPages = pages.filter((_, i) => i!== idx);
+    setPages(newPages);
+    setCurrentPageIndex(Math.min(currentPageIndex, newPages.length - 1));
+    setSelectedElementId(null);
+  };
+
+  const goToPage = (idx) => {
+    setCurrentPageIndex(idx);
+    setSelectedElementId(null);
   };
 
   const addText = () => {
-    const newEl = { id: Date.now(), type: 'text', content: 'Nuevo texto', x: 160, y: 220, size: 36, color: '#ffffff' };
+    const newEl = {
+      id: Date.now(), type: 'text', content: 'Nuevo texto', x: 160, y: 220, width: 220, height: 60, rotation: 0,
+      size: 36, color: '#ffffff', fontWeight: '400', fontStyle: 'normal', fontFamily: FONT_OPTIONS[0].value,
+      textAlign: 'center', visible: true
+    };
     setElements(prev => [...prev, newEl]);
     setSelectedElementId(newEl.id);
   };
 
   const addShape = (shape) => {
-    const newEl = { id: Date.now(), type: 'shape', shape, x: 200, y: 200, width: 180, height: 120, color: '#6366f1' };
+    const newEl = { id: Date.now(), type: 'shape', shape, x: 200, y: 200, width: 180, height: 120, rotation: 0, color: '#ea580c', visible: true };
     setElements(prev => [...prev, newEl]);
     setSelectedElementId(newEl.id);
   };
 
   const addImage = (e) => {
     const file = e.target.files[0];
-    if (!file) return;
+    if (!file) { return; }
     const reader = new FileReader();
     reader.onload = (ev) => {
-      const newEl = { id: Date.now(), type: 'image', src: ev.target.result, x: 150, y: 150, width: 300, height: 220 };
+      const newEl = { id: Date.now(), type: 'image', src: ev.target.result, x: 150, y: 150, width: 300, height: 220, rotation: 0, visible: true };
       setElements(prev => [...prev, newEl]);
       setSelectedElementId(newEl.id);
     };
     reader.readAsDataURL(file);
+    e.target.value = '';
   };
 
   const deleteElement = () => {
     if (!selectedElementId) return;
-    setElements(prev => prev.filter(el => el.id !== selectedElementId));
+    setElements(prev => prev.filter(el => el.id!== selectedElementId));
     setSelectedElementId(null);
   };
 
+  const moveLayer = (id, direction) => {
+    setElements(prev => {
+      const idx = prev.findIndex(el => el.id === id);
+      if (idx === -1) return prev;
+      const newIdx = direction === 'up'? idx + 1 : idx - 1;
+      if (newIdx < 0 || newIdx >= prev.length) return prev;
+      const next = [...prev];
+      [next[idx], next[newIdx]] = [next[newIdx], next[idx]];
+      return next;
+    });
+  };
+
+  const toggleVisible = (id) => {
+    setElements(prev => prev.map(el => el.id === id? {...el, visible: el.visible === false? true : false } : el));
+  };
+
   const updateElement = (id, updates) => {
-    setElements(prev => prev.map(el => el.id === id ? {...el, ...updates} : el));
+    setElements(prev => prev.map(el => el.id === id? {...el,...updates} : el));
   };
 
   const handlePointerDown = (e, id) => {
@@ -104,22 +561,80 @@ function App() {
     const el = elements.find(elem => elem.id === id);
     if (!el) return;
     setSelectedElementId(id);
-    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+    const clientX = e.clientX?? (e.touches && e.touches[0].clientX);
+    const clientY = e.clientY?? (e.touches && e.touches[0].clientY);
     dragRef.current = { isDragging: true, elementId: id, startX: clientX, startY: clientY, startLeft: el.x, startTop: el.y };
   };
 
-  const handlePointerMove = (e) => {
-    if (!dragRef.current.isDragging) return;
-    const { startX, startY, startLeft, startTop, elementId } = dragRef.current;
-    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
-    const dx = clientX - startX;
-    const dy = clientY - startY;
-    updateElement(elementId, { x: Math.max(20, startLeft + dx), y: Math.max(20, startTop + dy) });
+  const handleResizeStart = (e, handleId, el) => {
+    e.stopPropagation();
+    setSelectedElementId(el.id);
+    const clientX = e.clientX?? (e.touches && e.touches[0].clientX);
+    const clientY = e.clientY?? (e.touches && e.touches[0].clientY);
+    resizeRef.current = {
+      isResizing: true, elementId: el.id, handle: handleId,
+      startX: clientX, startY: clientY,
+      startEl: { x: el.x, y: el.y, width: el.width, height: el.height, rotation: el.rotation || 0, size: el.size }
+    };
   };
 
-  const handlePointerUp = () => { dragRef.current.isDragging = false; };
+  const handleRotateStart = (e, el) => {
+    e.stopPropagation();
+    setSelectedElementId(el.id);
+    const rect = canvasRef.current.getBoundingClientRect();
+    const centerX = rect.left + el.x + el.width / 2;
+    const centerY = rect.top + el.y + el.height / 2;
+    const clientX = e.clientX?? (e.touches && e.touches[0].clientX);
+    const clientY = e.clientY?? (e.touches && e.touches[0].clientY);
+    rotateRef.current = {
+      isRotating: true, elementId: el.id, centerX, centerY,
+      startAngle: angleBetween(centerX, centerY, clientX, clientY),
+      startRotation: el.rotation || 0
+    };
+  };
+
+  const handlePointerMove = (e) => {
+    const clientX = e.clientX?? (e.touches && e.touches[0].clientX);
+    const clientY = e.clientY?? (e.touches && e.touches[0].clientY);
+
+    if (dragRef.current.isDragging) {
+      if (e.cancelable) e.preventDefault();
+      const { startX, startY, startLeft, startTop, elementId } = dragRef.current;
+      const dx = clientX - startX;
+      const dy = clientY - startY;
+      updateElement(elementId, { x: Math.max(0, startLeft + dx), y: Math.max(0, startTop + dy) });
+      return;
+    }
+
+    if (resizeRef.current.isResizing) {
+      if (e.cancelable) e.preventDefault();
+      const { startX, startY, startEl, elementId, handle } = resizeRef.current;
+      const dx = clientX - startX;
+      const dy = clientY - startY;
+      const local = rotateVector(dx, dy, -startEl.rotation);
+      const next = computeResize(handle, startEl, local.x, local.y);
+      const updates = {...next };
+      if (startEl.size) {
+        const scale = (next.width / startEl.width + next.height / startEl.height) / 2;
+        updates.size = Math.max(8, Math.round(startEl.size * scale));
+      }
+      updateElement(elementId, updates);
+      return;
+    }
+
+    if (rotateRef.current.isRotating) {
+      if (e.cancelable) e.preventDefault();
+      const { centerX, centerY, startAngle, startRotation, elementId } = rotateRef.current;
+      const currentAngle = angleBetween(centerX, centerY, clientX, clientY);
+      updateElement(elementId, { rotation: startRotation + (currentAngle - startAngle) });
+    }
+  };
+
+  const handlePointerUp = () => {
+    dragRef.current.isDragging = false;
+    resizeRef.current.isResizing = false;
+    rotateRef.current.isRotating = false;
+  };
 
   useEffect(() => {
     document.addEventListener('mousemove', handlePointerMove);
@@ -137,7 +652,7 @@ function App() {
   const exportPNG = async () => {
     if (!canvasRef.current) return alert("Canvas no encontrado");
     try {
-      const canvas = await html2canvas(canvasRef.current, { scale: 2 });
+      const canvas = await html2canvas(canvasRef.current, { scale: 2, useCORS: true });
       const link = document.createElement('a');
       link.download = 'voltara-design.png';
       link.href = canvas.toDataURL('image/png');
@@ -150,11 +665,18 @@ function App() {
   const exportPDF = async () => {
     if (!canvasRef.current) return alert("Abre un diseño primero");
     try {
-      const canvas = await html2canvas(canvasRef.current, { scale: 2 });
+      const canvas = await html2canvas(canvasRef.current, { scale: 2, useCORS: true });
       const imgData = canvas.toDataURL('image/png');
       const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({ orientation: 'landscape' });
-      pdf.addImage(imgData, 'PNG', 10, 10, 280, 190);
+      const orientation = canvas.width > canvas.height? 'landscape' : 'portrait';
+      const pdf = new jsPDF({ orientation, unit: 'mm', format: 'a4' });
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const margin = 10;
+      const ratio = Math.min((pageW - margin * 2) / canvas.width, (pageH - margin * 2) / canvas.height);
+      const imgW = canvas.width * ratio;
+      const imgH = canvas.height * ratio;
+      pdf.addImage(imgData, 'PNG', (pageW - imgW) / 2, (pageH - imgH) / 2, imgW, imgH);
       pdf.save('voltara-design.pdf');
     } catch (err) {
       alert("Error al exportar PDF");
@@ -162,11 +684,10 @@ function App() {
   };
 
   const generatePresentation = () => {
-    const prompt = prompt("¿Qué tema quieres para la presentación?");
-    if (!prompt) return;
-    alert(`🤖 Generando presentación sobre: "${prompt}"`);
+    const tema = window.prompt("¿Qué tema quieres para la presentación?");
+    if (!tema) return;
     setSlides([
-      { title: "Introducción", content: prompt },
+      { title: "Introducción", content: tema },
       { title: "Puntos Clave", content: "• Punto 1\n• Punto 2\n• Punto 3" },
       { title: "Conclusión", content: "¡Gracias por tu atención!" }
     ]);
@@ -175,133 +696,203 @@ function App() {
   };
 
   const addManualSlide = () => {
-    const title = prompt("Título del slide:");
+    const title = window.prompt("Título del slide:");
     if (!title) return;
-    const content = prompt("Contenido del slide:");
+    const content = window.prompt("Contenido del slide:");
     setSlides(prev => [...prev, { title, content: content || "" }]);
   };
 
-  const renderElement = (el) => {
-    const isSelected = selectedElementId === el.id;
-    const commonStyle = { left: el.x + 'px', top: el.y + 'px' };
+  return React.createElement('div', { className: "flex flex-col h-screen overflow-hidden" },
 
-    if (el.type === 'text') {
-      return React.createElement('div', {
-        key: el.id,
-        className: `element ${isSelected ? 'ring-2 ring-violet-400' : ''}`,
-        style: { ...commonStyle, color: el.color, fontSize: `${el.size}px`, fontWeight: el.fontWeight || 500, textShadow: '2px 2px 6px rgba(0,0,0,0.8)', padding: '8px 12px' },
-        onPointerDown: (e) => handlePointerDown(e, el.id),
-        onDoubleClick: () => {
-          const txt = prompt("Editar texto:", el.content);
-          if (txt !== null) updateElement(el.id, {content: txt});
-        }
-      }, el.content);
-    }
-
-    if (el.type === 'shape') {
-      return React.createElement('div', {
-        key: el.id,
-        className: `element ${isSelected ? 'ring-2 ring-violet-400' : ''}`,
-        style: { ...commonStyle, width: el.width + 'px', height: el.height + 'px', backgroundColor: el.color, borderRadius: el.shape === 'circle' ? '50%' : '12px' },
-        onPointerDown: (e) => handlePointerDown(e, el.id)
-      });
-    }
-
-    if (el.type === 'image') {
-      return React.createElement('img', {
-        key: el.id,
-        src: el.src,
-        className: `element object-contain ${isSelected ? 'ring-2 ring-violet-400' : ''}`,
-        style: { ...commonStyle, width: el.width + 'px', height: el.height + 'px' },
-        onPointerDown: (e) => handlePointerDown(e, el.id)
-      });
-    }
-    return null;
-  };
-
-  return React.createElement('div', { className: "flex h-screen bg-zinc-950 overflow-hidden" },
-    // Sidebar
-    React.createElement('div', { className: `${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:static z-50 w-72 h-full bg-zinc-900 border-r border-zinc-800 transition-all flex flex-col` },
-      React.createElement('div', { className: "p-6 border-b border-zinc-800 flex items-center gap-3" },
-        React.createElement('img', { src: "https://TU_URL_DEL_LOGO_AQUÍ.png", alt: "Logo", className: "h-12 w-auto" }),
-        React.createElement('div', { className: "font-display text-3xl font-semibold" }, "Voltara")
-      ),
-      React.createElement('div', { className: "flex-1 overflow-y-auto p-3 space-y-1" },
-        ['home','library','editor','creative','present'].map((page, i) => {
-          const labels = ['Inicio','Biblioteca','Editor','IA Creativa','Presentar'];
-          const icons = ['fa-home','fa-layer-group','fa-pen-ruler','fa-wand-magic-sparkles','fa-display'];
-          return React.createElement('button', {
-            key: i,
-            onClick: () => {setActive(page); setSidebarOpen(false);},
-            className: `w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl ${active === page ? 'bg-violet-600 text-white' : 'hover:bg-zinc-800 text-zinc-300'}`
-          },
-            React.createElement('i', {className: `fas ${icons[i]}`}),
-            React.createElement('span', null, labels[i])
-          );
-        })
-      ),
-      React.createElement('div', { className: "p-4 text-xs text-zinc-500 border-t border-zinc-800 text-center" }, "© Keny Chinchilla Navarro")
-    ),
-
-    // Main
-    React.createElement('div', { className: "flex-1 flex flex-col overflow-hidden" },
-      React.createElement('div', { className: "h-14 border-b border-zinc-800 bg-zinc-900 px-4 flex items-center justify-between" },
-        React.createElement('button', { onClick: () => setSidebarOpen(!sidebarOpen), className: "lg:hidden text-2xl" }, React.createElement('i', {className:"fas fa-bars"})),
-        active === 'editor' && React.createElement('div', {className:"flex gap-2"},
-          React.createElement('button', {onClick: exportPNG, className:"bg-white text-black px-4 py-2 rounded-2xl text-sm"}, "PNG"),
-          React.createElement('button', {onClick: exportPDF, className:"bg-white text-black px-4 py-2 rounded-2xl text-sm"}, "PDF")
-        )
-      ),
-      React.createElement('div', { className: "flex-1 overflow-auto p-6" },
-        active === 'home' && React.createElement('div', {className:"text-center py-20"}, React.createElement('h1', {className:"text-6xl font-display font-bold"}, "Voltara v12")),
-        
-        active === 'library' && React.createElement('div', null,
-          React.createElement('h2', {className:"text-3xl font-semibold mb-8"}, `Plantillas (${TEMPLATES.length})`),
-          React.createElement('div', {className:"grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6"},
-            TEMPLATES.map(tpl => React.createElement('div', {
-              key: tpl.id,
-              onClick: () => openTemplate(tpl),
-              className: "cursor-pointer bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-800 hover:border-violet-500"
-            },
-              React.createElement('img', {src: tpl.thumb, className: "w-full h-52 object-cover"}),
-              React.createElement('div', {className:"p-4"}, React.createElement('p', {className:"font-medium"}, tpl.title))
-            ))
-          )
-        ),
-
-        active === 'editor' && selectedTemplate && React.createElement('div', {className:"relative h-full"},
-          React.createElement('div', {
-            ref: canvasRef,
-            className: "canvas-container w-full max-w-5xl mx-auto h-[620px] bg-zinc-900 rounded-3xl overflow-hidden relative",
-            style: {backgroundImage: `url(${selectedTemplate.bg})`}
-          }, elements.map(renderElement)),
-
-          React.createElement('div', {className:"absolute top-6 left-1/2 -translate-x-1/2 bg-zinc-900/95 backdrop-blur border border-zinc-700 rounded-3xl px-6 py-3 flex gap-3 z-30"},
-            React.createElement('button', {onClick: addText, className:"flex items-center gap-2 px-5 py-2.5 hover:bg-zinc-800 rounded-2xl"}, "Texto"),
-            React.createElement('button', {onClick: () => addShape('rect'), className:"flex items-center gap-2 px-5 py-2.5 hover:bg-zinc-800 rounded-2xl"}, "Rect"),
-            React.createElement('button', {onClick: () => addShape('circle'), className:"flex items-center gap-2 px-5 py-2.5 hover:bg-zinc-800 rounded-2xl"}, "Círculo"),
-            React.createElement('button', {onClick: () => fileInputRef.current.click(), className:"flex items-center gap-2 px-5 py-2.5 hover:bg-zinc-800 rounded-2xl"}, "Imagen")
-          ),
-          React.createElement('input', {type:"file", ref: fileInputRef, accept:"image/*", onChange: addImage, className:"hidden"})
-        ),
-
-        active === 'present' && React.createElement('div', {className:"max-w-4xl mx-auto"},
-          React.createElement('div', {className:"flex gap-3 mb-8"},
-            React.createElement('button', {onClick: generatePresentation, className:"flex-1 bg-gradient-to-r from-violet-600 to-purple-600 py-4 rounded-3xl font-semibold"}, "✨ IA Generar"),
-            React.createElement('button', {onClick: addManualSlide, className:"flex-1 border border-zinc-700 py-4 rounded-3xl font-semibold"}, "➕ Añadir Slide Manual")
-          ),
-          slides.length > 0 && React.createElement('div', {className:"bg-zinc-900 rounded-3xl p-10"},
-            React.createElement('h3', {className:"text-2xl font-semibold mb-6"}, `Slide ${currentSlide + 1} / ${slides.length}`),
-            React.createElement('div', {className:"text-4xl font-bold mb-8"}, slides[currentSlide].title),
-            React.createElement('div', {className:"text-zinc-300 text-lg whitespace-pre-line"}, slides[currentSlide].content),
-            React.createElement('div', {className:"flex justify-between mt-12"},
-              React.createElement('button', {onClick: () => setCurrentSlide(Math.max(0, currentSlide-1)), className:"px-8 py-3 border border-zinc-700 rounded-2xl"}, "Anterior"),
-              React.createElement('button', {onClick: () => setCurrentSlide(Math.min(slides.length-1, currentSlide+1)), className:"px-8 py-3 bg-white text-black rounded-2xl"}, "Siguiente")
+    React.createElement('div', { className: "h-14 shrink-0 bg-white/60 backdrop-blur-xl px-4 flex items-center justify-between gap-3 border-b border-white/40" },
+      React.createElement('div', { className: "flex items-center gap-3" },
+        active === 'editor' && pages.length > 0
+         ? React.createElement('button', {
+              onClick: () => changeTab('library'),
+              className: "w-8 h-8 rounded-md flex items-center justify-center text-[#3d4b56] hover:bg-white/50"
+            }, React.createElement('i', { className: "fas fa-arrow-left text-sm" }))
+          : React.createElement('div', { className: "flex items-center gap-2" },
+              React.createElement('div', { className: "h-8 w-8 rounded-md bg-gradient-to-br from-[#ea580c] to-[#16a34a] flex items-center justify-center" },
+                React.createElement('i', { className: "fas fa-bolt text-white text-sm" })
+              ),
+              React.createElement('span', { className: "font-display text-lg font-bold text-[#0e1318]" }, "Voltara")
             )
+      ),
+      active === 'editor' && pages.length > 0 && React.createElement('div', { className: "flex items-center gap-2" },
+        React.createElement('button', {
+          onClick: () => setLayersOpen(!layersOpen),
+          className: `w-8 h-8 rounded-md flex items-center justify-center text-sm ${layersOpen? 'bg-[#ea580c] text-white' : 'text-[#3d4b56] hover:bg-white/50'}`
+        }, React.createElement('i', { className: "fas fa-layer-group" })),
+        selectedElementId && React.createElement('button', {
+          onClick: deleteElement,
+          className: "w-8 h-8 rounded-md flex items-center justify-center bg-white/50 backdrop-blur-md text-[#3d4b56] hover:bg-white/70 text-sm"
+        }, React.createElement('i', { className: "fas fa-trash" })),
+        React.createElement('div', { className: "relative" },
+          React.createElement('button', {
+            onClick: () => setDownloadOpen(!downloadOpen),
+            className: "px-4 h-8 rounded-md text-sm font-medium flex items-center gap-2 bg-[#ea580c] text-white hover:bg-[#c2410c] transition-colors"
+          }, "Compartir", React.createElement('i', { className: "fas fa-chevron-down text-xs" })),
+          downloadOpen && React.createElement('div', {
+            className: "absolute right-0 top-full mt-2 bg-white/60 backdrop-blur-xl border border-white/40 shadow-[0_4px_16px_rgba(0,0,0,0.12)] rounded-lg py-2 w-44 z-50"
+          },
+            React.createElement('button', {
+              onClick: () => { exportPNG(); setDownloadOpen(false); },
+              className: "w-full text-left px-4 py-2.5 text-sm text-[#3d4b56] hover:bg-white/50 flex items-center gap-2"
+            }, React.createElement('i', { className: "fas fa-image text-[#6b7b8a] w-4" }), "Imagen PNG"),
+            React.createElement('button', {
+              onClick: () => { exportPDF(); setDownloadOpen(false); },
+              className: "w-full text-left px-4 py-2.5 text-sm text-[#3d4b56] hover:bg-white/50 flex items-center gap-2"
+            }, React.createElement('i', { className: "fas fa-file-pdf text-[#6b7b8a] w-4" }), "PDF")
           )
         )
       )
-    )
+    ),
+
+    React.createElement('div', { className: "flex-1 overflow-auto p-5" },
+
+      active === 'home' && React.createElement('div', { className: "py-10" },
+        React.createElement('div', { className: "text-center max-w-2xl mx-auto mb-8" },
+          React.createElement('h1', { className: "text-4xl md:text-5xl font-display font-bold text-[#0e1318] mb-3 tracking-tight" }, "Diseña sin límites"),
+          React.createElement('p', { className: "text-[#6b7b8a]" }, "Plantillas, fotos y edición visual, todo en un mismo lugar.")
+        ),
+        React.createElement('div', { className: "relative max-w-xl mx-auto" },
+          React.createElement('i', { className: "fas fa-magnifying-glass absolute left-5 top-1/2 -translate-y-1/2 text-[#6b7b8a]" }),
+          React.createElement('input', {
+            type: 'text',
+            value: homeQuery,
+            onChange: (e) => setHomeQuery(e.target.value),
+            onKeyDown: (e) => { if (e.key === 'Enter') runSearch(homeQuery); },
+            placeholder: '¿Qué vas a diseñar hoy?',
+            className: "w-full pl-12 pr-4 py-4 rounded-full border border-white/40 bg-white/60 backdrop-blur-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] focus:outline-none focus:ring-2 focus:ring-[#ea580c] text-[#0e1318]"
+          })
+        ),
+        React.createElement('div', { className: "flex flex-wrap justify-center gap-2 mt-5 max-w-xl mx-auto" },
+          CATEGORIES.map(cat => React.createElement('button', {
+            key: cat,
+            onClick: () => runSearch(cat),
+            className: "flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 backdrop-blur-xl border border-white/40 hover:border-[#ea580c] text-sm text-[#3d4b56]"
+          },
+            React.createElement('i', { className: `fas ${CATEGORY_META[cat]? CATEGORY_META[cat].icon : 'fa-shapes'} text-[#ea580c]` }),
+            CATEGORY_META[cat]? CATEGORY_META[cat].label : cat
+          ))
+        ),
+        React.createElement('div', { className: "mt-12 max-w-5xl mx-auto" },
+          React.createElement('h2', { className: "text-lg font-semibold text-[#0e1318] mb-4" }, "Empezá con una plantilla"),
+          React.createElement('div', { className: "columns-2 md:columns-5 gap-4" },
+            TEMPLATES.slice(0, 10).map(tpl => React.createElement('div', {
+              key: tpl.id,
+              onClick: () => openTemplate(tpl),
+              className: "cursor-pointer bg-white/60 backdrop-blur-xl rounded-lg overflow-hidden border border-white/40 shadow-[0_1px_3px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] hover:border-[#ea580c] transition-all duration-150 mb-4 break-inside-avoid"
+            },
+              React.createElement('img', { src: tpl.thumb, className: `w-full object-cover ${aspectClass(tpl.category)}` }),
+              React.createElement('div', { className: "p-2.5" }, React.createElement('p', { className: "text-sm font-medium text-[#0e1318] truncate" }, tpl.title))
+            ))
+          )
+        )
+      ),
+
+      active === 'library' && React.createElement('div', null,
+        React.createElement('div', { className: "flex items-center justify-between mb-6 flex-wrap gap-3" },
+          React.createElement('h2', { className: "text-2xl font-semibold text-[#0e1318]" }, `Plantillas (${visibleTemplates.length})`),
+          libraryFilter && React.createElement('button', {
+            onClick: () => setLibraryFilter(''),
+            className: "flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#ea580c]/15 text-[#ea580c] text-sm"
+          }, `"${libraryFilter}"`, React.createElement('i', { className: "fas fa-xmark" }))
+        ),
+        React.createElement('div', { className: "columns-2 md:columns-4 lg:columns-5 gap-4" },
+          visibleTemplates.map(tpl => React.createElement('div', {
+            key: tpl.id,
+            onClick: () => openTemplate(tpl),
+            className: "cursor-pointer bg-white/60 backdrop-blur-xl rounded-lg overflow-hidden border border-white/40 shadow-[0_1px_3px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] hover:border-[#ea580c] transition-all duration-150 mb-4 break-inside-avoid"
+          },
+            React.createElement('img', { src: tpl.thumb, className: `w-full object-cover ${aspectClass(tpl.category)}` }),
+            React.createElement('div', { className: "p-3" }, React.createElement('p', { className: "font-medium text-sm text-[#0e1318]" }, tpl.title))
+          ))
+        )
+      ),
+
+      active === 'creative' && React.createElement('div', { className: "text-center py-20" },
+        React.createElement('i', { className: "fas fa-wand-magic-sparkles text-4xl text-[#ea580c] mb-4" }),
+        React.createElement('p', { className: "text-[#6b7b8a]" }, "IA Creativa llegará pronto")
+      ),
+
+      active === 'editor' && pages.length === 0 && React.createElement('div', { className: "text-center py-20" },
+        React.createElement('i', { className: "fas fa-pen-ruler text-4xl text-[#d1d5db] mb-4" }),
+        React.createElement('p', { className: "text-[#6b7b8a] mb-6" }, "Elegí una plantilla para empezar a diseñar"),
+        React.createElement('button', {
+          onClick: () => changeTab('library'),
+          className: "px-6 py-3 rounded-lg bg-[#ea580c] text-white font-medium hover:bg-[#c2410c]"
+        }, "Ver plantillas")
+      ),
+
+      active === 'editor' && pages.length > 0 && React.createElement('div', { className: "h-full flex flex-col gap-3" },
+        React.createElement(PageStrip, {
+          pages, currentPageIndex,
+          onSelect: goToPage,
+          onAdd: addPage,
+          onDelete: deletePage
+        }),
+        React.createElement('div', { className: "relative flex-1 bg-white/25 backdrop-blur-md rounded-lg p-4 md:p-8 flex items-center justify-center" },
+          React.createElement('div', {
+            ref: canvasRef,
+            className: "canvas-container bg-[#0e1318] rounded-lg overflow-hidden relative shadow-[0_8px_24px_rgba(0,0,0,0.12)]",
+            style: {
+              backgroundImage: `url(${currentPage.background})`,
+              aspectRatio: `${currentPage.canvasWidth || 960} / ${currentPage.canvasHeight || 540}`,
+             ...(currentPage.canvasHeight > currentPage.canvasWidth
+                ? { height: '100%', maxHeight: '640px', width: 'auto', maxWidth: '100%' }
+                : { width: '100%', maxWidth: '900px', height: 'auto', maxHeight: '640px' })
+            },
+            onPointerDown: () => setSelectedElementId(null)
+          }, elements.map(el => el.visible === false? null : React.createElement(ElementFrame, {
+            key: el.id,
+            el,
+            isSelected: selectedElementId === el.id,
+            onDragStart: (e) => handlePointerDown(e, el.id),
+            onResizeStart: (e, handleId) => handleResizeStart(e, handleId, el),
+            onRotateStart: (e) => handleRotateStart(e, el),
+            onEditText: () => {
+              const txt = window.prompt("Editar texto:", el.content);
+              if (txt!== null) updateElement(el.id, { content: txt });
+            }
+          }))),
+
+          React.createElement('input', { type: "file", ref: fileInputRef, accept: "image/*", onChange: addImage, className: "hidden" }),
+
+          layersOpen && React.createElement(LayersPanel, {
+            elements,
+            selectedElementId,
+            onSelect: (id) => setSelectedElementId(id),
+            onToggleVisible: toggleVisible,
+            onMoveUp: (id) => moveLayer(id, 'up'),
+            onMoveDown: (id) => moveLayer(id, 'down'),
+            onClose: () => setLayersOpen(false)
+          })
+        )
+      ),
+
+      active === 'present' && React.createElement('div', { className: "max-w-3xl mx-auto" },
+        React.createElement('div', { className: "flex gap-3 mb-6" },
+          React.createElement('button', { onClick: generatePresentation, className: "flex-1 bg-gradient-to-r from-[#ea580c] to-[#16a34a] text-white py-3 rounded-lg font-semibold" }, "✨ IA Generar"),
+          React.createElement('button', { onClick: addManualSlide, className: "flex-1 border border-white/40 text-[#3d4b56] py-3 rounded-lg font-semibold hover:bg-white/50" }, "➕ Slide manual")
+        ),
+        slides.length > 0 && React.createElement('div', { className: "bg-white/60 backdrop-blur-xl border border-white/40 shadow-[0_1px_3px_rgba(0,0,0,0.08)] rounded-lg p-8" },
+          React.createElement('p', { className: "text-sm text-[#6b7b8a] mb-4" }, `Slide ${currentSlide + 1} / ${slides.length}`),
+          React.createElement('div', { className: "text-3xl font-bold text-[#0e1318] mb-6" }, slides[currentSlide].title),
+          React.createElement('div', { className: "text-[#3d4b56] text-lg whitespace-pre-line mb-10" }, slides[currentSlide].content),
+          React.createElement('div', { className: "flex justify-between" },
+            React.createElement('button', { onClick: () => setCurrentSlide(Math.max(0, currentSlide - 1)), className: "px-6 py-2.5 border border-white/40 rounded-lg text-[#3d4b56] hover:bg-white/50" }, "Anterior"),
+            React.createElement('button', { onClick: () => setCurrentSlide(Math.min(slides.length - 1, currentSlide + 1)), className: "px-6 py-2.5 bg-[#ea580c] text-white rounded-lg hover:bg-[#c2410c]" }, "Siguiente")
+          )
+        )
+      )
+    ),
+
+    (active === 'editor' && pages.length > 0)
+    ? (selectedEl && selectedEl.type === 'text'
+        ? React.createElement(TextToolbar, { el: selectedEl, onUpdate: (updates) => updateElement(selectedEl.id, updates), onBack: () => setSelectedElementId(null) })
+        : React.createElement(EditorToolbar, { onAddText: addText, onAddShape: addShape, onAddImage: () => fileInputRef.current.click() }))
+      : React.createElement(BottomNav, { active, onChange: changeTab })
   );
 }
 
