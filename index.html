@@ -214,6 +214,25 @@ function bgTypeFor(category, i) {
   return Array.isArray(v)? v[i % v.length] : v;
 }
 
+function snapToGuides(val, others, threshold=6) {
+  for (const o of others) {
+    if (Math.abs(val - o) <= threshold) return o;
+  }
+  return undefined;
+}
+
+function getMyColors() {
+  try { return JSON.parse(localStorage.getItem('voltara_v26_mycolors')||'[]'); } catch(e){ return []; }
+}
+function saveMyColor(c) {
+  const prev=getMyColors();
+  if(prev.includes(c)) return;
+  try { localStorage.setItem('voltara_v26_mycolors', JSON.stringify([c,...prev].slice(0,16))); } catch(e){}
+}
+function removeMyColor(c) {
+  try { localStorage.setItem('voltara_v26_mycolors', JSON.stringify(getMyColors().filter(x=>x!==c))); } catch(e){}
+}
+
 function formatDims(category) {
   const key = (CATEGORY_META[category] && CATEGORY_META[category].format) || 'square';
   return FORMATS[key] || FORMATS.square;
@@ -745,6 +764,17 @@ function getDesignColors(elements) {
   return cols.slice(0,8);
 }
 
+function isBgLight(bg) {
+  if (!bg) return false;
+  if (bg.startsWith('#')) {
+    const hex=bg.replace(/^#/,'');
+    const r=parseInt(hex.substr(0,2)||'0',16);
+    const g=parseInt(hex.substr(2,2)||'0',16);
+    const b=parseInt(hex.substr(4,2)||'0',16);
+    return (r*299+g*587+b*114)/1000 > 180;
+  }
+  return /fff|white|faf|fef3/.test(bg);
+}
 function matchFilter(tpl, q) {
   if (!q) return true;
   const lo = q.toLowerCase();
@@ -859,6 +889,10 @@ function App() {
   const [showLayers, setShowLayers] = useState(false);
   const [showAddPanel, setShowAddPanel] = useState(false);
   const [showBgPanel, setShowBgPanel] = useState(false);
+  const [showFmtPanel, setShowFmtPanel] = useState(false);
+  const [urlImgModal, setUrlImgModal] = useState(false);
+  const [urlImgValue, setUrlImgValue] = useState('');
+  const [editingPageName, setEditingPageName] = useState(null);
   const [gridOn, setGridOn] = useState(false);
   const [projectName, setProjectName] = useState('Mi diseño');
   const [toastMsg, setToastMsg] = useState(null);
@@ -1066,9 +1100,18 @@ function App() {
       }
     }
     function onUp(){if(dragRef.current&&dragRef.current.began)endTransaction();dragRef.current=null;}
-    window.addEventListener('pointermove',onMove);
-    window.addEventListener('pointerup',onUp);
-    return()=>{window.removeEventListener('pointermove',onMove);window.removeEventListener('pointerup',onUp);};
+    let pinchStartDist=0, pinchStartZoom=0;
+    function onTouchStart(e){if(e.touches.length===2){pinchStartDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);pinchStartZoom=zoom;dragRef.current=null;}}
+    function onTouchMove(e){
+      if(e.touches.length===2&&pinchStartDist>0){e.preventDefault();const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);setZoom(Math.max(0.1,Math.min(2,parseFloat((pinchStartZoom*d/pinchStartDist).toFixed(2)))));}
+      else{onMove(e);}
+    }
+    function onTouchEnd(e){if(e.touches.length<2)pinchStartDist=0;onUp(e);}
+    window.addEventListener('pointermove',onMove);window.addEventListener('pointerup',onUp);
+    window.addEventListener('touchstart',onTouchStart,{passive:true});
+    window.addEventListener('touchmove',onTouchMove,{passive:false});
+    window.addEventListener('touchend',onTouchEnd);
+    return()=>{window.removeEventListener('pointermove',onMove);window.removeEventListener('pointerup',onUp);window.removeEventListener('touchstart',onTouchStart);window.removeEventListener('touchmove',onTouchMove);window.removeEventListener('touchend',onTouchEnd);};
   },[zoom,pages,pageIdx]);
 
   function addText() {
@@ -1335,6 +1378,11 @@ function App() {
               React.createElement('div',{style:{width:'18px',height:'18px',borderRadius:'4px',border:'1px solid rgba(255,255,255,.3)',background:page.backgroundType!=='photo'&&page.background?page.background:'#0b0e13'}})
             ),
             showBgPanel&&React.createElement('div',{style:{position:'absolute',top:'44px',right:0,width:'228px',background:'rgba(5,26,42,.97)',backdropFilter:'blur(20px)',border:'1px solid var(--border)',borderRadius:'13px',padding:'13px',zIndex:60,boxShadow:'0 8px 32px rgba(0,0,0,.5)'},onClick:e=>e.stopPropagation()},
+              React.createElement('div',{style:{fontSize:'10px',fontWeight:'700',letterSpacing:'.1em',color:'var(--brand)',textTransform:'uppercase',marginBottom:'7px'}},'Foto de fondo'),
+              React.createElement('label',{style:{display:'flex',alignItems:'center',gap:'8px',padding:'7px 10px',borderRadius:'9px',border:'1px dashed var(--border)',cursor:'pointer',fontSize:'11px',color:'var(--muted)',marginBottom:'10px'},onMouseOver:e=>e.currentTarget.style.borderColor='var(--brand)',onMouseOut:e=>e.currentTarget.style.borderColor='var(--border)'},
+                React.createElement('i',{className:'fas fa-image',style:{color:'var(--brand)'}}),
+                'Subir foto propia',
+                React.createElement('input',{type:'file',accept:'image/*',style:{display:'none'},onChange:e=>{const f=e.target.files?.[0];if(!f)return;const rd=new FileReader();rd.onload=ev=>{updPage(p=>({...p,background:ev.target.result,backgroundType:'photo'}));setShowBgPanel(false);showToast('Foto aplicada como fondo');};rd.readAsDataURL(f);e.target.value='';}})),
               React.createElement('div',{style:{fontSize:'10px',fontWeight:'700',letterSpacing:'.1em',color:'var(--brand)',textTransform:'uppercase',marginBottom:'7px'}},'Color sólido'),
               React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'8px',marginBottom:'11px'}},
                 React.createElement('label',{style:{width:'30px',height:'30px',borderRadius:'7px',overflow:'hidden',border:'1px solid var(--border)',cursor:'pointer',flexShrink:0}},
@@ -1430,10 +1478,14 @@ function App() {
           ))
         ),
         /* canvas area */
-        React.createElement('div',{className:'canvas-area',onClick:()=>{setSelId(null);setShowAddPanel(false);}},
+        React.createElement('div',{className:'canvas-area',style:{background:page&&isBgLight(page.background)?'rgba(100,115,130,.45)':'rgba(2,11,20,.5)',transition:'background .4s'},onClick:()=>{setSelId(null);setShowAddPanel(false);}},
           React.createElement('div',{className:'page-strip'},
             pages.map((p,i)=>React.createElement('div',{key:p.id,className:`page-chip${i===pageIdx?' active':''}`,onClick:e=>{e.stopPropagation();setPageIdx(i);}},
-              `Pág ${i+1}`,
+              editingPageName===i
+                ? React.createElement('input',{autoFocus:true,defaultValue:p.name||('Pág '+(i+1)),style:{background:'transparent',border:'none',color:'inherit',fontSize:'12px',fontWeight:'600',fontFamily:"'Manrope',sans-serif",outline:'none',width:'80px'},onClick:e=>e.stopPropagation(),
+                    onBlur:e=>{const v=e.target.value.trim()||('Pág '+(i+1));setPages(ps=>ps.map((pg,pi)=>pi===i?{...pg,name:v}:pg));setEditingPageName(null);},
+                    onKeyDown:e=>{if(e.key==='Enter')e.target.blur();if(e.key==='Escape')setEditingPageName(null);}})
+                : React.createElement('span',{onDoubleClick:e=>{e.stopPropagation();setEditingPageName(i);setPageIdx(i);}},p.name||('Pág '+(i+1))),
               React.createElement('span',{style:{fontSize:'10px',opacity:.7,cursor:'pointer',padding:'0 4px'},onClick:e=>{e.stopPropagation();dupPage(i);}},React.createElement('i',{className:'fas fa-clone'})),
               pages.length>1&&React.createElement('span',{style:{fontSize:'10px',opacity:.7,cursor:'pointer',padding:'0 4px'},onClick:e=>{e.stopPropagation();delPage(i);}},React.createElement('i',{className:'fas fa-xmark'}))
             )),
@@ -1555,7 +1607,14 @@ function App() {
             ),
             React.createElement('div',{className:'props-row'},
               React.createElement('input',{type:'color',value:selEl.color||'#00A3FF',onChange:e=>updEl(selId,{color:e.target.value})}),
+              React.createElement('button',{title:'Guardar color',style:{width:'26px',height:'26px',borderRadius:'6px',background:'var(--glass)',border:'1px solid var(--border)',cursor:'pointer',color:'var(--accent)',fontSize:'11px',flexShrink:0},onClick:()=>{saveMyColor(selEl.color||'#00A3FF');showToast('Color guardado');}},React.createElement('i',{className:'fas fa-bookmark'})),
               React.createElement('input',{type:'range',min:'0.05',max:'1',step:'0.05',value:String(selEl.opacity!==undefined?selEl.opacity:1),onChange:e=>updEl(selId,{opacity:parseFloat(e.target.value)}),style:{flex:1}})
+            ),
+            getMyColors().length>0&&React.createElement('div',null,
+              React.createElement('div',{style:{fontSize:'9px',fontWeight:'700',letterSpacing:'.08em',color:'var(--muted)',textTransform:'uppercase',marginBottom:'5px'}},'Mis colores'),
+              React.createElement('div',{className:'color-row'},
+                getMyColors().map(c=>React.createElement('div',{key:c,className:`color-dot${selEl.color===c?' active':''}`,style:{background:c},onClick:()=>updEl(selId,{color:c}),onContextMenu:e=>{e.preventDefault();removeMyColor(c);showToast('Color eliminado');}}))
+              )
             )
           ),
           selEl.type==='shape'&&!SHAPE_CLIPS[selEl.shape]&&React.createElement('div',{className:'props-section'},
