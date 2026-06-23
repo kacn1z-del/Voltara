@@ -840,6 +840,47 @@ function PricingModal({onInsert,onClose}){
   );
 }
 
+
+function CanvasResizeModal({page,onResize,onClose}){
+  const cats=Object.entries(CATS);
+  const [selFmt,setSelFmt]=React.useState(page?.category||'instagram');
+  const [cw,setCw]=React.useState(fdims(page?.category||'instagram').w);
+  const [ch,setCh]=React.useState(fdims(page?.category||'instagram').h);
+  const [mode,setMode]=React.useState('preset'); // preset | custom
+  React.useEffect(()=>{if(mode==='preset'){const d=fdims(selFmt);setCw(d.w);setCh(d.h);}},[ selFmt,mode]);
+  return React.createElement('div',{className:'mo',onClick:onClose},
+    React.createElement('div',{className:'mb',onClick:e=>e.stopPropagation()},
+      React.createElement('div',{className:'mt'},'📐 Cambiar tamaño del canvas'),
+      React.createElement('div',{style:{display:'flex',gap:'5px',marginBottom:'12px'}},
+        React.createElement('button',{className:'pl'+(mode==='preset'?' on':''),onClick:()=>setMode('preset')},'Presets'),
+        React.createElement('button',{className:'pl'+(mode==='custom'?' on':''),onClick:()=>setMode('custom')},'Personalizado')
+      ),
+      mode==='preset'&&React.createElement('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'5px',maxHeight:'260px',overflowY:'auto',marginBottom:'12px'}},
+        cats.map(([k,v])=>{const d=fdims(k);return React.createElement('div',{key:k,style:{padding:'8px 10px',borderRadius:'8px',border:`1px solid ${selFmt===k?'var(--ac)':'var(--bo)'}`,background:selFmt===k?'rgba(0,255,136,.07)':'rgba(255,255,255,.03)',cursor:'pointer',transition:'all .15s'},onClick:()=>setSelFmt(k)},
+          React.createElement('div',{style:{fontSize:'11px',fontWeight:700,color:selFmt===k?'var(--ac)':'var(--tx)'}},v.l),
+          React.createElement('div',{style:{fontSize:'10px',color:'var(--mu)'}},`${d.w}×${d.h}px`)
+        );})),
+      mode==='custom'&&React.createElement('div',{style:{marginBottom:'12px'}},
+        React.createElement('div',{className:'rr',style:{marginBottom:'8px'}},
+          React.createElement('span',{style:{fontSize:'11px',color:'var(--mu)',width:'30px'}},'W'),
+          React.createElement('input',{className:'ri',type:'number',value:cw,onChange:e=>setCw(+e.target.value),min:100,max:5000}),
+          React.createElement('span',{style:{fontSize:'11px',color:'var(--mu)'}},'px')
+        ),
+        React.createElement('div',{className:'rr'},
+          React.createElement('span',{style:{fontSize:'11px',color:'var(--mu)',width:'30px'}},'H'),
+          React.createElement('input',{className:'ri',type:'number',value:ch,onChange:e=>setCh(+e.target.value),min:100,max:5000}),
+          React.createElement('span',{style:{fontSize:'11px',color:'var(--mu)'}},'px')
+        )
+      ),
+      React.createElement('p',{style:{fontSize:'11px',color:'var(--mu)',marginBottom:'12px',lineHeight:'1.6'}},'Los elementos se escalarán automáticamente al nuevo tamaño.'),
+      React.createElement('div',{className:'mac'},
+        React.createElement('button',{className:'bg2',style:{fontSize:'12px'},onClick:onClose},'Cancelar'),
+        React.createElement('button',{className:'bp',style:{fontSize:'12px'},onClick:()=>{onResize(selFmt,cw,ch);onClose();}},React.createElement('i',{className:'fas fa-check'}),' Aplicar')
+      )
+    )
+  );
+}
+
 function CtxMenu({x,y,items,onClose}){
   useEffect(()=>{const h=()=>onClose();document.addEventListener('pointerdown',h);return()=>document.removeEventListener('pointerdown',h);},[]);
   const sx=Math.min(x,window.innerWidth-165),sy=Math.min(y,window.innerHeight-items.length*34-20);
@@ -923,6 +964,11 @@ function App(){
   const addE=el=>{updP(p=>({...p,elements:[...p.elements,el]}));setSel(el.id);};
   const delE=id=>{updP(p=>({...p,elements:p.elements.filter(e=>e.id!==id)}));if(sel===id)setSel(null);};
   const dupE=id=>{const el=els.find(e=>e.id===id);if(!el)return;addE({...JSON.parse(JSON.stringify(el)),id:uid(),x:el.x+20,y:el.y+20});showToast('Duplicado ✓');};
+  const [copiedStyle,setCopiedStyle]=React.useState(null);
+  const copyStyle=()=>{if(!selEl)return;const{color,fw,fs,ff,ta,lh,ls,tt,ts,stroke,opacity,fi,radius,of}=selEl;setCopiedStyle({color,fw,fs,ff,ta,lh,ls,tt,ts,stroke,opacity,fi,radius,of});showToast('Estilo copiado ✓');};
+  const pasteStyle=()=>{if(!selEl||!copiedStyle)return;updE(sel,copiedStyle);showToast('Estilo pegado ✓');};
+  const [selMulti,setSelMulti]=React.useState([]);
+  const [canvasResizeM,setCanvasResizeM]=React.useState(false);
   const mvZ=(id,dir)=>updP(p=>{const a=[...p.elements],i=a.findIndex(e=>e.id===id);if(dir==='top'){const e=a.splice(i,1)[0];a.push(e);}else if(dir==='bot'){const e=a.splice(i,1)[0];a.unshift(e);}else if(dir==='up'&&i<a.length-1){[a[i],a[i+1]]=[a[i+1],a[i]];}else if(dir==='dn'&&i>0){[a[i],a[i-1]]=[a[i-1],a[i]];}return{...p,elements:a};});
   const togVis=id=>{const el=els.find(e=>e.id===id);updE(id,{visible:el?.visible===false?true:false});};
   const togLock=id=>{const el=els.find(e=>e.id===id);updE(id,{locked:!el?.locked});if(!el?.locked)setSel(null);};
@@ -1158,6 +1204,57 @@ function App(){
   {c:'moda',t:'NUEVA\nCOLECCIÓN',s:'Otoño · Invierno 2026',a:'#fff',bg_c:'linear-gradient(135deg,#020B14,#0a0a0a)'},
   {c:'moda',t:'LOOKBOOK\n2026',s:'Estilos que hablan',a:'#ec4899',bg_c:'linear-gradient(135deg,#1a0015,#020B14)'},
   {c:'moda',t:'STREET\nSTYLE',s:'Tendencias urbanas',a:'#facc15',bg_c:'linear-gradient(135deg,#1a1200,#020B14)'},
+
+  // ── REELS extra ──
+  {c:'reels',t:'WORKOUT\nCHALLENGE',s:'7 días · Únete ya',a:'#22c55e',bg_c:'linear-gradient(180deg,#0b1f12,#020B14)'},
+  {c:'reels',t:'RECETA\nVIRAL',s:'Lista en 3 minutos 🍳',a:'#f97316',bg_c:'linear-gradient(180deg,#1a0800,#020B14)'},
+  {c:'reels',t:'UNBOXING\nEXCLUSIVO',s:'¿Qué hay adentro? 📦',a:'#00A3FF',bg_c:'linear-gradient(180deg,#020B14,#051A2A)'},
+  // ── TIKTOK extra ──
+  {c:'tiktok',t:'STITCH\nCONMIGO',s:'Mi respuesta 💬',a:'#00FF88',bg_c:'linear-gradient(180deg,#0b1f12,#020B14)'},
+  {c:'tiktok',t:'TREND\nALERT 🚨',s:'Esto es tendencia ahora',a:'#ef4444',bg_c:'linear-gradient(180deg,#1a0000,#020B14)'},
+  // ── PODCAST extra ──
+  {c:'podcast',t:'TEMPORADA 2\nYA LLEGÓ',s:'Más contenido · Más valor',a:'#8b5cf6',bg_c:'linear-gradient(135deg,#0d0a1f,#020B14)'},
+  {c:'podcast',t:'TOP 3\nLECCIONES',s:'Lo que aprendí este año',a:'#facc15',bg_c:'linear-gradient(135deg,#1a1200,#020B14)'},
+  // ── EVENTOS extra ──
+  {c:'event',t:'OPEN HOUSE\nDIGITAL',s:'Visitá nuestro espacio virtual',a:'#00FF88',bg_c:'linear-gradient(135deg,#0b1f12,#020B14)'},
+  {c:'event',t:'LANZAMIENTO\nOFICIAL',s:'Fecha: próximamente',a:'#00A3FF',bg_c:'linear-gradient(135deg,#020B14,#051A2A)'},
+  // ── MODA extra ──
+  {c:'moda',t:'EDITORIAL\nFOTO',s:'Sesión exclusiva 2026',a:'#ec4899',bg_c:'linear-gradient(135deg,#1a0015,#020B14)'},
+  {c:'moda',t:'CAPSULE\nCOLLECTION',s:'Piezas únicas · Edición limitada',a:'#fff',bg_c:'linear-gradient(135deg,#0a0a0a,#020B14)'},
+  // ── INSTAGRAM Stories format ──
+  {c:'historia',t:'NUEVA\nCOLECCIÓN',s:'Deslizá para ver más →',a:'#00FF88',bg_c:'linear-gradient(180deg,#0b1f12,#020B14)'},
+  {c:'historia',t:'Q&A\nEN VIVO',s:'Preguntame lo que quieras',a:'#00A3FF',bg_c:'linear-gradient(180deg,#020B14,#051A2A)'},
+  {c:'historia',t:'TOP 5\nFAVORITOS',s:'Esta semana 📌',a:'#facc15',bg_c:'linear-gradient(180deg,#1a1200,#020B14)'},
+  // ── MORE INSTAGRAM ──
+  {c:'instagram',t:'PASO A PASO\nEN 4 FOTOS',s:'Guarda este post 📌',a:'#00FF88',bg_c:'linear-gradient(135deg,#0b1f12,#020B14)'},
+  {c:'instagram',t:'¿SABÍAS QUE\nEXISTE?',s:'Te cambió la vida ahora',a:'#8b5cf6',bg_c:'linear-gradient(135deg,#0d0a1f,#020B14)'},
+  {c:'instagram',t:'COMPARACIÓN\nHONESTA',s:'Probé los dos y te cuento',a:'#facc15',bg_c:'linear-gradient(135deg,#1a1200,#020B14)'},
+  {c:'instagram',t:'MI SETUP\nDE TRABAJO',s:'Todo lo que uso a diario',a:'#00A3FF',bg_c:'linear-gradient(135deg,#020B14,#051A2A)'},
+  // ── MORE MARKETING ──
+  {c:'marketing',t:'PRECIO\nESPECIAL',s:'Solo hasta el domingo',a:'#ef4444',bg_c:'linear-gradient(135deg,#1a0000,#020B14)'},
+  {c:'marketing',t:'BUNDLE\nOFERTA',s:'3x2 en todos los planes',a:'#00FF88',bg_c:'linear-gradient(135deg,#0b1f12,#020B14)'},
+  {c:'marketing',t:'RESEÑA\n5 ESTRELLAS',s:'"Superó todas mis expectativas"',a:'#facc15',bg_c:'linear-gradient(135deg,#1a1200,#020B14)'},
+  // ── MORE WEB ──
+  {c:'web',t:'HERO\nSECTION',s:'Above the fold perfecto',a:'#8b5cf6',bg_c:'linear-gradient(135deg,#0d0a1f,#020B14)'},
+  {c:'web',t:'404\nPAGE',s:'Ups, algo salió mal 🙃',a:'#ef4444',bg_c:'linear-gradient(135deg,#1a0000,#020B14)'},
+  // ── CREATIVE FORMATS ──
+  {c:'poster',t:'SOLD OUT\nAGAIN',s:'Gracias por el apoyo 🙏',a:'#00FF88',bg_c:'linear-gradient(135deg,#0b1f12,#020B14)'},
+  {c:'poster',t:'COMING\nSOON',s:'Algo grande se viene...',a:'#00A3FF',bg_c:'linear-gradient(135deg,#020B14,#051A2A)'},
+  {c:'poster',t:'JOIN THE\nMOVEMENT',s:'Sé parte del cambio',a:'#8b5cf6',bg_c:'linear-gradient(135deg,#0d0a1f,#020B14)'},
+  // ── MORE MENUS ──
+  {c:'menu',t:'HAPPY\nHOUR',s:'4PM - 7PM · 2x1 en tragos',a:'#facc15',bg_c:'linear-gradient(135deg,#1a1200,#020B14)'},
+  {c:'menu',t:'MENÚ\nDEGUSTACIÓN',s:'7 tiempos · Experiencia única',a:'#ec4899',bg_c:'linear-gradient(135deg,#1a0015,#020B14)'},
+  // ── MORE CERTS ──
+  {c:'cert',t:'CERTIFICADO\nDE ASISTENCIA',s:'Con satisfacción certificamos',a:'#00A3FF',bg_c:'linear-gradient(135deg,#020B14,#051A2A)'},
+  // ── MORE FLYERS ──
+  {c:'flyer',t:'VENTA\nDE GARAGE',s:'Sábado 8AM - 2PM',a:'#f97316',bg_c:'linear-gradient(135deg,#1a0800,#020B14)'},
+  {c:'flyer',t:'CLASES\nDE COCINA',s:'Martes y jueves · 6PM',a:'#22c55e',bg_c:'linear-gradient(135deg,#0b1f12,#020B14)'},
+  // ── MORE LINKEDIN ──
+  {c:'linkedin',t:'REFLEXIÓN\nDEL VIERNES',s:'Lo que aprendí esta semana',a:'#00A3FF',bg_c:'linear-gradient(135deg,#020B14,#051A2A)'},
+  {c:'linkedin',t:'BUSCO\nMENTOR',s:'¿Quién me puede guiar?',a:'#00FF88',bg_c:'linear-gradient(135deg,#0b1f12,#020B14)'},
+  // ── MORE BIRTHDAY ──
+  {c:'birthday',t:'CUMPLE\n50 🎊',s:'Medio siglo de vida increíble',a:'#facc15',bg_c:'linear-gradient(135deg,#1a1200,#020B14)'},
+  {c:'birthday',t:'QUINCEAÑERA\nSOÑADA',s:'Una noche para recordar',a:'#ec4899',bg_c:'linear-gradient(135deg,#1a0015,#020B14)'},
 ].map((t,i)=>{const f=(CATS[t.c]&&FMT[CATS[t.c].f])||FMT.square;return{id:'t'+i,c:t.c,t:t.t,s:t.s,a:t.a,bg:`https://picsum.photos/seed/v${i}/${Math.round(f.w/2)}/${Math.round(f.h/2)}`,bfull:`https://picsum.photos/seed/v${i}/${f.w}/${f.h}`};}), []);
 
   const ftpls=useMemo(()=>TPLS.filter(t=>{const q=filt.toLowerCase();if(!q&&!lcat)return true;if(lcat&&t.c!==lcat)return false;if(!q)return true;return t.c.includes(q)||(CATS[t.c]?.l||'').toLowerCase().includes(q)||t.t.toLowerCase().includes(q);}),[filt,lcat,TPLS]);
@@ -1188,11 +1285,44 @@ function App(){
   // Add elements
   const addArcTxt=()=>addE({id:uid(),type:'text',content:'TEXTO EN ARCO',x:60,y:60,width:280,height:200,rotation:0,size:28,color:'#ffffff',fw:'700',ff:"'Space Grotesk',sans-serif",ta:'center',ts:'none',lh:'1.2',opacity:1,animation:'none',visible:true,locked:false,arc:true,arcR:80,arcSpan:4.4,fi:{brightness:100,contrast:100,saturation:100,blur:0}});
   const addTimer=()=>addE({id:uid(),type:'timer',x:40,y:60,width:280,height:100,rotation:0,size:36,color:'#00FF88',label:'OFERTA TERMINA EN',targetMs:Date.now()+48*3600000,opacity:1,animation:'none',visible:true,locked:false});
+  const addSocialCard=()=>{
+    const g=[
+      {id:uid(),type:'shape',shape:'rect',x:40,y:60,width:240,height:140,rotation:0,color:'rgba(13,21,38,.9)',radius:'16px',opacity:1,animation:'none',visible:true,locked:false},
+      {id:uid(),type:'shape',shape:'circle',x:56,y:76,width:50,height:50,rotation:0,color:'#00A3FF',opacity:1,animation:'none',visible:true,locked:false},
+      {id:uid(),type:'text',content:'@usuario',x:114,y:76,width:150,height:24,rotation:0,size:14,color:'#fff',fw:'700',ff:"'Space Grotesk',sans-serif",ta:'left',ts:'none',lh:'1',opacity:1,animation:'none',visible:true,locked:false,fi:{brightness:100,contrast:100,saturation:100,blur:0}},
+      {id:uid(),type:'text',content:'Diseñador · KCN Studio',x:114,y:100,width:150,height:20,rotation:0,size:10,color:'rgba(255,255,255,.6)',fw:'400',ff:"'Manrope',sans-serif",ta:'left',ts:'none',lh:'1',opacity:1,animation:'none',visible:true,locked:false,fi:{brightness:100,contrast:100,saturation:100,blur:0}},
+      {id:uid(),type:'shape',shape:'rect',x:56,y:142,width:60,height:2,rotation:0,color:'#00FF88',radius:'1px',opacity:.8,animation:'none',visible:true,locked:false},
+      {id:uid(),type:'text',content:'Seguir',x:220,y:132,width:52,height:26,rotation:0,size:10,color:'#020B14',fw:'700',ff:"'Manrope',sans-serif",ta:'center',ts:'none',lh:'2.6',opacity:1,animation:'none',visible:true,locked:false,fi:{brightness:100,contrast:100,saturation:100,blur:0}},
+      {id:uid(),type:'shape',shape:'rect',x:220,y:132,width:52,height:26,rotation:0,color:'#00FF88',radius:'13px',opacity:1,animation:'none',visible:true,locked:false},
+    ];
+    g.forEach(addE);
+    showToast('Tarjeta de perfil agregada ✓');
+  };
+  const addStatCard=()=>{
+    const s=[
+      {id:uid(),type:'shape',shape:'rect',x:40,y:60,width:160,height:100,rotation:0,color:'rgba(0,163,255,.08)',radius:'12px',opacity:1,animation:'none',visible:true,locked:false},
+      {id:uid(),type:'text',content:'10,240',x:48,y:72,width:144,height:44,rotation:0,size:32,color:'#00FF88',fw:'800',ff:"'Space Grotesk',sans-serif",ta:'center',ts:'none',lh:'1.3',opacity:1,animation:'none',visible:true,locked:false,fi:{brightness:100,contrast:100,saturation:100,blur:0}},
+      {id:uid(),type:'text',content:'↑ 24% este mes',x:48,y:116,width:144,height:20,rotation:0,size:10,color:'rgba(255,255,255,.6)',fw:'600',ff:"'Manrope',sans-serif",ta:'center',ts:'none',lh:'1',opacity:1,animation:'none',visible:true,locked:false,fi:{brightness:100,contrast:100,saturation:100,blur:0}},
+      {id:uid(),type:'text',content:'VISITANTES',x:48,y:138,width:144,height:16,rotation:0,size:9,color:'#00A3FF',fw:'700',ff:"'Manrope',sans-serif",ta:'center',ts:'none',lh:'1',opacity:1,animation:'none',visible:true,locked:false,fi:{brightness:100,contrast:100,saturation:100,blur:0}},
+    ];
+    s.forEach(addE);
+    showToast('Stat card agregada ✓');
+  };
   const addProgress=(label,pct,color)=>addE({id:uid(),type:'progress',x:40,y:80,width:Math.round(dims.w*.7),height:50,rotation:0,color:color||'#00A3FF',pct:pct||75,label:label||'Progreso',barH:10,opacity:1,animation:'none',visible:true,locked:false});
     const addArrow=()=>addE({id:uid(),type:'arrow',x:60,y:Math.round(dims.h/2)-10,width:200,height:20,rotation:0,color:'#00A3FF',arrowW:3,opacity:1,animation:'none',visible:true,locked:false});
   const addQR=(src,txt)=>addE({id:uid(),type:'qr',src,qrText:txt,x:Math.round(dims.w/2)-75,y:Math.round(dims.h/2)-75,width:150,height:150,rotation:0,opacity:1,animation:'none',visible:true,locked:false});
   const addPrice=plans=>plans.forEach((plan,i)=>addE({id:uid(),type:'price',plan,x:30+i*160,y:60,width:150,height:260,rotation:0,opacity:1,animation:'none',visible:true,locked:false,radius:'12px'}));
   const addCollage=urls=>{addE({id:uid(),type:'collage',photos:urls,cols:Math.ceil(Math.sqrt(urls.length)),x:40,y:40,width:Math.round(dims.w*.55),height:Math.round(dims.h*.45),rotation:0,gap:4,radius:'4px',opacity:1,animation:'none',visible:true,locked:false,fi:{brightness:100,contrast:100,saturation:100,blur:0}});};
+  function doCanvasResize(cat,w,h){
+    if(!page)return;
+    const od=fdims(page.category||'instagram');
+    const sx=w/od.w,sy=h/od.h;const sc=Math.min(sx,sy);
+    setPages(ps=>ps.map((p,i)=>{
+      if(i!==pIdx)return p;
+      return{...p,category:cat||p.category,elements:p.elements.map(e=>({...e,x:Math.round(e.x*sx),y:Math.round(e.y*sy),width:Math.round(e.width*sc),height:Math.round(e.height*sc),size:e.size?Math.round(e.size*sc):undefined}))};
+    }));
+    showToast('Canvas redimensionado ✓');
+  }
   function doMagicResize(fmts){if(!page)return;const od=fdims(page.category||'instagram');const newPages=fmts.map((fk,i)=>{const nd=FMT[fk]||FMT.square;const sx=nd.w/od.w,sy=nd.h/od.h;const sc=Math.min(sx,sy);return{id:uid(),category:Object.keys(CATS).find(k=>CATS[k].f===fk)||fk,background:page.background,backgroundType:page.backgroundType,name:fk+' '+(i+2),elements:page.elements.map(e=>({...e,id:uid(),x:Math.round(e.x*sx),y:Math.round(e.y*sy),width:Math.round(e.width*sc),height:Math.round(e.height*sc),size:e.size?Math.round(e.size*sc):undefined}))};});setPages(ps=>[...ps,...newPages]);showToast('✓ '+fmts.length+' formatos creados');}
     const addTxt=(content,opts)=>addE({id:uid(),type:'text',content:content||'Hacé clic para editar',x:60,y:80,width:240,height:80,rotation:0,size:opts?.size||30,color:'#ffffff',fw:opts?.fw||'700',fs:'normal',ff:opts?.ff||"'Space Grotesk',sans-serif",ta:'center',ts:'none',lh:'1.2',opacity:1,animation:'none',visible:true,locked:false,fi:{brightness:100,contrast:100,saturation:100,blur:0}});
   const addSh=shape=>{const b={id:uid(),type:'shape',shape,x:100,y:100,width:120,height:120,rotation:0,color:'#00A3FF',opacity:1,animation:'none',visible:true,locked:false};if(shape==='rect')b.radius='8px';if(shape==='line'){b.height=4;b.width=220;b.radius='2px';b.shape='rect';}addE(b);};
@@ -1249,6 +1379,8 @@ function App(){
       if((e.metaKey||e.ctrlKey)&&(e.key==='y'||(e.shiftKey&&e.key==='z'))){e.preventDefault();redo();}
       if((e.key==='Delete'||e.key==='Backspace')&&sel){e.preventDefault();delE(sel);}
       if((e.metaKey||e.ctrlKey)&&e.key==='d'&&sel){e.preventDefault();dupE(sel);}
+      if((e.metaKey||e.ctrlKey)&&e.key==='a'){e.preventDefault();if(els.length>0){setSel(els[els.length-1].id);showToast('Tip: ⌘+clic para seleccionar múltiples');}}
+      if(e.key==='Tab'){e.preventDefault();if(els.length>0){const idx=els.findIndex(e=>e.id===sel);setSel(els[(idx+1)%els.length].id);}}
       if((e.metaKey||e.ctrlKey)&&e.key==='l'&&sel){e.preventDefault();togLock(sel);}
       if(sel&&['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){
         e.preventDefault();const step=e.shiftKey?10:1;const el=els.find(x=>x.id===sel);if(!el||el.locked)return;
@@ -1825,7 +1957,19 @@ function App(){
             ))
           )
         ),
-        GROUPS.map(g=>React.createElement('div',{key:g.l},
+        React.createElement('div',{className:'sl'},'Crear nuevo'),
+        React.createElement('div',{style:{display:'flex',gap:'8px',overflowX:'auto',paddingBottom:'4px',marginBottom:'20px'}},
+          [{c:'instagram',l:'Post',dim:'640×640'},{c:'historia',l:'Historia',dim:'400×711'},{c:'reels',l:'Reels',dim:'1080×1920'},{c:'pres',l:'Presentación',dim:'960×540'},{c:'yt',l:'YouTube',dim:'1280×720'},{c:'poster',l:'Póster',dim:'500×700'},{c:'card',l:'Tarjeta',dim:'700×400'},{c:'linkedin',l:'LinkedIn',dim:'1200×627'},{c:'email',l:'Email',dim:'600×800'}]
+          .map((f,i)=>React.createElement('div',{key:f.c,style:{flexShrink:0,background:'rgba(13,21,38,.7)',border:'1px solid var(--bo)',borderRadius:'10px',padding:'10px 14px',cursor:'pointer',transition:'all .18s',textAlign:'center',minWidth:'80px'},
+            onClick:()=>openBlank(f.c),
+            onMouseOver:e=>{e.currentTarget.style.borderColor='var(--bog)';e.currentTarget.style.transform='translateY(-2px)';},
+            onMouseOut:e=>{e.currentTarget.style.borderColor='var(--bo)';e.currentTarget.style.transform='none';}
+          },
+            React.createElement('div',{style:{fontSize:'11px',fontWeight:700,color:'var(--tx)',marginBottom:'3px'}},f.l),
+            React.createElement('div',{style:{fontSize:'9px',color:'var(--mu)'}},f.dim)
+          ))
+        ),
+                GROUPS.map(g=>React.createElement('div',{key:g.l},
           React.createElement('div',{className:'sl'},g.l),
           React.createElement('div',{className:'cg'},
             g.c.map(c=>{const m=CATS[c];if(!m)return null;return React.createElement('div',{key:c,className:'cc',onClick:()=>{setLcat(c);setView('library');}},
@@ -1896,7 +2040,10 @@ function App(){
           React.createElement('input',{className:'pn',value:pname,onChange:e=>setPname(e.target.value)})
         ),
         React.createElement('div',{className:'tm'},
-          React.createElement('button',{className:'bi',disabled:!hist.length,onClick:undo,title:'⌘Z'},React.createElement('i',{className:'fas fa-rotate-left'})),
+          React.createElement('button',{className:'bi',disabled:!hist.length,onClick:undo,title:'⌘Z',style:{position:'relative'}},
+            React.createElement('i',{className:'fas fa-rotate-left'}),
+            hist.length>0&&React.createElement('span',{style:{position:'absolute',top:'-4px',right:'-4px',background:'var(--ac)',color:'#020B14',fontSize:'8px',fontWeight:800,width:'14px',height:'14px',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',lineHeight:1}},hist.length>9?'9+':hist.length)
+          ),
           React.createElement('button',{className:'bi',disabled:!fut.length,onClick:redo,title:'⌘Y'},React.createElement('i',{className:'fas fa-rotate-right'})),
           React.createElement('div',{className:'dv'}),
           React.createElement('button',{className:'bi',onClick:()=>setZoom(z=>clamp(+(z-.1).toFixed(2),.12,3))},React.createElement('i',{className:'fas fa-minus'})),
@@ -1905,6 +2052,7 @@ function App(){
           React.createElement('button',{className:'bi',onClick:()=>setZoom(z=>clamp(+(z+.1).toFixed(2),.12,3))},React.createElement('i',{className:'fas fa-plus'})),
           React.createElement('div',{className:'dv'}),
           React.createElement('button',{className:'bi'+(grid?' on':''),title:'Grilla',onClick:()=>setGrid(g=>!g)},React.createElement('i',{className:'fas fa-hashtag'})),
+          React.createElement('button',{className:'bi',title:'Centrar canvas',onClick:()=>{const cw=cvRef.current?.parentElement?.clientWidth;const ch=cvRef.current?.parentElement?.clientHeight;if(cw&&ch){setZoom(Math.min((cw-32)/dims.w,(ch-60)/dims.h,.95));}}},React.createElement('i',{className:'fas fa-compress-arrows-alt'})),
           React.createElement('button',{className:'bi'+(ruler?' on':''),title:'Regla',onClick:()=>setRuler(r=>!r)},React.createElement('i',{className:'fas fa-ruler'})),
           sel&&React.createElement(React.Fragment,null,
             React.createElement('div',{className:'dv'}),
@@ -1952,7 +2100,7 @@ function App(){
           // Page strip
           React.createElement('div',{className:'ps2'},
             pages.map((p,i)=>React.createElement('div',{key:p.id,className:'pc'+(i===pIdx?' on':''),onClick:e=>{e.stopPropagation();setPIdx(i);}},
-              React.createElement('span',null,p.name||`Pág ${i+1}`),
+              React.createElement('span',{style:{cursor:'text'},onDoubleClick:e=>{e.stopPropagation();const n=prompt('Nombre de página:',p.name||`Pág ${i+1}`);if(n)setPages(ps=>ps.map((pg,pi)=>pi===i?{...pg,name:n}:pg));}},p.name||`Pág ${i+1}`),
               React.createElement('span',{style:{fontSize:'10px',opacity:.6,cursor:'pointer',marginLeft:'2px'},onClick:e=>{e.stopPropagation();dupPg(i);}},React.createElement('i',{className:'fas fa-clone'})),
               pages.length>1&&React.createElement('span',{style:{fontSize:'10px',opacity:.6,cursor:'pointer',marginLeft:'1px'},onClick:e=>{e.stopPropagation();delPg(i);}},React.createElement('i',{className:'fas fa-xmark'}))
             )),
@@ -2060,8 +2208,11 @@ function App(){
         React.createElement('button',{className:'bg2',style:{fontSize:'11px'},onClick:()=>expPNG(false)},React.createElement('i',{className:'fas fa-image'}),' PNG'),
         React.createElement('button',{className:'bg2',style:{fontSize:'11px'},onClick:()=>expPDF(pages.length>1)},React.createElement('i',{className:'fas fa-file-pdf'}),' PDF'),
         React.createElement('button',{className:'bg2',style:{fontSize:'11px'},onClick:()=>setShareM(true)},React.createElement('i',{className:'fas fa-share-nodes'}),' Compartir'),
-        React.createElement('button',{className:'bg2',style:{fontSize:'11px'},onClick:()=>{addPg();setView('editor');}},React.createElement('i',{className:'fas fa-plus'}),' Agregar slide'),
-        React.createElement('button',{className:'bg2',style:{fontSize:'11px'},onClick:()=>{const all=pages.map((_,i)=>i);setPIdx(0);showToast('Modo presentación: usa ← → para navegar');}},React.createElement('i',{className:'fas fa-play'}),' Iniciar desde el principio')
+        React.createElement('button',{className:'bg2',style:{fontSize:'11px'},onClick:()=>{addPg();setView('editor');}},React.createElement('i',{className:'fas fa-plus'}),' Slide'),
+        React.createElement('button',{className:'bg2',style:{fontSize:'11px'},onClick:()=>{setPIdx(0);showToast('← → para navegar · Esc para salir');}},React.createElement('i',{className:'fas fa-play'}),' Desde inicio'),
+        React.createElement('button',{className:'bg2',style:{fontSize:'11px'},onClick:()=>expPNG(true)},React.createElement('i',{className:'fas fa-images'}),' Exportar todo'),
+        React.createElement('button',{className:'bg2',style:{fontSize:'11px'},onClick:()=>{const t=prompt('Notas del slide (solo vos las ves):',page?.notes||'');if(t!==null)setPages(ps=>ps.map((p,i)=>i===pIdx?{...p,notes:t}:p));showToast('Notas guardadas ✓');}},React.createElement('i',{className:'fas fa-note-sticky'}),' Notas'),
+        page?.notes&&React.createElement('div',{style:{background:'rgba(250,204,21,.08)',border:'1px solid rgba(250,204,21,.2)',borderRadius:'8px',padding:'10px 12px',fontSize:'12px',color:'var(--tx2)',lineHeight:'1.6',maxWidth:'500px',textAlign:'left'}},React.createElement('span',{style:{color:'#facc15',fontWeight:700,marginRight:'6px'}},'📝'),page.notes)
       )
     );
   }
@@ -2107,6 +2258,7 @@ function App(){
     qrM&&React.createElement(QRModal,{onInsert:addQR,onClose:()=>setQrM(false)}),
     mrM&&React.createElement(MagicResizeModal,{page,onResize:doMagicResize,onClose:()=>setMrM(false)}),
     priceM&&React.createElement(PricingModal,{onInsert:addPrice,onClose:()=>setPriceM(false)}),
+    canvasResizeM&&page&&React.createElement(CanvasResizeModal,{page,onResize:doCanvasResize,onClose:()=>setCanvasResizeM(false)}),
     mockupM&&page&&React.createElement(MockupModal,{page,onClose:()=>setMockupM(false)}),
     toast&&React.createElement('div',{className:'tos'},toast),
     // Bottom nav
